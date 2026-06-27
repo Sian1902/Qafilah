@@ -52,6 +52,12 @@ class WishlistLocalDataSource(
         localPath?.let { File(it).delete() }
     }
 
+    suspend fun clearAll() {
+        dao.clearAll()
+        withContext(Dispatchers.IO) {
+            File(context.filesDir, "wishlist_images").deleteRecursively()
+        }
+    }
     private suspend fun cacheImageLocally(imageUrl: String, productId: String): String? =
         withContext(Dispatchers.IO) {
             try {
