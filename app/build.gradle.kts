@@ -1,15 +1,14 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.ksp)
+    alias(libs.plugins.apollo)
+    alias(libs.plugins.googleServices)
 }
 
 android {
     namespace = "com.example.qafilah"
-    compileSdk {
-        version = release(36) {
-            minorApiLevel = 1
-        }
-    }
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "com.example.qafilah"
@@ -55,4 +54,30 @@ dependencies {
     androidTestImplementation(libs.androidx.junit)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
     debugImplementation(libs.androidx.compose.ui.tooling)
+
+    // --- New Dependencies ---
+
+    // Koin
+    implementation(libs.koin.androidx.compose)
+
+    // Room
+    implementation(libs.room.runtime)
+    implementation(libs.room.ktx)
+    ksp(libs.room.compiler)
+
+    // Apollo Client (GraphQL)
+    implementation(libs.apollo.runtime)
+
+    // DataStore Preferences
+    implementation(libs.datastore.preferences)
+
+    // Firebase Auth (via BOM)
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.auth.ktx)
+
+    // Coroutines
+    implementation(libs.coroutines.android)
+
+    // Material Icons Extended
+    implementation(libs.compose.material.icons.extended)
 }
