@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.ksp)
     alias(libs.plugins.apollo)
     alias(libs.plugins.googleServices)
+    alias(libs.plugins.kotlin.android)
 }
 
 android {
@@ -35,6 +36,9 @@ android {
     }
     buildFeatures {
         compose = true
+    }
+    kotlinOptions {
+        jvmTarget = "11"
     }
 }
 
