@@ -24,4 +24,5 @@ dependencyResolutionManagement {
 
 rootProject.name = "Qafilah"
 include(":app")
- 
+
+include(":ui_kit")
