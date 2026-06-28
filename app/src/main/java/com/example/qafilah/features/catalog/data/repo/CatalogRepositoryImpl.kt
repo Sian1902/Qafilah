@@ -1,8 +1,12 @@
 package com.example.qafilah.features.catalog.data.repo
 
 import com.example.qafilah.features.catalog.data.datasource.CatalogRemoteDataSource
-import com.example.qafilah.features.catalog.domain.CatalogRepository
+import com.example.qafilah.features.catalog.domain.repo.CatalogRepository
 import com.example.qafilah.core.model.Product
+import com.example.qafilah.features.catalog.data.mapper.toDomain
+import com.example.qafilah.features.catalog.domain.model.ProductDetails
+import com.example.qafilah.features.catalog.domain.model.ProductVariant
+import com.example.qafilah.graphql.admin.GetProductQuery
 import com.example.qafilah.graphql.admin.SearchProductsQuery
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -24,16 +28,25 @@ class CatalogRepositoryImpl(
             }
         }
     }
-}
 
-fun SearchProductsQuery.Node.toDomain(): Product {
-    return Product(
-        id = this.id,
-        title = this.title,
-        vendor = this.vendor,
-        productType = this.productType,
-        imageUrl = this.featuredMedia?.preview?.image?.url as? String,
-        priceAmount = this.priceRangeV2.minVariantPrice.amount.toString(),
-        currencyCode = this.priceRangeV2.minVariantPrice.currencyCode.name
-    )
+    override suspend fun getProductDetails(productId: String): Result<ProductDetails> {
+        return withContext(Dispatchers.IO) {
+            try {
+                val formattedId = if (productId.startsWith("gid://")) {
+                    productId
+                } else {
+                    "gid://shopify/Product/$productId"
+                }
+
+                val productData = remoteDataSource.getProduct(formattedId)
+                    ?: throw Exception("Product not found")
+
+                Result.success(productData.toDomain())
+
+            } catch (e: Exception) {
+                Result.failure(e)
+            }
+        }
+    }
+
 }
