@@ -3,6 +3,7 @@ package com.example.qafilah.auth.Di
 import com.example.qafilah.auth.data.AuthRepositoryImpl
 import com.example.qafilah.auth.domain.repository.AuthRepository
 import com.example.qafilah.auth.domain.usecase.SignInUseCase
+import com.example.qafilah.auth.domain.usecase.SignUpUseCase
 import com.example.qafilah.auth.presentation.AuthViewModel
 import com.google.firebase.auth.FirebaseAuth
 import org.koin.androidx.viewmodel.dsl.viewModel
@@ -18,6 +19,12 @@ val authModule = module {
     // 3. Provide Use Cases
     factory { SignInUseCase(repository = get()) }
 
+    factory { SignUpUseCase(repository = get()) }
+
     // 4. Provide ViewModel
-    viewModel { AuthViewModel(signInUseCase = get()) }
+    viewModel {
+        AuthViewModel(signInUseCase = get(),
+            signUpUseCase = get()
+        )
+    }
 }

@@ -20,7 +20,7 @@ val shopifyApiKey = localProperties.getProperty("SHOPIFY_API_KEY") ?: ""
 
 android {
     namespace = "com.example.qafilah"
-    compileSdk = 37
+    compileSdk = 36
 
     buildFeatures {
         buildConfig = true
