@@ -6,6 +6,7 @@ plugins {
     alias(libs.plugins.ksp)
     alias(libs.plugins.apollo)
     alias(libs.plugins.googleServices)
+    alias(libs.plugins.kotlin.android)
 }
 
 val localProperties = Properties()
@@ -51,6 +52,9 @@ android {
     buildFeatures {
         compose = true
     }
+    kotlinOptions {
+        jvmTarget = "11"
+    }
 }
 
 dependencies {
@@ -71,6 +75,9 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.tooling)
 
     // --- New Dependencies ---
+
+    implementation("androidx.core:core-ktx:1.15.0")
+    implementation("androidx.core:core:1.15.0")
 
     // Koin
     implementation(libs.koin.androidx.compose)

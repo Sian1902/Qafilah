@@ -10,42 +10,54 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
+import com.example.qafilah.auth.presentation.AuthState
+import com.example.qafilah.auth.presentation.AuthViewModel
 import com.example.qafilah.features.catalog.presentation.CatalogScreen
 import com.example.qafilah.ui.theme.QafilahTheme
+import kotlinx.coroutines.launch
+import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class MainActivity : ComponentActivity() {
 
-    private val TAG = "ShopifyTest"
+    // 1. Koin injects the ViewModel here
+    private val authViewModel: AuthViewModel by viewModel()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
-        setContent {
+        enableEdgeToEdge() // (from HEAD)
 
+        // 2. Listen to the AuthState (from incoming branch)
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                authViewModel.authState.collect { state ->
+                    when (state) {
+                        is AuthState.Idle -> Log.d("FirebaseTest", "State: Idle")
+                        is AuthState.Loading -> Log.d("FirebaseTest", "State: Loading...")
+                        is AuthState.Success -> {
+                            Log.d("FirebaseTest", "State: SUCCESS! User ID: ${state.user.id}")
+                        }
+                        is AuthState.Error -> {
+                            Log.e("FirebaseTest", "State: FAILED! Error: ${state.message}")
+                        }
+                    }
+                }
+            }
+        }
+
+        // 3. Trigger the sign-in with your test credentials (from incoming branch)
+        authViewModel.signIn("test@example.com", "123456")
+
+        setContent {
             QafilahTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     CatalogScreen(modifier = Modifier.padding(innerPadding))
                 }
             }
         }
-    }
-}
-
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    QafilahTheme {
-        Greeting("Android")
     }
 }
