@@ -1,21 +1,46 @@
 {
   "project_info": {
-    "project_number": "123456789000",
-    "project_id": "dummy-firebase-project"
+    "project_number": "50329480866",
+    "project_id": "qafilah-f25f1",
+    "storage_bucket": "qafilah-f25f1.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:123456789000:android:abcdef1234567890",
+        "mobilesdk_app_id": "1:50329480866:android:26501a738e66eaed8a31fb",
         "android_client_info": {
           "package_name": "com.example.qafilah"
         }
       },
+      "oauth_client": [
+        {
+          "client_id": "50329480866-47ol7au14dgo2q58ndqqtscb50ngfv8n.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.qafilah",
+            "certificate_hash": "f66bc72d567e89fda6648715277573e02eeb52d6"
+          }
+        },
+        {
+          "client_id": "50329480866-0ismrbov61kq0tj3c4g1282foev660r6.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
-          "current_key": "dummy-api-key-replace-me-later"
+          "current_key": "AIzaSyA3uSNQGYPfpeVv7prsXa5Dcjc6XP5vCk4"
         }
-      ]
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "50329480866-0ismrbov61kq0tj3c4g1282foev660r6.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
     }
   ],
   "configuration_version": "1"
