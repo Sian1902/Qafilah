@@ -6,22 +6,15 @@ import androidx.lifecycle.viewModelScope
 import com.example.qafilah.core.model.Product
 import com.example.qafilah.core.network.ShopifyClient
 import com.example.qafilah.features.catalog.data.datasource.CatalogRemoteDataSourceImpl
-import com.example.qafilah.features.catalog.data.repo.HomeRepositoryImpl
+import com.example.qafilah.features.catalog.data.repo.CatalogRepositoryImpl
 import com.example.qafilah.features.catalog.domain.usecases.GetProductsUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 class CatalogViewModel(
+    private val getProductsUseCase: GetProductsUseCase
 ): ViewModel() {
-    private val getProductsUseCase: GetProductsUseCase = GetProductsUseCase(
-        homeRepository = HomeRepositoryImpl(
-            remoteDataSource = CatalogRemoteDataSourceImpl(
-                apolloClient = ShopifyClient.instance
-            )
-        )
-    )
-
     init {
         getProducts()
     }

@@ -7,7 +7,7 @@ import com.example.qafilah.graphql.admin.SearchProductsQuery
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
-class HomeRepositoryImpl(
+class CatalogRepositoryImpl(
     private val remoteDataSource: CatalogRemoteDataSource
 ) : CatalogRepository{
     override suspend fun searchProducts(
