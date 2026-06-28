@@ -7,7 +7,6 @@ plugins {
     alias(libs.plugins.ksp)
     alias(libs.plugins.apollo)
     alias(libs.plugins.googleServices)
-    alias(libs.plugins.kotlin.android)
 }
 
 val localProperties = Properties()
@@ -75,7 +74,7 @@ dependencies {
     androidTestImplementation(libs.androidx.junit)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
     debugImplementation(libs.androidx.compose.ui.tooling)
-    implementation(project(":ui_kit"))}
+    implementation(project(":ui_kit"))
 
     // --- New Dependencies ---
 
