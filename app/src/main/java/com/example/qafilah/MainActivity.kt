@@ -19,7 +19,6 @@ import com.example.ui_kit.theme.QafilahTheme
 
 class MainActivity : ComponentActivity() {
 
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -68,4 +67,3 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
-
