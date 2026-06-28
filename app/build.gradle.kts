@@ -104,6 +104,10 @@ dependencies {
 
     // Material Icons Extended
     implementation(libs.compose.material.icons.extended)
+
+    implementation(libs.androidx.navigation.compose)
+
+
 }
 
 apollo {
