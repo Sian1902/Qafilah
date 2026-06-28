@@ -12,14 +12,14 @@ object ShopifyClient {
     private val okHttpClient = OkHttpClient.Builder()
         .addInterceptor(Interceptor { chain ->
             val request = chain.request().newBuilder()
-                .addHeader("X-Shopify-Access-Token", BuildConfig.SHOPIFY_API_KEY)
+                .addHeader("X-Shopify-Storefront-Access-Token", BuildConfig.SHOPIFY_API_KEY)
                 .build()
             chain.proceed(request)
         })
         .build()
 
     val instance: ApolloClient = ApolloClient.Builder()
-        .serverUrl("https://mad46-and8.myshopify.com/admin/api/2024-01/graphql.json")
+        .serverUrl("https://mad46-and8.myshopify.com/api/2024-01/graphql.json")
         .okHttpClient(okHttpClient)
         .build()
 }

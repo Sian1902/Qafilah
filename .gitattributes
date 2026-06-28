@@ -1,2 +1,2 @@
 # Mark Apollo schema as generated so GitHub hides it in PR diffs
-src/main/graphql/admin/schema.graphqls linguist-generated=true
+src/main/graphql/storefront/schema.graphqls linguist-generated=true

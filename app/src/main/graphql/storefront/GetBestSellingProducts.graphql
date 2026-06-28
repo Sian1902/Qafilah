@@ -1,0 +1,20 @@
+query GetBestSellingProducts($first: Int!, $after: String) {
+    products(first: $first, after: $after, sortKey: BEST_SELLING) {
+        edges {
+            cursor
+            node {
+                id
+                title
+                vendor
+                availableForSale
+                priceRange {
+                    minVariantPrice { amount currencyCode }
+                }
+                images(first: 1) {
+                    edges { node { url altText } }
+                }
+            }
+        }
+        pageInfo { hasNextPage endCursor }
+    }
+}

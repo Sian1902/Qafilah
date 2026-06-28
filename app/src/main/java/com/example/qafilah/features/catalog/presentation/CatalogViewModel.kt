@@ -4,39 +4,57 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.qafilah.core.model.Product
-import com.example.qafilah.core.network.ShopifyClient
-import com.example.qafilah.features.catalog.data.datasource.CatalogRemoteDataSourceImpl
-import com.example.qafilah.features.catalog.data.repo.CatalogRepositoryImpl
-import com.example.qafilah.features.catalog.domain.usecases.GetProductsUseCase
+import com.example.qafilah.features.catalog.domain.usecases.GetBestSellingUseCase
+import com.example.qafilah.features.catalog.domain.usecases.GetCollectionProductsUseCase
+import com.example.qafilah.features.catalog.domain.usecases.GetCollectionsUseCase
+import com.example.qafilah.features.catalog.domain.usecases.SearchProductsUseCase
 import com.example.qafilah.features.catalog.domain.usecases.GetSingleProductUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 class CatalogViewModel(
-    private val getProductsUseCase: GetProductsUseCase,
-    private val getSingleProductUseCase: GetSingleProductUseCase
-): ViewModel() {
-    init {
-        getProducts()
-        getSingleProduct()
-    }
+    private val searchProductsUseCase: SearchProductsUseCase,
+    private val getSingleProductUseCase: GetSingleProductUseCase,
+    private val getBestSellingUseCase: GetBestSellingUseCase,
+    private val getCollectionsUseCase: GetCollectionsUseCase,
+    private val getCollectionProductsUseCase: GetCollectionProductsUseCase
+) : ViewModel() {
 
-    var _list = MutableStateFlow<List<Product>>(emptyList())
+    private val _list = MutableStateFlow<List<Product>>(emptyList())
     val list = _list.asStateFlow()
 
-    fun getProducts(){
-        viewModelScope.launch {
-            val response = getProductsUseCase("sh", 20)
-            _list.value = response.getOrDefault(emptyList())
-            Log.e("ShopifyTest", "getProducts: ${response.getOrDefault(emptyList()).size}")
-        }
+    init {
+        testDataPipelines()
     }
 
-    fun getSingleProduct(){
+    private fun testDataPipelines() {
         viewModelScope.launch {
-            val response = getSingleProductUseCase("7861590163533")
-            Log.e("ShopifyTest", "getSingleProduct: ${response.getOrNull()?.title}")
+            try {
+                val bestSellers = getBestSellingUseCase(limit = 5, after = null)
+                Log.e("ShopifyTest", "🔥 Best Sellers Count: ${bestSellers.size}")
+                if (bestSellers.isNotEmpty()) {
+                    Log.e("ShopifyTest", "   Top Item: ${bestSellers.first().title}")
+                }
+
+                val collections = getCollectionsUseCase(limit = 5, after = null)
+                Log.e("ShopifyTest", "📁 Collections Count: ${collections.size}")
+                if (collections.isNotEmpty()) {
+                    Log.e("ShopifyTest", "   First Collection: ${collections.first().title} (ID: ${collections.first().id})")
+                }
+
+                val targetCollectionId = "gid://shopify/Collection/305504583757"
+                val collectionDetails = getCollectionProductsUseCase(id = targetCollectionId)
+
+                Log.e("ShopifyTest", "📦 Target Collection: ${collectionDetails.collectionInfo.title}")
+                Log.e("ShopifyTest", "   Products Inside: ${collectionDetails.products.size}")
+                if (collectionDetails.products.isNotEmpty()) {
+                    Log.e("ShopifyTest", "   First Product: ${collectionDetails.products.first().title}")
+                }
+
+            } catch (e: Exception) {
+                Log.e("ShopifyTest", "❌ Network or GraphQL Error: ${e.message}")
+            }
         }
     }
 }
