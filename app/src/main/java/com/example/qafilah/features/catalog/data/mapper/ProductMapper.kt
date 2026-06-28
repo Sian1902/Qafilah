@@ -3,25 +3,30 @@ package com.example.qafilah.features.catalog.data.mapper
 import com.example.qafilah.core.model.Product
 import com.example.qafilah.features.catalog.domain.model.ProductDetails
 import com.example.qafilah.features.catalog.domain.model.ProductVariant
-import com.example.qafilah.graphql.admin.GetProductQuery
-import com.example.qafilah.graphql.admin.SearchProductsQuery
-
+import com.example.qafilah.graphql.storefront.GetProductQuery
+import com.example.qafilah.graphql.storefront.SearchProductsQuery
 
 fun GetProductQuery.Product.toDomain(): ProductDetails {
     return ProductDetails(
         id = this.id,
         title = this.title,
-        descriptionHtml = this.descriptionHtml as String?,
+        vendor = this.vendor,
+        productType = this.productType,
+        tags = this.tags,
+        description = this.description,
+        images = this.images.edges.map { it.node.url.toString() },
 
-        images = this.images.edges.mapNotNull { it.node.url as? String },
+        rating = this.metafields.find { it?.key == "rating" }?.value?.toDoubleOrNull(),
+        ratingCount = this.metafields.find { it?.key == "rating_count" }?.value?.toIntOrNull(),
 
         variants = this.variants.edges.map { edge ->
             val node = edge.node
             ProductVariant(
                 id = node.id,
                 title = node.title,
-                price = node.price.toString(),
-                inventoryQuantity = node.inventoryQuantity,
+                price = node.price.amount.toString(),
+                compareAtPrice = node.compareAtPrice?.amount?.toString(),
+                inventoryQuantity = node.quantityAvailable,
 
                 options = node.selectedOptions.associate { option ->
                     option.name to option.value
@@ -31,14 +36,15 @@ fun GetProductQuery.Product.toDomain(): ProductDetails {
     )
 }
 
-fun SearchProductsQuery.Node.toDomain(): Product {
+fun SearchProductsQuery.OnProduct.toDomain(): Product {
     return Product(
         id = this.id,
         title = this.title,
         vendor = this.vendor,
-        productType = this.productType,
-        imageUrl = this.featuredMedia?.preview?.image?.url as? String,
-        priceAmount = this.priceRangeV2.minVariantPrice.amount.toString(),
-        currencyCode = this.priceRangeV2.minVariantPrice.currencyCode.name
+
+        imageUrl = this.images.edges.firstOrNull()?.node?.url?.toString(),
+
+        priceAmount = this.priceRange.minVariantPrice.amount.toString(),
+        currencyCode = this.priceRange.minVariantPrice.currencyCode.toString()
     )
 }

@@ -6,8 +6,6 @@ import com.example.qafilah.core.model.Product
 import com.example.qafilah.features.catalog.data.mapper.toDomain
 import com.example.qafilah.features.catalog.domain.model.ProductDetails
 import com.example.qafilah.features.catalog.domain.model.ProductVariant
-import com.example.qafilah.graphql.admin.GetProductQuery
-import com.example.qafilah.graphql.admin.SearchProductsQuery
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 

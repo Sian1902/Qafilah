@@ -1,0 +1,50 @@
+query GetProduct($id: ID!) {
+    product(id: $id) {
+        id
+        title
+        description
+        descriptionHtml
+        vendor
+        productType
+        tags
+        availableForSale
+        priceRange {
+            minVariantPrice { amount currencyCode }
+            maxVariantPrice { amount currencyCode }
+        }
+        compareAtPriceRange {
+            minVariantPrice { amount currencyCode }
+        }
+        images(first: 20) {
+            edges { node { id url altText width height } }
+        }
+        options {
+            id
+            name
+            values
+        }
+        variants(first: 30) {
+            edges {
+                node {
+                    id
+                    title
+                    availableForSale
+                    quantityAvailable
+                    price { amount currencyCode }
+                    compareAtPrice { amount currencyCode }
+                    selectedOptions { name value }
+                    image { url altText }
+                }
+            }
+        }
+        metafields(identifiers: [
+            { namespace: "reviews", key: "rating" },
+            { namespace: "reviews", key: "rating_count" }
+        ]) {
+            key
+            namespace
+            value
+            type
+        }
+    }
+}

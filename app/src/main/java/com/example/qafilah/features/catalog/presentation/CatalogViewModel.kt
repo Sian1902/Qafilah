@@ -27,7 +27,7 @@ class CatalogViewModel(
 
     fun getProducts(){
         viewModelScope.launch {
-            val response = getProductsUseCase("sh", 20)
+            val response = getProductsUseCase("", 20)
             _list.value = response.getOrDefault(emptyList())
             Log.e("ShopifyTest", "getProducts: ${response.getOrDefault(emptyList()).size}")
         }
@@ -35,7 +35,7 @@ class CatalogViewModel(
 
     fun getSingleProduct(){
         viewModelScope.launch {
-            val response = getSingleProductUseCase("7861590163533")
+            val response = getSingleProductUseCase("7861585674317")
             Log.e("ShopifyTest", "getSingleProduct: ${response.getOrNull()?.title}")
         }
     }

@@ -1,15 +1,17 @@
 package com.example.qafilah.features.catalog.data.datasource
 
 import com.apollographql.apollo.ApolloClient
-import com.example.qafilah.graphql.admin.GetProductQuery
-import com.example.qafilah.graphql.admin.SearchProductsQuery
+import com.example.qafilah.graphql.storefront.GetProductQuery
+import com.example.qafilah.graphql.storefront.SearchProductsQuery
+
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 class CatalogRemoteDataSourceImpl(
     private val apolloClient: ApolloClient
 ) : CatalogRemoteDataSource {
-    override suspend fun searchProducts(searchQuery: String, limit: Int): List<SearchProductsQuery.Node> {
+
+    override suspend fun searchProducts(searchQuery: String, limit: Int): List<SearchProductsQuery.OnProduct> {
         return withContext(Dispatchers.IO) {
             try {
                 val response = apolloClient
@@ -21,7 +23,8 @@ class CatalogRemoteDataSourceImpl(
                     throw Exception(errorMessage)
                 }
 
-                response.data?.products?.edges?.mapNotNull { it.node } ?: emptyList()
+                // Unwrap the edges, get the node, and safely cast to the OnProduct fragment
+                response.data?.search?.edges?.mapNotNull { it.node.onProduct } ?: emptyList()
             } catch (e: Exception) {
                 throw e
             }
@@ -46,5 +49,4 @@ class CatalogRemoteDataSourceImpl(
             }
         }
     }
-
 }

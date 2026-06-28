@@ -105,22 +105,14 @@ dependencies {
 }
 
 apollo {
-    service("admin") {
-        packageName.set("com.example.qafilah.graphql.admin")
-        srcDir("src/main/graphql/admin")
+    service("storefront") {
+        packageName.set("com.example.qafilah.graphql.storefront")
+        srcDir("src/main/graphql/storefront")
 
         introspection {
-            endpointUrl.set("https://mad46-and8.myshopify.com/admin/api/2024-01/graphql.json")
-            schemaFile.set(file("src/main/graphql/admin/schema.graphqls"))
-            headers.put("X-Shopify-Access-Token", shopifyApiKey)
+            endpointUrl.set("https://mad46-and8.myshopify.com/api/2024-01/graphql.json")
+            schemaFile.set(file("src/main/graphql/storefront/schema.graphqls"))
+            headers.put("X-Shopify-Storefront-Access-Token", shopifyApiKey)
         }
     }
-
-//    // Do the same for storefront if you are also using the Storefront API
-//    service("storefront") {
-//        packageName.set("com.example.qafilah.graphql.storefront")
-//        srcDir("src/main/graphql/storefront")
-//
-//        // Note: Storefront API usually requires 'X-Shopify-Storefront-Access-Token' instead
-//    }
 }
