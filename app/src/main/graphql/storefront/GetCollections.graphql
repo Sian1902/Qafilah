@@ -1,0 +1,17 @@
+query GetCollections($first: Int!, $after: String) {
+    collections(first: $first, after: $after) {
+        edges {
+            node {
+                id
+                title
+                handle
+                description
+                image { url altText }
+                products(first: 1) {
+                    edges { node { id } }
+                }
+            }
+        }
+        pageInfo { hasNextPage endCursor }
+    }
+}

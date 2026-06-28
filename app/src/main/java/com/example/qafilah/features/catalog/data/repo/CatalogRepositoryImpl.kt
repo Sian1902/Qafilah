@@ -4,8 +4,12 @@ import com.example.qafilah.features.catalog.data.datasource.CatalogRemoteDataSou
 import com.example.qafilah.features.catalog.domain.repo.CatalogRepository
 import com.example.qafilah.core.model.Product
 import com.example.qafilah.features.catalog.data.mapper.toDomain
+import com.example.qafilah.features.catalog.data.mapper.toStoreCollection
+import com.example.qafilah.features.catalog.domain.model.CollectionWithProducts
 import com.example.qafilah.features.catalog.domain.model.ProductDetails
 import com.example.qafilah.features.catalog.domain.model.ProductVariant
+import com.example.qafilah.features.catalog.domain.model.StoreCollection
+import com.example.qafilah.graphql.storefront.type.ProductCollectionSortKeys
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -47,4 +51,30 @@ class CatalogRepositoryImpl(
         }
     }
 
+    override suspend fun getBestSellingProducts(limit: Int, after: String?): List<Product> {
+        val networkResult = remoteDataSource.getBestSellingProducts(limit, after)
+        return networkResult.map { it.toDomain() }
+    }
+
+    override suspend fun getCollections(limit: Int, after: String?): List<StoreCollection> {
+        val response = remoteDataSource.getCollections(limit, after)
+        return response.collections.edges.map { edge ->
+            edge.node.toDomain()
+        }
+    }
+
+    override suspend fun getProductsByCollection(id: String): CollectionWithProducts {
+
+        val response = remoteDataSource.getProductsByCollection(id)
+
+        val collectionData = response.collection ?: throw Exception("Collection not found")
+
+        val storeCollection = collectionData.toStoreCollection()
+        val products = collectionData.products.edges.map { it.node.toDomain() }
+
+        return CollectionWithProducts(
+            collectionInfo = storeCollection,
+            products = products
+        )
+    }
 }

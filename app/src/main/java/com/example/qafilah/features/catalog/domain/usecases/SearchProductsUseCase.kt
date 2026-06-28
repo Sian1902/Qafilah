@@ -3,7 +3,7 @@ package com.example.qafilah.features.catalog.domain.usecases
 import com.example.qafilah.features.catalog.domain.repo.CatalogRepository
 import com.example.qafilah.core.model.Product
 
-class GetProductsUseCase(
+class SearchProductsUseCase(
     private val homeRepository: CatalogRepository
 ) {
     suspend operator fun invoke(
