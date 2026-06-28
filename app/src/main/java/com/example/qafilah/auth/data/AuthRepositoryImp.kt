@@ -35,4 +35,18 @@ class AuthRepositoryImpl(
     override fun signOut() {
         firebaseAuth.signOut()
     }
+    override suspend fun signUp(email: String, password: String): Result<AppUser> {
+        return try {
+            val authResult = firebaseAuth.createUserWithEmailAndPassword(email, password).await()
+            val user = authResult.user
+
+            if (user != null) {
+                Result.success(AppUser(id = user.uid, email = user.email))
+            } else {
+                Result.failure(Exception("Registration failed: User instance is null"))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
 }
