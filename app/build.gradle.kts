@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
@@ -7,18 +9,31 @@ plugins {
     alias(libs.plugins.kotlin.android)
 }
 
+val localProperties = Properties()
+val localPropertiesFile = rootProject.file("local.properties")
+if (localPropertiesFile.exists()) {
+    localPropertiesFile.inputStream().use { localProperties.load(it) }
+}
+
+val shopifyApiKey = localProperties.getProperty("SHOPIFY_API_KEY") ?: ""
+
+
 android {
     namespace = "com.example.qafilah"
     compileSdk = 37
 
+    buildFeatures {
+        buildConfig = true
+    }
     defaultConfig {
         applicationId = "com.example.qafilah"
         minSdk = 24
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"
-
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        buildConfigField("String", "SHOPIFY_API_KEY", "\"$shopifyApiKey\"")
     }
 
     buildTypes {
@@ -87,4 +102,25 @@ dependencies {
 
     // Material Icons Extended
     implementation(libs.compose.material.icons.extended)
+}
+
+apollo {
+    service("admin") {
+        packageName.set("com.example.qafilah.graphql.admin")
+        srcDir("src/main/graphql/admin")
+
+        introspection {
+            endpointUrl.set("https://mad46-and8.myshopify.com/admin/api/2024-01/graphql.json")
+            schemaFile.set(file("src/main/graphql/admin/schema.graphqls"))
+            headers.put("X-Shopify-Access-Token", shopifyApiKey)
+        }
+    }
+
+//    // Do the same for storefront if you are also using the Storefront API
+//    service("storefront") {
+//        packageName.set("com.example.qafilah.graphql.storefront")
+//        srcDir("src/main/graphql/storefront")
+//
+//        // Note: Storefront API usually requires 'X-Shopify-Storefront-Access-Token' instead
+//    }
 }
