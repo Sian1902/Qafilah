@@ -11,6 +11,7 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import com.example.qafilah.features.auth.presentation.screens.LoginScreen
 import com.example.qafilah.features.onboarding.OnboardingScreen
 import com.example.qafilah.features.splash.SplashScreen
 
@@ -47,7 +48,16 @@ fun AppNavHost(
 
         composable(Screen.Login.route) {
             Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text("Login")
+                LoginScreen(
+                    onNavigateToSignUp = {
+                        navController.navigate(Screen.Register.route)
+                    },
+                    onNavigateToHome = { user ->
+                        navController.navigate(NavItem.Home.route) {
+                            popUpTo(0) { inclusive = true }
+                        }
+                    }
+                )
             }
         }
 
