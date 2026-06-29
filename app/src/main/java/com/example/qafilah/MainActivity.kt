@@ -10,9 +10,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.example.qafilah.navigation.AppNavHost
-import com.example.qafilah.navigation.NavItem
-import com.example.qafilah.navigation.Screen
+import com.example.qafilah.core.navigation.AppNavHost
+import com.example.qafilah.core.navigation.NavItem
+import com.example.qafilah.core.navigation.Screen
 import com.example.ui_kit.components.bottomnav.BottomNavBar
 import com.example.ui_kit.components.bottomnav.BottomNavBarItem
 import com.example.ui_kit.theme.QafilahTheme
