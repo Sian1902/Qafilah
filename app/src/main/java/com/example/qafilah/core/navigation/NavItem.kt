@@ -30,7 +30,7 @@ sealed class NavItem(
     object Wishlist : NavItem(
         route = "wishlist",
         label = "Wishlist",
-        icon = R.drawable.cart
+        icon = R.drawable.fav
     )
 
     object Profile : NavItem(
@@ -41,5 +41,7 @@ sealed class NavItem(
 
     companion object {
         val all = listOf(Home, Search, Cart, Wishlist, Profile)
+
+        val guestRestricted = setOf(Cart.route, Wishlist.route)
     }
 }

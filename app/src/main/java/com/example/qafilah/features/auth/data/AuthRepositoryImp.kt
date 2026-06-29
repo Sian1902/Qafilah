@@ -1,5 +1,5 @@
 package com.example.qafilah.features.auth.data
-// feature/data/repository/AuthRepositoryImpl.kt
+
 import com.example.qafilah.features.auth.domain.model.AppUser
 import com.example.qafilah.features.auth.domain.repository.AuthRepository
 import com.google.firebase.auth.FirebaseAuth
@@ -11,7 +11,6 @@ class AuthRepositoryImpl(
 
     override suspend fun signIn(email: String, password: String): Result<AppUser> {
         return try {
-            // .await() suspends until the Firebase Task completes
             val authResult = firebaseAuth.signInWithEmailAndPassword(email, password).await()
             val user = authResult.user
 
@@ -21,7 +20,6 @@ class AuthRepositoryImpl(
                 Result.failure(Exception("Unknown error occurred"))
             }
         } catch (e: Exception) {
-            // Catches FirebaseAuthInvalidCredentialsException, etc.
             Result.failure(e)
         }
     }
@@ -35,6 +33,7 @@ class AuthRepositoryImpl(
     override fun signOut() {
         firebaseAuth.signOut()
     }
+
     override suspend fun signUp(email: String, password: String): Result<AppUser> {
         return try {
             val authResult = firebaseAuth.createUserWithEmailAndPassword(email, password).await()
