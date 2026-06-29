@@ -4,7 +4,13 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
@@ -22,6 +28,8 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.qafilah.R
+import com.example.qafilah.features.auth.domain.model.AppUser
 import com.example.qafilah.features.auth.presentation.AuthState
 import com.example.qafilah.features.auth.presentation.AuthViewModel
 import com.example.ui_kit.components.auth.AuthFooter
@@ -29,29 +37,28 @@ import com.example.ui_kit.components.auth.LoginCard
 import com.example.ui_kit.components.auth.LoginTitle
 import com.example.ui_kit.theme.QafilahTheme
 import org.koin.androidx.compose.koinViewModel
-import com.example.qafilah.R
-import com.example.qafilah.features.auth.domain.model.AppUser
+
 
 @Composable
 fun LoginScreen(
     modifier: Modifier = Modifier,
     onNavigateToSignUp: () -> Unit,
-    onNavigateToHome: (user: AppUser) -> Unit
+    onNavigateToHome: (user: AppUser) -> Unit,
+    onContinueAsGuest: () -> Unit
 ) {
     val viewModel: AuthViewModel = koinViewModel()
     val state = viewModel.authState.collectAsStateWithLifecycle()
 
     LaunchedEffect(state.value) {
         if (state.value is AuthState.Success) {
-            onNavigateToHome(
-                (state.value as AuthState.Success).user
-            )
+            onNavigateToHome((state.value as AuthState.Success).user)
         }
     }
 
     LoginContent(
         modifier = modifier,
         state = state.value,
+
         onLogin = { email, password ->
             viewModel.signIn(email, password)
         },
@@ -59,16 +66,19 @@ fun LoginScreen(
 
         },
         onLoginAsGuest = {
-            onNavigateToHome(AppUser(
-                id = "Guest",
-                email = "alooo@alooo.com",
-            ))
+            onNavigateToHome(
+                AppUser(
+                    id = "Guest",
+                    email = "alooo@alooo.com",
+                )
+            )
         },
         onNavigateToSignUp = {
             onNavigateToSignUp()
         }
     )
 }
+
 
 @Composable
 private fun LoginContent(
@@ -128,7 +138,6 @@ private fun LoginContent(
                         interactionSource = remember { MutableInteractionSource() },
                         indication = null
                     ) {
-                        // nothing underneath gets triggered
                     },
                 contentAlignment = Alignment.Center
             ) {
@@ -157,6 +166,7 @@ fun LoginScreenPreview() {
         }
     }
 }
+
 @Preview(showSystemUi = true)
 @Composable
 fun LoginScreenPreviewLight() {
