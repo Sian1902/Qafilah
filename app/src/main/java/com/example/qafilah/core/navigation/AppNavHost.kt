@@ -11,6 +11,8 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import com.example.qafilah.features.auth.presentation.screens.LoginScreen // Import actual screen
+import com.example.qafilah.features.auth.presentation.screens.SignUpScreen // Import actual screen
 import com.example.qafilah.features.onboarding.OnboardingScreen
 import com.example.qafilah.features.splash.SplashScreen
 
@@ -38,23 +40,40 @@ fun AppNavHost(
         composable(Screen.Onboarding.route) {
             OnboardingScreen(
                 onFinish = {
-                    navController.navigate(NavItem.Home.route) {
-                        popUpTo(0) { inclusive = true }
+                    // 1. FIXED: Routes to Login now instead of directly to Home
+                    navController.navigate(Screen.Login.route) {
+                        popUpTo(Screen.Onboarding.route) { inclusive = true }
                     }
                 }
             )
         }
 
         composable(Screen.Login.route) {
-            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text("Login")
-            }
+            // 2. FIXED: Injected actual LoginScreen instead of generic Box placeholder
+            LoginScreen(
+                onNavigateToSignUp = {
+                    navController.navigate(Screen.Register.route)
+                },
+                onNavigateToHome = { user ->
+                    navController.navigate(NavItem.Home.route) {
+                        popUpTo(0) { inclusive = true } // Clear auth history completely
+                    }
+                }
+            )
         }
 
         composable(Screen.Register.route) {
-            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text("Register")
-            }
+            // 3. FIXED: Injected actual SignUpScreen instead of generic Box placeholder
+            SignUpScreen(
+                onNavigateToLogin = {
+                    navController.popBackStack() // Smooth slide back to Login screen
+                },
+                onNavigateToHome = { user ->
+                    navController.navigate(NavItem.Home.route) {
+                        popUpTo(0) { inclusive = true }
+                    }
+                }
+            )
         }
 
         composable(Screen.Checkout.route) {

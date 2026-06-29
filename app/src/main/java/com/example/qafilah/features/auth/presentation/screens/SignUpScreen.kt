@@ -22,17 +22,18 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.qafilah.features.auth.presentation.AuthState
 import com.example.qafilah.features.auth.presentation.AuthViewModel
 import com.example.ui_kit.components.auth.AuthFooter
-import com.example.ui_kit.components.auth.LoginCard
+import com.example.ui_kit.components.auth.SignUpCard
 import com.example.ui_kit.components.auth.LoginTitle
 import com.example.ui_kit.theme.QafilahTheme
 import org.koin.androidx.compose.koinViewModel
 import com.example.qafilah.R
 import com.example.qafilah.features.auth.domain.model.AppUser
+import androidx.compose.material3.Text
 
 @Composable
-fun LoginScreen(
+fun SignUpScreen(
     modifier: Modifier = Modifier,
-    onNavigateToSignUp: () -> Unit,
+    onNavigateToLogin: () -> Unit,
     onNavigateToHome: (user: AppUser) -> Unit
 ) {
     val viewModel: AuthViewModel = koinViewModel()
@@ -46,11 +47,12 @@ fun LoginScreen(
         }
     }
 
-    LoginContent(
+    SignUpContent(
         modifier = modifier,
         state = state.value,
-        onLogin = { email, password ->
-            viewModel.signIn(email, password)
+        onSignUp = { name, email, password ->
+            // The AuthViewModel's signUp currently only accepts email and password.
+            viewModel.signUp(email, password)
         },
         onLoginAsGuest = {
             onNavigateToHome(AppUser(
@@ -58,19 +60,19 @@ fun LoginScreen(
                 email = "alooo@alooo.com",
             ))
         },
-        onNavigateToSignUp = {
-            onNavigateToSignUp()
+        onNavigateToLogin = {
+            onNavigateToLogin()
         }
     )
 }
 
 @Composable
-private fun LoginContent(
+private fun SignUpContent(
     modifier: Modifier = Modifier,
     state: AuthState,
-    onLogin: (email: String, password: String) -> Unit,
+    onSignUp: (name: String, email: String, password: String) -> Unit,
     onLoginAsGuest: () -> Unit,
-    onNavigateToSignUp: () -> Unit
+    onNavigateToLogin: () -> Unit
 ) {
     val errorMessage = (state as? AuthState.Error)?.message
 
@@ -88,22 +90,41 @@ private fun LoginContent(
         ) {
             Spacer(modifier = Modifier.height(48.dp))
 
-            // Keep standard login headers
-            LoginTitle(
-                logoPainter = painterResource(id = R.drawable.ic_logo),
-            )
+            // 1. Re-use or customize the title header for Sign Up flow
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                androidx.compose.foundation.Image(
+                    painter = painterResource(id = R.drawable.ic_logo),
+                    contentDescription = "App Logo",
+                    modifier = Modifier.size(150.dp)
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                Text(
+                    text = "Qafilah",
+                    style = MaterialTheme.typography.displayMedium,
+                    color = MaterialTheme.colorScheme.onBackground
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = "Your journey to discovery begins here",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
+                )
+            }
 
-            // Render LoginCard wrapper
-            LoginCard(
-                onLogin = onLogin,
+            // 2. FIXED: Swap LoginCard with SignUpCard to show Name and Confirm Password fields
+            SignUpCard(
+                onSignUp = onSignUp,
                 authErrorMessage = errorMessage
             )
 
-            // Explicitly set isInLogin = true
+            // 3. FIXED: Set isInLogin = false to display sign-up context links
             AuthFooter(
-                isInLogin = true,
+                isInLogin = false,
                 onLoginAsGuest = onLoginAsGuest,
-                onNavigate = onNavigateToSignUp
+                onNavigate = onNavigateToLogin
             )
         }
 
@@ -132,14 +153,14 @@ private fun LoginContent(
 
 @Preview(showSystemUi = true)
 @Composable
-fun LoginScreenPreview() {
+fun SignUpScreenPreview() {
     QafilahTheme(darkTheme = true) {
         Surface {
-            LoginContent(
+            SignUpContent(
                 state = AuthState.Idle,
-                onLogin = { _, _ -> },
+                onSignUp = { _, _, _ -> },
                 onLoginAsGuest = {},
-                onNavigateToSignUp = {}
+                onNavigateToLogin = {}
             )
         }
     }

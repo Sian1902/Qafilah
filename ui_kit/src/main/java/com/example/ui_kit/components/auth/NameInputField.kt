@@ -6,7 +6,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -18,7 +18,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun EmailInputField(
+fun NameInputField(
     value: String,
     onValueChange: (String) -> Unit,
     isError: Boolean,
@@ -26,7 +26,7 @@ fun EmailInputField(
 ) {
     Column(modifier = modifier.fillMaxWidth()) {
         Text(
-            text = "Email Address",
+            text = "Full Name",
             style = MaterialTheme.typography.labelSmall,
             color = if (isError) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
         )
@@ -35,8 +35,8 @@ fun EmailInputField(
             value = value,
             onValueChange = onValueChange,
             isError = isError,
-            placeholder = { Text("traveler@qafilah.com", color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)) },
-            leadingIcon = { Icon(Icons.Default.Email, contentDescription = null, tint = MaterialTheme.colorScheme.primary) },
+            placeholder = { Text("Layla Al-Farsi", color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)) },
+            leadingIcon = { Icon(Icons.Default.Person, contentDescription = null, tint = MaterialTheme.colorScheme.primary) },
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(12.dp),
             colors = OutlinedTextFieldDefaults.colors(
@@ -51,7 +51,7 @@ fun EmailInputField(
             singleLine = true,
             supportingText = {
                 if (isError) {
-                    Text("Please enter a valid email address", color = MaterialTheme.colorScheme.error)
+                    Text("Please enter your full name", color = MaterialTheme.colorScheme.error)
                 }
             }
         )

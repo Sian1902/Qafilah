@@ -27,6 +27,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
@@ -36,8 +37,10 @@ fun PasswordInputField(
     value: String,
     onValueChange: (String) -> Unit,
     isError: Boolean,
-    onForgotPasswordClick: () -> Unit,
-    modifier: Modifier = Modifier
+    onForgotPasswordClick: (() -> Unit)? = null,
+    modifier: Modifier = Modifier,
+    label: String = "Password",
+    leadingIconVector: ImageVector = Icons.Default.Lock
 ) {
     var passwordVisible by rememberSaveable { mutableStateOf(false) }
 
@@ -48,12 +51,14 @@ fun PasswordInputField(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "PASSWORD",
+                text = label,
                 style = MaterialTheme.typography.labelSmall,
                 color = if (isError) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
             )
-            TextButton(onClick = onForgotPasswordClick, contentPadding = PaddingValues(0.dp)) {
-                Text("Forgot Password?", color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.labelSmall)
+            if (onForgotPasswordClick != null) {
+                TextButton(onClick = onForgotPasswordClick, contentPadding = PaddingValues(0.dp)) {
+                    Text("Forgot Password?", color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.labelSmall)
+                }
             }
         }
         Spacer(modifier = Modifier.height(4.dp))
@@ -62,7 +67,7 @@ fun PasswordInputField(
             onValueChange = onValueChange,
             isError = isError,
             placeholder = { Text("••••••••", color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)) },
-            leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null, tint = MaterialTheme.colorScheme.primary) },
+            leadingIcon = { Icon(leadingIconVector, contentDescription = null, tint = MaterialTheme.colorScheme.primary) },
             trailingIcon = {
                 IconButton(onClick = { passwordVisible = !passwordVisible }) {
                     Icon(
