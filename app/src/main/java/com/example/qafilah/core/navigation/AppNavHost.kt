@@ -15,6 +15,7 @@ import androidx.navigation.navArgument
 import com.example.qafilah.features.auth.domain.model.AppUser
 import com.example.qafilah.features.auth.presentation.screens.LoginScreen
 import com.example.qafilah.features.cart.presentation.CartScreen
+
 import com.example.qafilah.features.onboarding.OnboardingScreen
 import com.example.qafilah.features.splash.SplashScreen
 import com.example.qafilah.features.wishlist.WishlistScreen
@@ -68,6 +69,7 @@ fun AppNavHost(
                     }
                 }
             )
+        
         }
 
         composable(Screen.Register.route) {

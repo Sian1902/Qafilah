@@ -23,11 +23,16 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 
 @Composable
 fun SocialLoginSection(
     modifier: Modifier = Modifier,
+    googleIcon: Painter,
     onGoogleClick: () -> Unit = {},
     onAppleClick: () -> Unit = {},
     onEmailClick: () -> Unit = {}
@@ -54,18 +59,18 @@ fun SocialLoginSection(
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            SocialIconButton(icon = Icons.Default.AccountCircle, onClick = onGoogleClick)
-            Spacer(modifier = Modifier.width(16.dp))
-            SocialIconButton(icon = Icons.Default.Phone, onClick = onAppleClick)
-            Spacer(modifier = Modifier.width(16.dp))
-            SocialIconButton(icon = Icons.Default.Email, onClick = onEmailClick)
+            SocialIconButton(icon = googleIcon, onClick = onGoogleClick)
+//            Spacer(modifier = Modifier.width(16.dp))
+//            SocialIconButton(icon = Icons.Default.Phone, onClick = onAppleClick)
+//            Spacer(modifier = Modifier.width(16.dp))
+//            SocialIconButton(icon = Icons.Default.Email, onClick = onEmailClick)
         }
     }
 }
 
 @Composable
 private fun SocialIconButton(
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    icon: Painter,
     onClick: () -> Unit
 ) {
     Surface(
@@ -75,9 +80,9 @@ private fun SocialIconButton(
         onClick = onClick
     ) {
         Icon(
-            imageVector = icon,
+            painter = icon,
             contentDescription = null,
-            tint = MaterialTheme.colorScheme.onBackground,
+            tint = Color.Unspecified,
             modifier = Modifier.padding(12.dp).fillMaxSize()
         )
     }
