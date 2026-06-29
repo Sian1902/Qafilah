@@ -15,7 +15,7 @@ import androidx.navigation.navArgument
 import com.example.qafilah.features.auth.domain.model.AppUser
 import com.example.qafilah.features.auth.presentation.screens.LoginScreen
 import com.example.qafilah.features.cart.presentation.CartScreen
-
+import com.example.qafilah.features.home.presentation.HomeScreen
 import com.example.qafilah.features.onboarding.OnboardingScreen
 import com.example.qafilah.features.splash.SplashScreen
 import com.example.qafilah.features.wishlist.WishlistScreen
@@ -69,7 +69,7 @@ fun AppNavHost(
                     }
                 }
             )
-        
+
         }
 
         composable(Screen.Register.route) {
@@ -107,9 +107,27 @@ fun AppNavHost(
 
 
         composable(NavItem.Home.route) {
-            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text("Home")
-            }
+            HomeScreen(
+                onSearchClick = {
+                    navController.navigate(NavItem.Search.route)
+                },
+                onNotificationClick = {
+                    // TODO: navigate to a notifications screen once it exists
+                },
+                onCategoryClick = { category ->
+                    // TODO: navigate to a category listing screen, e.g.
+                    // navController.navigate("category/${category.id}")
+                },
+                onViewAllCategoriesClick = {
+                    // TODO: navigate to a full categories screen
+                },
+                onBrandClick = { brand ->
+                    // TODO: navigate to a brand listing screen
+                },
+                onProductClick = { product ->
+                    navController.navigate(Screen.ProductDetail.createRoute(product.id))
+                }
+            )
         }
 
         composable(NavItem.Search.route) {
