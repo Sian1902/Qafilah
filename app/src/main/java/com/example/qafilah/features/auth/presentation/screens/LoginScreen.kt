@@ -2,6 +2,7 @@ package com.example.qafilah.features.auth.presentation.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -15,6 +16,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -52,6 +55,9 @@ fun LoginScreen(
         onLogin = { email, password ->
             viewModel.signIn(email, password)
         },
+        onLoginWithGoogle = {
+
+        },
         onLoginAsGuest = {
             onNavigateToHome(AppUser(
                 id = "Guest",
@@ -69,15 +75,21 @@ private fun LoginContent(
     modifier: Modifier = Modifier,
     state: AuthState,
     onLogin: (email: String, password: String) -> Unit,
+    onLoginWithGoogle: () -> Unit,
     onLoginAsGuest: () -> Unit,
     onNavigateToSignUp: () -> Unit
 ) {
     val errorMessage = (state as? AuthState.Error)?.message
-
+    val focusManager = LocalFocusManager.current
     Box(
         modifier = modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
+            .pointerInput(Unit) {
+                detectTapGestures(onTap = {
+                    focusManager.clearFocus()
+                })
+            }
     ) {
         Column(
             modifier = Modifier
@@ -94,7 +106,10 @@ private fun LoginContent(
 
             LoginCard(
                 onLogin = onLogin,
-                authErrorMessage = errorMessage
+                authErrorMessage = errorMessage,
+                googleIcon = painterResource(id = R.drawable.ic_google),
+                onLoginWithGoogle = {}
+
             )
 
             AuthFooter(
@@ -135,6 +150,22 @@ fun LoginScreenPreview() {
             LoginContent(
                 state = AuthState.Idle,
                 onLogin = { _, _ -> },
+                onLoginWithGoogle = {},
+                onLoginAsGuest = {},
+                onNavigateToSignUp = {}
+            )
+        }
+    }
+}
+@Preview(showSystemUi = true)
+@Composable
+fun LoginScreenPreviewLight() {
+    QafilahTheme(darkTheme = false) {
+        Surface {
+            LoginContent(
+                state = AuthState.Idle,
+                onLogin = { _, _ -> },
+                onLoginWithGoogle = {},
                 onLoginAsGuest = {},
                 onNavigateToSignUp = {}
             )
