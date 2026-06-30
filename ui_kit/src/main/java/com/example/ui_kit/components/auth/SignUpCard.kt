@@ -21,8 +21,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.ui_kit.R
 import com.example.ui_kit.components.shared.PrimaryButton
 import com.example.ui_kit.theme.QafilahTheme
 
@@ -101,7 +103,8 @@ fun SignUpCard(
                     password = it
                     passwordHasError = false
                 },
-                isError = passwordHasError
+                isError = passwordHasError,
+                {}
             )
 
             Spacer(modifier = Modifier.height(12.dp))
@@ -112,9 +115,8 @@ fun SignUpCard(
                     confirmPassword = it
                     confirmPasswordHasError = false
                 },
-                isError = confirmPasswordHasError,
-                label = "Confirm Password",
-                leadingIconVector = Icons.Default.VerifiedUser
+                onForgotPasswordClick = {},
+                isError = false
             )
 
             Spacer(modifier = Modifier.height(24.dp))
@@ -126,7 +128,6 @@ fun SignUpCard(
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            SocialLoginSection()
         }
     }
 }

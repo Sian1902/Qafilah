@@ -1,5 +1,6 @@
 package com.example.qafilah.features.auth.presentation.screens
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -29,6 +30,7 @@ import org.koin.androidx.compose.koinViewModel
 import com.example.qafilah.R
 import com.example.qafilah.features.auth.domain.model.AppUser
 import androidx.compose.material3.Text
+import com.example.ui_kit.components.auth.SocialLoginSection
 
 @Composable
 fun SignUpScreen(
@@ -95,7 +97,7 @@ private fun SignUpContent(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
-                androidx.compose.foundation.Image(
+                Image(
                     painter = painterResource(id = R.drawable.ic_logo),
                     contentDescription = "App Logo",
                     modifier = Modifier.size(150.dp)
@@ -118,6 +120,13 @@ private fun SignUpContent(
             SignUpCard(
                 onSignUp = onSignUp,
                 authErrorMessage = errorMessage
+            )
+
+            SocialLoginSection(
+                googleIcon = painterResource(id = R.drawable.ic_google),
+                onGoogleClick = { },
+                onAppleClick = {},
+                onEmailClick = {}
             )
 
             // 3. FIXED: Set isInLogin = false to display sign-up context links
