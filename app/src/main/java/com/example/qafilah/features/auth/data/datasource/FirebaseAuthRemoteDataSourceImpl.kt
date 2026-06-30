@@ -18,16 +18,16 @@ class FirebaseAuthRemoteDataSourceImpl(
         return AppUser(id = user.uid, email = email, firstName = firstName, lastName = lastName)
     }
 
-    override suspend fun signUpPrimary(email: String, password: String, fullName: String): AppUser {
+    override suspend fun signUpPrimary(name: String ,email: String, password: String): AppUser {
         val authResult = firebaseAuth.createUserWithEmailAndPassword(email, password).await()
         val user = authResult.user ?: throw Exception("Registration failed: User instance is null")
 
         val profileUpdates = userProfileChangeRequest {
-            displayName = fullName.trim()
+            displayName = name.trim()
         }
         user.updateProfile(profileUpdates).await()
 
-        val (firstName, lastName) = NameUtils.extractNames(fullName, email)
+        val (firstName, lastName) = NameUtils.extractNames(name, email)
         return AppUser(id = user.uid, email = email, firstName = firstName, lastName = lastName)
     }
 

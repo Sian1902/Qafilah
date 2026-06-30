@@ -15,11 +15,9 @@ interface CryptoManager {
 class TinkCryptoManager(context: Context) : CryptoManager {
 
     init {
-        // Initialize the Tink library
         AeadConfig.register()
     }
 
-    // Tink automatically handles the Android Keystore and generates/retrieves the key
     private val aead: Aead = AndroidKeysetManager.Builder()
         .withSharedPref(context, "tink_keyset", "secure_prefs")
         .withKeyTemplate(KeyTemplates.get("AES256_GCM"))
