@@ -47,7 +47,6 @@ val authModule = module {
         AuthViewModel(
             signInUseCase = get(),
             signUpUseCase = get(),
-            tokenLocalDataSource = get()
         )
     }
 
