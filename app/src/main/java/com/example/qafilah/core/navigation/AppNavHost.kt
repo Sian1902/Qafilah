@@ -11,10 +11,14 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
-import com.example.qafilah.features.auth.presentation.screens.LoginScreen // Import actual screen
-import com.example.qafilah.features.auth.presentation.screens.SignUpScreen // Import actual screen
+import com.example.qafilah.features.auth.domain.model.AppUser
+import com.example.qafilah.features.auth.presentation.screens.LoginScreen
+import com.example.qafilah.features.auth.presentation.screens.SignUpScreen
+import com.example.qafilah.features.cart.presentation.CartScreen
+import com.example.qafilah.features.home.presentation.HomeScreen
 import com.example.qafilah.features.onboarding.OnboardingScreen
 import com.example.qafilah.features.splash.SplashScreen
+import com.example.qafilah.features.wishlist.WishlistScreen
 
 @Composable
 fun AppNavHost(
@@ -40,30 +44,32 @@ fun AppNavHost(
         composable(Screen.Onboarding.route) {
             OnboardingScreen(
                 onFinish = {
-                    // 1. FIXED: Routes to Login now instead of directly to Home
                     navController.navigate(Screen.Login.route) {
-                        popUpTo(Screen.Onboarding.route) { inclusive = true }
+                        popUpTo(0) { inclusive = true }
                     }
                 }
             )
         }
 
         composable(Screen.Login.route) {
-            // 2. FIXED: Injected actual LoginScreen instead of generic Box placeholder
             LoginScreen(
                 onNavigateToSignUp = {
                     navController.navigate(Screen.Register.route)
                 },
-                onNavigateToHome = { user ->
+                onNavigateToHome = { _: AppUser ->
                     navController.navigate(NavItem.Home.route) {
                         popUpTo(0) { inclusive = true } // Clear auth history completely
+                    }
+                },
+                onContinueAsGuest = {
+                    navController.navigate(NavItem.Home.route) {
+                        popUpTo(Screen.Login.route) { inclusive = true }
                     }
                 }
             )
         }
 
         composable(Screen.Register.route) {
-            // 3. FIXED: Injected actual SignUpScreen instead of generic Box placeholder
             SignUpScreen(
                 onNavigateToLogin = {
                     navController.popBackStack() // Smooth slide back to Login screen
@@ -76,6 +82,17 @@ fun AppNavHost(
             )
         }
 
+        composable(
+            route = Screen.ProductDetail.route,
+            arguments = listOf(navArgument("productId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val productId = backStackEntry.arguments?.getString("productId")
+                ?: return@composable
+            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                Text("Product: $productId")
+            }
+        }
+
         composable(Screen.Checkout.route) {
             Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 Text("Checkout")
@@ -83,29 +100,38 @@ fun AppNavHost(
         }
 
         composable(
-            route = Screen.ProductDetail.route,
-            arguments = listOf(navArgument("productId") { type = NavType.StringType })
-        ) { backStackEntry ->
-            val productId = backStackEntry.arguments?.getString("productId") ?: return@composable
-            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text("Product: $productId")
-            }
-        }
-
-        composable(
             route = Screen.OrderConfirmation.route,
             arguments = listOf(navArgument("orderId") { type = NavType.StringType })
         ) { backStackEntry ->
-            val orderId = backStackEntry.arguments?.getString("orderId") ?: return@composable
+            val orderId = backStackEntry.arguments?.getString("orderId")
+                ?: return@composable
             Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 Text("Order: $orderId")
             }
         }
 
         composable(NavItem.Home.route) {
-            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text("Home")
-            }
+            HomeScreen(
+                onSearchClick = {
+                    navController.navigate(NavItem.Search.route)
+                },
+                onNotificationClick = {
+                    // TODO: navigate to a notifications screen once it exists
+                },
+                onCategoryClick = { category ->
+                    // TODO: navigate to a category listing screen, e.g.
+                    // navController.navigate("category/${category.id}")
+                },
+                onViewAllCategoriesClick = {
+                    // TODO: navigate to a full categories screen
+                },
+                onBrandClick = { brand ->
+                    // TODO: navigate to a brand listing screen
+                },
+                onProductClick = { product ->
+                    navController.navigate(Screen.ProductDetail.createRoute(product.id))
+                }
+            )
         }
 
         composable(NavItem.Search.route) {
@@ -115,15 +141,27 @@ fun AppNavHost(
         }
 
         composable(NavItem.Cart.route) {
-            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text("Cart")
-            }
+            CartScreen(
+                onNavigateToLogin = { navController.navigate(Screen.Login.route) },
+                onNavigateToSignUp = { navController.navigate(Screen.Register.route) },
+                onNavigateToHome = {
+                    navController.navigate(NavItem.Home.route) {
+                        popUpTo(NavItem.Cart.route) { inclusive = true }
+                    }
+                }
+            )
         }
 
         composable(NavItem.Wishlist.route) {
-            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text("Wishlist")
-            }
+            WishlistScreen(
+                onNavigateToLogin = { navController.navigate(Screen.Login.route) },
+                onNavigateToSignUp = { navController.navigate(Screen.Register.route) },
+                onNavigateToHome = {
+                    navController.navigate(NavItem.Home.route) {
+                        popUpTo(NavItem.Wishlist.route) { inclusive = true }
+                    }
+                }
+            )
         }
 
         composable(NavItem.Profile.route) {

@@ -46,8 +46,7 @@ class MainActivity : ComponentActivity() {
                                 currentRoute = currentRoute,
                                 onItemClick = { item ->
                                     navController.navigate(item.route) {
-                                        // Avoid building up a large back stack
-                                        popUpTo(NavItem.Home.route) {
+                                        popUpTo(navController.graph.startDestinationId) {
                                             saveState = true
                                         }
                                         launchSingleTop = true

@@ -31,6 +31,7 @@ class AuthViewModel(
             )
         }
     }
+
     fun signUp(email: String, password: String) {
         viewModelScope.launch {
             _authState.value = AuthState.Loading
@@ -47,10 +48,9 @@ class AuthViewModel(
     }
 }
 
-// Simple state wrapper
 sealed class AuthState {
     object Idle : AuthState()
     object Loading : AuthState()
-    data class Success(val user: AppUser) : AuthState() // Note: Using domain AppUser
+    data class Success(val user: AppUser) : AuthState()
     data class Error(val message: String) : AuthState()
 }

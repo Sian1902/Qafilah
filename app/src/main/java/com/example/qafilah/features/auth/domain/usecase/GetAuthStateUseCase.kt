@@ -1,12 +1,11 @@
 package com.example.qafilah.features.auth.domain.usecase
 
+
 import com.example.qafilah.features.auth.domain.model.AppUser
 import com.example.qafilah.features.auth.domain.repository.AuthRepository
 
-class SignUpUseCase(
+class GetAuthStateUseCase(
     private val repository: AuthRepository
 ) {
-    suspend operator fun invoke(email: String, password: String): Result<AppUser> {
-        return repository.signUp(email, password)
-    }
+    operator fun invoke(): AppUser? = repository.getCurrentUser()
 }
