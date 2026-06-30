@@ -6,5 +6,5 @@ interface AuthRepository {
     suspend fun signUp(email: String, password: String): Result<AppUser>
     suspend fun signIn(email: String, password: String): Result<AppUser>
     fun getCurrentUser(): AppUser?
-    fun signOut()
+    suspend fun signOut()
 }
