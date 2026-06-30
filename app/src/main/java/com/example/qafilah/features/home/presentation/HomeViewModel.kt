@@ -32,6 +32,7 @@ class HomeViewModel(
     }
 
     fun loadHome() {
+
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = null) }
             try {
@@ -43,7 +44,10 @@ class HomeViewModel(
                         isLoading = false,
                         categories = staticCategories, // TODO: swap for a GetCategoriesUseCase once it exists
                         brands = collections.map { collection -> collection.toBrandLabel() },
-                        products = products.map { product -> product.toUiModel() }
+                        products = products.map { product ->
+                            product.toUiModel()
+                        }
+
                     )
                 }
             } catch (e: Exception) {
@@ -52,13 +56,10 @@ class HomeViewModel(
                 }
             }
         }
+
     }
 
-    /**
-     * Optimistic local toggle. TODO: replace with a call into a wishlist use case
-     * (e.g. ToggleWishlistUseCase) so this actually persists to Firestore instead
-     * of only flipping UI state.
-     */
+
     fun toggleFavorite(productId: String) {
         _uiState.update { state ->
             state.copy(
@@ -73,7 +74,7 @@ class HomeViewModel(
 private fun Product.toUiModel(): ProductUiModel = ProductUiModel(
     id = id,
     imageUrl = imageUrl.orEmpty(),
-    category = vendor.orEmpty(),
+    category = vendor,
     name = title,
     price = priceAmount,
     isFavorite = false

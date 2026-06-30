@@ -1,21 +1,19 @@
 package com.example.qafilah.features.catalog.data.repo
 
-import com.example.qafilah.features.catalog.data.datasource.CatalogRemoteDataSource
-import com.example.qafilah.features.catalog.domain.repo.CatalogRepository
 import com.example.qafilah.core.model.Product
+import com.example.qafilah.features.catalog.data.datasource.CatalogRemoteDataSource
 import com.example.qafilah.features.catalog.data.mapper.toDomain
 import com.example.qafilah.features.catalog.data.mapper.toStoreCollection
 import com.example.qafilah.features.catalog.domain.model.CollectionWithProducts
 import com.example.qafilah.features.catalog.domain.model.ProductDetails
-import com.example.qafilah.features.catalog.domain.model.ProductVariant
 import com.example.qafilah.features.catalog.domain.model.StoreCollection
-import com.example.qafilah.graphql.storefront.type.ProductCollectionSortKeys
+import com.example.qafilah.features.catalog.domain.repo.CatalogRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 class CatalogRepositoryImpl(
     private val remoteDataSource: CatalogRemoteDataSource
-) : CatalogRepository{
+) : CatalogRepository {
     override suspend fun searchProducts(
         query: String,
         limit: Int
@@ -49,6 +47,10 @@ class CatalogRepositoryImpl(
                 Result.failure(e)
             }
         }
+    }
+
+    override suspend fun getProductDetail(productId: String): Result<com.example.qafilah.features.product_detail.domain.model.ProductDetail> {
+        throw UnsupportedOperationException("Moved to ProductDetailRepository")
     }
 
     override suspend fun getBestSellingProducts(limit: Int, after: String?): List<Product> {

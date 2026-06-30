@@ -87,7 +87,6 @@ fun LoginPromptBottomSheet(
 
             Spacer(Modifier.height(28.dp))
 
-            // Primary CTA
             Button(
                 onClick = { onDismiss(); onNavigateToLogin() },
                 modifier = Modifier.fillMaxWidth()
@@ -97,7 +96,6 @@ fun LoginPromptBottomSheet(
 
             Spacer(Modifier.height(12.dp))
 
-            // Secondary CTA — matches "Sign Up" terminology used in LoginScreen
             OutlinedButton(
                 onClick = { onDismiss(); onNavigateToSignUp() },
                 modifier = Modifier.fillMaxWidth()

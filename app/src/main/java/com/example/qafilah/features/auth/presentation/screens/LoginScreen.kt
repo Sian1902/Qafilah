@@ -110,12 +110,10 @@ private fun LoginContent(
         ) {
             Spacer(modifier = Modifier.height(48.dp))
 
-            // Keep standard login headers
             LoginTitle(
                 logoPainter = painterResource(id = R.drawable.ic_logo),
             )
 
-            // Render LoginCard wrapper
             LoginCard(
                 onLogin = onLogin,
                 authErrorMessage = errorMessage,
@@ -124,7 +122,6 @@ private fun LoginContent(
 
             )
 
-            // Explicitly set isInLogin = true
             AuthFooter(
                 isInLogin = true,
                 onLoginAsGuest = onLoginAsGuest,

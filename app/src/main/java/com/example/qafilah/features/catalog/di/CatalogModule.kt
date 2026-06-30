@@ -7,8 +7,8 @@ import com.example.qafilah.features.catalog.domain.repo.CatalogRepository
 import com.example.qafilah.features.catalog.domain.usecases.GetBestSellingUseCase
 import com.example.qafilah.features.catalog.domain.usecases.GetCollectionProductsUseCase
 import com.example.qafilah.features.catalog.domain.usecases.GetCollectionsUseCase
-import com.example.qafilah.features.catalog.domain.usecases.SearchProductsUseCase
 import com.example.qafilah.features.catalog.domain.usecases.GetSingleProductUseCase
+import com.example.qafilah.features.catalog.domain.usecases.SearchProductsUseCase
 import com.example.qafilah.features.catalog.presentation.CatalogViewModel
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
@@ -16,7 +16,11 @@ import org.koin.dsl.module
 val catalogModule = module {
     single<CatalogRemoteDataSource> { CatalogRemoteDataSourceImpl(apolloClient = get()) }
 
-    single<CatalogRepository> { CatalogRepositoryImpl(remoteDataSource = get()) }
+    single<CatalogRepository> {
+        CatalogRepositoryImpl(
+            remoteDataSource = get()
+        )
+    }
 
     factory { SearchProductsUseCase(homeRepository = get()) }
     factory { GetSingleProductUseCase(homeRepository = get()) }

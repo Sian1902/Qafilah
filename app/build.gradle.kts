@@ -106,7 +106,7 @@ dependencies {
     implementation(libs.compose.material.icons.extended)
 
     implementation(libs.androidx.navigation.compose)
-
+    implementation("io.coil-kt:coil-compose:2.7.0")
 
 }
 
@@ -120,5 +120,9 @@ apollo {
             schemaFile.set(file("src/main/graphql/storefront/schema.graphqls"))
             headers.put("X-Shopify-Storefront-Access-Token", shopifyApiKey)
         }
+    }
+    service("admin") {
+        packageName.set("com.example.qafilah.graphql.admin")
+        srcDir("src/main/graphql/admin")
     }
 }

@@ -19,6 +19,7 @@ import com.example.qafilah.features.home.presentation.HomeScreen
 import com.example.qafilah.features.onboarding.OnboardingScreen
 import com.example.qafilah.features.splash.SplashScreen
 import com.example.qafilah.features.wishlist.WishlistScreen
+import com.example.qafilah.features.product_detail.presentation.ProductDetailScreen
 
 @Composable
 fun AppNavHost(
@@ -84,13 +85,19 @@ fun AppNavHost(
 
         composable(
             route = Screen.ProductDetail.route,
-            arguments = listOf(navArgument("productId") { type = NavType.StringType })
+            arguments = listOf(
+                navArgument("productId") {
+                    type = NavType.StringType
+                    nullable = true
+                }
+            )
         ) { backStackEntry ->
             val productId = backStackEntry.arguments?.getString("productId")
                 ?: return@composable
-            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text("Product: $productId")
-            }
+            ProductDetailScreen(
+                productId = productId,
+                onBackClick = { navController.popBackStack() }
+            )
         }
 
         composable(Screen.Checkout.route) {

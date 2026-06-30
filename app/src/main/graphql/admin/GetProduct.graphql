@@ -1,0 +1,22 @@
+query getProduct($id: ID!) {
+  product(id: $id) {
+    id
+    title
+    descriptionHtml
+    images(first: 10) { edges { node { url altText } } }
+    variants(first: 20) {
+      edges {
+        node {
+          id
+          title
+          price
+          inventoryQuantity
+          selectedOptions { name value }
+        }
+      }
+    }
+    metafields(first: 20) {
+      edges { node { namespace key value type } }
+    }
+  }
+}
