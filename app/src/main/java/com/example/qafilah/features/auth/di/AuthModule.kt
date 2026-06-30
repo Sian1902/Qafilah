@@ -1,5 +1,7 @@
 package com.example.qafilah.features.auth.di
 
+import com.example.qafilah.features.auth.data.datasource.FirebaseAuthRemoteDataSource
+import com.example.qafilah.features.auth.data.datasource.FirebaseAuthRemoteDataSourceImpl
 import com.example.qafilah.features.auth.data.repo.AuthRepositoryImpl
 import com.example.qafilah.features.auth.data.datasource.ShopifyAuthRemoteDataSource
 import com.example.qafilah.features.auth.data.datasource.ShopifyAuthRemoteDataSourceImpl
@@ -22,15 +24,17 @@ val authModule = module {
         ShopifyAuthRemoteDataSourceImpl(apolloClient = get())
     }
 
-    single<AuthRepository> {
-        AuthRepositoryImpl(
-            firebaseAuth = get(),
-            shopifyRemoteDataSource = get(),
-            tokenLocalDataSource = get()
-        )
+    single<FirebaseAuthRemoteDataSource>{
+        FirebaseAuthRemoteDataSourceImpl(firebaseAuth = get())
     }
 
-
+    single<AuthRepository> {
+        AuthRepositoryImpl(
+            shopifyDataSource = get(),
+            tokenLocalDataSource = get(),
+            firebaseDataSource = get()
+        )
+    }
 
 
 

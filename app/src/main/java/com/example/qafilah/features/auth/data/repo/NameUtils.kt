@@ -1,8 +1,5 @@
 package com.example.qafilah.features.auth.data.repo
 
-/**
- * Helper object for name extraction so callers can reference NameUtils.extractNames(...).
- */
 object NameUtils {
     fun extractNames(
         displayName: String?,
@@ -10,11 +7,26 @@ object NameUtils {
         defaultFirst: String? = null,
         defaultLast: String? = null
     ): Pair<String?, String?> {
-        val fullName = displayName?.takeIf { it.isNotBlank() } ?: email?.substringBefore("@") ?: ""
-        val parts = fullName.split(" ", limit = 2)
-        val first = parts.getOrNull(0)?.takeIf { it.isNotBlank() } ?: defaultFirst
-        val last = parts.getOrNull(1)?.takeIf { it.isNotBlank() } ?: defaultLast
+        val rawName = displayName?.takeIf { it.isNotBlank() }
+            ?: email?.substringBefore("@")?.replace(Regex("[._-]"), " ")
+            ?: ""
+
+        val cleanName = rawName.trim().replace(Regex("\\s+"), " ")
+
+        if (cleanName.isBlank()) {
+            return Pair(defaultFirst, defaultLast)
+        }
+
+        val parts = cleanName.split(" ", limit = 2)
+
+        val first = parts.getOrNull(0)
+            ?.replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
+            ?: defaultFirst
+
+        val last = parts.getOrNull(1)
+            ?.replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
+            ?: defaultLast
+
         return Pair(first, last)
     }
 }
-
