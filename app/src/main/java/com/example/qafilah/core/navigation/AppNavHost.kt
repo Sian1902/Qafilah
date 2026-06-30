@@ -1,6 +1,5 @@
 package com.example.qafilah.core.navigation
 
-
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Text
@@ -14,6 +13,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.example.qafilah.features.auth.domain.model.AppUser
 import com.example.qafilah.features.auth.presentation.screens.LoginScreen
+import com.example.qafilah.features.auth.presentation.screens.SignUpScreen
 import com.example.qafilah.features.cart.presentation.CartScreen
 import com.example.qafilah.features.home.presentation.HomeScreen
 import com.example.qafilah.features.onboarding.OnboardingScreen
@@ -30,7 +30,6 @@ fun AppNavHost(
         startDestination = Screen.Splash.route,
         modifier = modifier
     ) {
-
 
         composable(Screen.Splash.route) {
             SplashScreen(
@@ -52,7 +51,6 @@ fun AppNavHost(
             )
         }
 
-
         composable(Screen.Login.route) {
             LoginScreen(
                 onNavigateToSignUp = {
@@ -60,7 +58,7 @@ fun AppNavHost(
                 },
                 onNavigateToHome = { _: AppUser ->
                     navController.navigate(NavItem.Home.route) {
-                        popUpTo(Screen.Login.route) { inclusive = true }
+                        popUpTo(0) { inclusive = true } // Clear auth history completely
                     }
                 },
                 onContinueAsGuest = {
@@ -69,13 +67,20 @@ fun AppNavHost(
                     }
                 }
             )
-
         }
 
         composable(Screen.Register.route) {
-
+            SignUpScreen(
+                onNavigateToLogin = {
+                    navController.popBackStack() // Smooth slide back to Login screen
+                },
+                onNavigateToHome = { user ->
+                    navController.navigate(NavItem.Home.route) {
+                        popUpTo(0) { inclusive = true }
+                    }
+                }
+            )
         }
-
 
         composable(
             route = Screen.ProductDetail.route,
@@ -104,7 +109,6 @@ fun AppNavHost(
                 Text("Order: $orderId")
             }
         }
-
 
         composable(NavItem.Home.route) {
             HomeScreen(
@@ -135,7 +139,6 @@ fun AppNavHost(
                 Text("Search")
             }
         }
-
 
         composable(NavItem.Cart.route) {
             CartScreen(
