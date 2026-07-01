@@ -192,7 +192,9 @@ fun AppNavHost(
                     navController.navigate(NavItem.Home.route) {
                         popUpTo(NavItem.Wishlist.route) { inclusive = true }
                     }
-                }
+                },
+                onProductClick = {},
+                onFavoriteClick = {}
             )
         }
 
