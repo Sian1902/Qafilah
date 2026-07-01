@@ -34,6 +34,7 @@ import com.example.qafilah.features.wishlist.presentation.WishlistViewModel
 import com.example.ui_kit.components.home.ProductCard
 import com.example.ui_kit.components.home.ProductUiModel
 import com.example.ui_kit.components.login.LoginPromptBottomSheet
+import com.example.ui_kit.components.shared.QafilahConfirmDialog
 import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -47,7 +48,7 @@ fun WishlistScreen(
     modifier: Modifier = Modifier,
     viewModel: WishlistViewModel = koinViewModel()
 ) {
-    val state by viewModel.state.collectAsStateWithLifecycle() //[cite: 14]
+    val state by viewModel.state.collectAsStateWithLifecycle()
 
     LaunchedEffect(Unit) {
         viewModel.onIntent(WishlistIntent.EnterScreen)
@@ -133,9 +134,7 @@ fun WishlistScreen(
                             ProductCard(
                                 product = product,
                                 onClick = onProductClick,
-                                onFavoriteClick = onFavoriteClick //[cite: 17]
-                            )
-                        }
+                                onFavoriteClick = { viewModel.onIntent(WishlistIntent.PromptRemove(product = product)) })                     }
                     }
                 }
             }
@@ -148,6 +147,14 @@ fun WishlistScreen(
             onDismiss = { viewModel.onIntent(WishlistIntent.DismissLoginPrompt) },
             onNavigateToLogin = { viewModel.onIntent(WishlistIntent.NavigateToLogin) },
             onNavigateToSignUp = { viewModel.onIntent(WishlistIntent.NavigateToSignUp) }
+        )
+    }
+    state.productToConfirmRemove?.let { product ->
+        QafilahConfirmDialog(
+            title = "Remove Item",
+            message = "Are you sure you want to remove ${product.name} from your wishlist?",
+            onConfirm = { viewModel.onIntent(WishlistIntent.ConfirmRemoval) },
+            onDismiss = { viewModel.onIntent(WishlistIntent.DismissRemoval) }
         )
     }
 }
