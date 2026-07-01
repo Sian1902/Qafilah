@@ -107,6 +107,11 @@ dependencies {
 
     implementation(libs.androidx.navigation.compose)
 
+    // Jetpack DataStore
+    implementation(libs.androidx.datastore.preferences.v111)
+
+    // Google Tink for secure, reliable encryption
+    implementation(libs.tink.android)
 
 }
 

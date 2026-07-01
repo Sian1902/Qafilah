@@ -53,8 +53,7 @@ fun SignUpScreen(
         modifier = modifier,
         state = state.value,
         onSignUp = { name, email, password ->
-            // The AuthViewModel's signUp currently only accepts email and password.
-            viewModel.signUp(email, password)
+            viewModel.signUp(name, email, password)
         },
         onLoginAsGuest = {
             onNavigateToHome(AppUser(

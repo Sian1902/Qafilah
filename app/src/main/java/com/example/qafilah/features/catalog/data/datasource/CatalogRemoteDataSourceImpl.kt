@@ -14,9 +14,9 @@ class CatalogRemoteDataSourceImpl(
     private val apolloClient: ApolloClient
 ) : CatalogRemoteDataSource {
 
-    override suspend fun searchProducts(searchQuery: String, limit: Int): List<SearchProductsQuery.OnProduct> {
+    override suspend fun searchProducts(query: String, limit: Int): List<SearchProductsQuery.OnProduct> {
         val data = safeApiCall {
-            apolloClient.query(SearchProductsQuery(query = searchQuery, first = limit)).execute()
+            apolloClient.query(SearchProductsQuery(query = query, first = limit)).execute()
         }
         return data.search.edges.mapNotNull { it.node.onProduct }
     }
