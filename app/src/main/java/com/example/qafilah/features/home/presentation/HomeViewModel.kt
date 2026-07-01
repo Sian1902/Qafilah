@@ -42,7 +42,7 @@ class HomeViewModel(
                 _uiState.update {
                     it.copy(
                         isLoading = false,
-                        categories = staticCategories, // TODO: swap for a GetCategoriesUseCase once it exists
+                        categories = staticCategories,
                         brands = collections.map { collection -> collection.toBrandLabel() },
                         products = products.map { product ->
                             product.toUiModel()

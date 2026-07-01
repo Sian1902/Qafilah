@@ -49,9 +49,6 @@ class CatalogRepositoryImpl(
         }
     }
 
-    override suspend fun getProductDetail(productId: String): Result<com.example.qafilah.features.product_detail.domain.model.ProductDetail> {
-        throw UnsupportedOperationException("Moved to ProductDetailRepository")
-    }
 
     override suspend fun getBestSellingProducts(limit: Int, after: String?): List<Product> {
         val networkResult = remoteDataSource.getBestSellingProducts(limit, after)

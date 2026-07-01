@@ -2,15 +2,15 @@ package com.example.qafilah.features.product_detail.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.qafilah.features.product_detail.domain.model.ProductVariant
-import com.example.qafilah.features.product_detail.domain.usecase.GetProductDetailUseCase
+import com.example.qafilah.features.catalog.domain.usecases.GetSingleProductUseCase
+import com.example.qafilah.features.catalog.domain.model.ProductVariant
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 class ProductDetailViewModel(
-    private val getProductDetailUseCase: GetProductDetailUseCase
+    private val getProductDetailUseCase: GetSingleProductUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<ProductDetailUiState>(ProductDetailUiState.Loading)
@@ -28,15 +28,18 @@ class ProductDetailViewModel(
             getProductDetailUseCase(productId)
                 .onSuccess { product ->
                     val initialVariant = product.variants.firstOrNull()
-                    val initialOptions = initialVariant
-                        ?.selectedOptions
-                        ?.associate { it.name to it.value }
-                        ?: emptyMap()
+                    val initialOptions = initialVariant?.options ?: emptyMap()
 
                     _uiState.value = ProductDetailUiState.Success(
                         product = product,
-                        selectedVariant = initialVariant
-                            ?: ProductVariant("", "Default", "0.00", 0, emptyList()),
+                        selectedVariant = initialVariant ?: ProductVariant(
+                            id = "",
+                            title = "Default",
+                            price = "0.00",
+                            compareAtPrice = null,
+                            inventoryQuantity = null,
+                            options = emptyMap()
+                        ),
                         selectedOptions = initialOptions,
                         isFavorite = localFavoriteState
                     )
@@ -55,7 +58,7 @@ class ProductDetailViewModel(
             put(name, value)
         }
         val matchingVariant = currentState.product.variants.find { variant ->
-            variant.selectedOptions.all { opt -> updatedOptions[opt.name] == opt.value }
+            variant.options.all { (optName, optValue) -> updatedOptions[optName] == optValue }
         } ?: currentState.selectedVariant
 
         _uiState.value = currentState.copy(

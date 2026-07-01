@@ -96,49 +96,31 @@ fun ProductDetailScreen(
             val optionGroups = remember(product.variants) {
                 val groups = mutableMapOf<String, MutableList<String>>()
                 for (variant in product.variants) {
-                    for (opt in variant.selectedOptions) {
-                        if (opt.name.equals(
-                                "Title",
-                                ignoreCase = true
-                            ) && opt.value.equals("Default Title", ignoreCase = true)
-                        ) {
+                    for ((name, value) in variant.options) {
+                        if (name.equals("Title", ignoreCase = true) && value.equals("Default Title", ignoreCase = true)) {
                             continue
                         }
-                        val list = groups.getOrPut(opt.name) { mutableListOf() }
-                        if (!list.contains(opt.value)) {
-                            list.add(opt.value)
+                        val list = groups.getOrPut(name) { mutableListOf() }
+                        if (!list.contains(value)) {
+                            list.add(value)
                         }
                     }
                 }
                 groups.toMap()
             }
 
-            val specKeys = listOf(
-                "custom.flex" to "FLEX",
-                "custom.flex_rating" to "FLEX",
-                "custom.terrain" to "TERRAIN",
-                "custom.material" to "MATERIAL",
-                "custom.profile" to "PROFILE"
-            )
-            val specs = remember(product.metafields) {
-                specKeys.mapNotNull { (key, label) ->
-                    val value = product.metafields[key]
-                    if (!value.isNullOrBlank()) SpecItem(label, value) else null
-                }
-            }
+            val specs = remember { emptyList<SpecItem>() }
 
-            val inStock =
-                selectedVariant.inventoryQuantity != null && selectedVariant.inventoryQuantity > 0
+            val inStock = selectedVariant.inventoryQuantity != null && selectedVariant.inventoryQuantity > 0
             val stockText = if (inStock) {
                 "In Stock (${selectedVariant.inventoryQuantity} available)"
             } else {
                 "Out of Stock"
             }
-            val stockColor =
-                if (inStock) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
+            val stockColor = if (inStock) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
 
-            val rating = product.getMetafield("reviews.rating")?.toDoubleOrNull()
-            val reviewCount = product.getMetafield("reviews.rating_count")?.toIntOrNull()
+            val rating = product.rating
+            val reviewCount = product.ratingCount
 
             Column(
                 modifier = modifier
@@ -152,9 +134,8 @@ fun ProductDetailScreen(
                 ) {
                     Box(modifier = Modifier.fillMaxWidth()) {
                         ProductImageHeader(
-                            images = product.images.map { it.url },
-                            collectionName = product.getMetafield("custom.collection")
-                                ?: "THE COLLECTION"
+                            images = product.images,
+                            collectionName = product.tags.firstOrNull()?.uppercase() ?: "THE COLLECTION"
                         )
                         TopIconBar(
                             isFavorite = isFavorite,
@@ -221,7 +202,7 @@ fun ProductDetailScreen(
                             }
                         }
 
-                        ExpandableDescriptionBlock(descriptionHtml = product.descriptionHtml)
+                        ExpandableDescriptionBlock(descriptionHtml = product.description ?: "")
 
                         SpecTagPairs(specs = specs)
 

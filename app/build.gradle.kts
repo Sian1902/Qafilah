@@ -121,8 +121,5 @@ apollo {
             headers.put("X-Shopify-Storefront-Access-Token", shopifyApiKey)
         }
     }
-    service("admin") {
-        packageName.set("com.example.qafilah.graphql.admin")
-        srcDir("src/main/graphql/admin")
-    }
+
 }

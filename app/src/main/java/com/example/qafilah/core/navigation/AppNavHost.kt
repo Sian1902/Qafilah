@@ -73,7 +73,7 @@ fun AppNavHost(
         composable(Screen.Register.route) {
             SignUpScreen(
                 onNavigateToLogin = {
-                    navController.popBackStack() // Smooth slide back to Login screen
+                    navController.popBackStack()
                 },
                 onNavigateToHome = { user ->
                     navController.navigate(NavItem.Home.route) {
@@ -123,17 +123,13 @@ fun AppNavHost(
                     navController.navigate(NavItem.Search.route)
                 },
                 onNotificationClick = {
-                    // TODO: navigate to a notifications screen once it exists
                 },
                 onCategoryClick = { category ->
-                    // TODO: navigate to a category listing screen, e.g.
-                    // navController.navigate("category/${category.id}")
+
                 },
                 onViewAllCategoriesClick = {
-                    // TODO: navigate to a full categories screen
                 },
                 onBrandClick = { brand ->
-                    // TODO: navigate to a brand listing screen
                 },
                 onProductClick = { product ->
                     navController.navigate(Screen.ProductDetail.createRoute(product.id))

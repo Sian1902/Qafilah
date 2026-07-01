@@ -5,7 +5,7 @@ import com.example.qafilah.features.auth.Di.authModule
 import com.example.qafilah.core.di.networkModule
 import com.example.qafilah.features.catalog.di.catalogModule
 import com.example.qafilah.features.home.di.homeModule
-import com.example.qafilah.features.product_detail.di.productDetailModule
+import com.example.qafilah.features.product_detail.di.productDetailsModule
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
 import org.koin.core.context.GlobalContext
@@ -17,7 +17,7 @@ class QafilahApp : Application() {
         catalogModule,
         authModule,
         homeModule,
-        productDetailModule
+        productDetailsModule
     )
 
     override fun onCreate() {
