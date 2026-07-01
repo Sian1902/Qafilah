@@ -1,8 +1,10 @@
 package com.example.qafilah.features.cart.presentation.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.qafilah.features.auth.domain.util.RequireAuth
+import com.example.qafilah.features.cart.domain.usecase.GetCartUseCase
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -31,7 +33,8 @@ data class CartState(
 )
 
 class CartViewModel(
-    private val requireAuth: RequireAuth
+    private val requireAuth: RequireAuth,
+    private val getCartUseCase: GetCartUseCase
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(CartState())
@@ -39,6 +42,17 @@ class CartViewModel(
 
     private val _events = Channel<CartEvent>(Channel.BUFFERED)
     val events = _events.receiveAsFlow()
+
+    init {
+        viewModelScope.launch {
+            _state.update { it.copy(isLoading = true) }
+            val cart = getCartUseCase()?.let {
+                Log.d("CartViewModel", "Cart: $it, ${it.lines.first().merchandise.product.title}")
+            }
+
+            _state.update { it.copy(isLoading = false) }
+        }
+    }
 
     fun onIntent(intent: CartIntent) {
         when (intent) {
