@@ -55,5 +55,5 @@ val authModule = module {
     }
 
     viewModel { CartViewModel(requireAuth = get()) }
-    viewModel { WishlistViewModel(requireAuth = get()) }
+    viewModel { WishlistViewModel(requireAuth = get(),get(),get()) }
 }
