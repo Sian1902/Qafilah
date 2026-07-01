@@ -14,7 +14,11 @@ class CatalogRemoteDataSourceImpl(
     private val apolloClient: ApolloClient
 ) : CatalogRemoteDataSource {
 
-    override suspend fun searchProducts(query: String, limit: Int): List<SearchProductsQuery.OnProduct> {
+
+    override suspend fun searchProducts(
+        query: String,
+        limit: Int
+    ): List<SearchProductsQuery.OnProduct> {
         val data = safeApiCall {
             apolloClient.query(SearchProductsQuery(query = query, first = limit)).execute()
         }
@@ -28,7 +32,10 @@ class CatalogRemoteDataSourceImpl(
         return data.product
     }
 
-    override suspend fun getBestSellingProducts(limit: Int, after: String?): List<GetBestSellingProductsQuery.Node> {
+    override suspend fun getBestSellingProducts(
+        limit: Int,
+        after: String?
+    ): List<GetBestSellingProductsQuery.Node> {
         val cursor = presentIfNotNull(after)
         val data = safeApiCall {
             apolloClient.query(GetBestSellingProductsQuery(first = limit, after = cursor)).execute()
@@ -45,7 +52,8 @@ class CatalogRemoteDataSourceImpl(
     }
 
     override suspend fun getProductsByCollection(id: String): GetProductsByCollectionQuery.Data {
-        val defaultSort = com.apollographql.apollo.api.Optional.present(ProductCollectionSortKeys.CREATED)
+        val defaultSort =
+            com.apollographql.apollo.api.Optional.present(ProductCollectionSortKeys.CREATED)
 
         return safeApiCall {
             apolloClient.query(

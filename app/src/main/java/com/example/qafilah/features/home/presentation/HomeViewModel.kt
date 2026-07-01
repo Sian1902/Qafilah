@@ -43,6 +43,7 @@ class HomeViewModel(
     }
 
     fun loadHome() {
+
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = null) }
             try {
@@ -52,9 +53,12 @@ class HomeViewModel(
                 _uiState.update {
                     it.copy(
                         isLoading = false,
-                        categories = staticCategories, // TODO: swap for a GetCategoriesUseCase once it exists
+                        categories = staticCategories,
                         brands = collections.map { collection -> collection.toBrandLabel() },
-                        products = products.map { product -> product.toUiModel() }
+                        products = products.map { product ->
+                            product.toUiModel()
+                        }
+
                     )
                 }
             } catch (e: Exception) {
@@ -63,13 +67,9 @@ class HomeViewModel(
                 }
             }
         }
+
     }
 
-    /**
-     * Optimistic local toggle. TODO: replace with a call into a wishlist use case
-     * (e.g. ToggleWishlistUseCase) so this actually persists to Firestore instead
-     * of only flipping UI state.
-     */
 
     private val _events = Channel<HomeEvent>(Channel.BUFFERED)
     val events = _events.receiveAsFlow()
@@ -78,10 +78,8 @@ class HomeViewModel(
         val uiProduct = _uiState.value.products.find { it.id == productId } ?: return
         val domainProduct = domainProductsCache.find { it.id == productId } ?: return
 
-        // Capture the current favorite state before modification
         val wasFavorite = uiProduct.isFavorite
 
-        // 1. OPTIMISTIC UPDATE: Change the heart color instantly in the UI state
         _uiState.update { state ->
             state.copy(
                 products = state.products.map { p ->
@@ -90,7 +88,6 @@ class HomeViewModel(
             )
         }
 
-        // 2. Run the heavy Room/Network operations completely in the background
         viewModelScope.launch {
             try {
                 if (wasFavorite) {
@@ -108,7 +105,6 @@ class HomeViewModel(
                     _events.trySend(HomeEvent.ShowSnackbar("${domainProduct.title} added to wishlist"))
                 }
             } catch (e: Exception) {
-                // 3. ROLLBACK: If database fails, revert the heart color to its original state
                 _uiState.update { state ->
                     state.copy(
                         products = state.products.map { p ->
@@ -125,11 +121,11 @@ class HomeViewModel(
 private fun Product.toUiModel(): ProductUiModel = ProductUiModel(
     id = id,
     imageUrl = imageUrl.orEmpty(),
-    category = vendor.orEmpty(),
+    category = vendor,
     name = title,
-    price = "$currencyCode $priceAmount", // Formatted as String for the UI
-    badge = null, // Or derive from domain if available
-    isFavorite = false // Optionally, you can cross-reference IsProductWishlistedUseCase here later
+    price = "$currencyCode $priceAmount",
+    badge = null,
+    isFavorite = false
 )
 
 private fun StoreCollection.toBrandLabel(): String = title
