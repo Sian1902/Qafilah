@@ -7,5 +7,4 @@ import org.koin.dsl.module
 val networkModule = module {
     single { ShopifyClient.instance }
 
-    single(named("adminApollo")) { ShopifyClient.adminInstance }
 }

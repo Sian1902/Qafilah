@@ -22,17 +22,6 @@ object ShopifyClient {
         .okHttpClient(storefrontOkHttp)
         .build()
 
-    private val adminOkHttp = OkHttpClient.Builder()
-        .addInterceptor(Interceptor { chain ->
-            val request = chain.request().newBuilder()
-                .addHeader("X-Shopify-Access-Token", BuildConfig.SHOPIFY_API_KEY)
-                .build()
-            chain.proceed(request)
-        })
-        .build()
 
-    val adminInstance: ApolloClient = ApolloClient.Builder()
-        .serverUrl("https://mad46-and8.myshopify.com/admin/api/2024-01/graphql.json")
-        .okHttpClient(adminOkHttp)
-        .build()
+
 }
