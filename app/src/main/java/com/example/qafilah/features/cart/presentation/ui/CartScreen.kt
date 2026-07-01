@@ -1,4 +1,4 @@
-package com.example.qafilah.features.cart.presentation
+package com.example.qafilah.features.cart.presentation.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -14,6 +14,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.qafilah.features.cart.presentation.viewmodel.CartEvent
+import com.example.qafilah.features.cart.presentation.viewmodel.CartIntent
+import com.example.qafilah.features.cart.presentation.viewmodel.CartViewModel
 import com.example.ui_kit.components.login.LoginPromptBottomSheet
 import org.koin.androidx.compose.koinViewModel
 

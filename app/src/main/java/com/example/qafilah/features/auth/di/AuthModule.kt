@@ -11,7 +11,7 @@ import com.example.qafilah.features.auth.domain.usecase.GetAuthStateUseCase
 import com.example.qafilah.features.auth.domain.usecase.SignInUseCase
 import com.example.qafilah.features.auth.domain.usecase.SignUpUseCase
 import com.example.qafilah.features.auth.presentation.AuthViewModel
-import com.example.qafilah.features.cart.presentation.CartViewModel
+import com.example.qafilah.features.cart.presentation.viewmodel.CartViewModel
 import com.example.qafilah.features.wishlist.presentation.WishlistViewModel
 import com.google.firebase.auth.FirebaseAuth
 import org.koin.androidx.viewmodel.dsl.viewModel

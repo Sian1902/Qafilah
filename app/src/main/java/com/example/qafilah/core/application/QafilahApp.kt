@@ -4,6 +4,7 @@ import android.app.Application
 import com.example.qafilah.core.di.databaseModule
 import com.example.qafilah.features.auth.di.authModule
 import com.example.qafilah.core.di.networkModule
+import com.example.qafilah.features.cart.di.cartModule
 import com.example.qafilah.features.catalog.di.catalogModule
 import com.example.qafilah.features.home.di.homeModule
 import org.koin.android.ext.koin.androidContext
@@ -17,7 +18,8 @@ class QafilahApp : Application() {
         catalogModule,
         authModule,
         homeModule,
-        databaseModule
+        databaseModule,
+        cartModule
     )
 
     override fun onCreate() {

@@ -1,4 +1,4 @@
-package com.example.qafilah.features.cart.presentation
+package com.example.qafilah.features.cart.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
