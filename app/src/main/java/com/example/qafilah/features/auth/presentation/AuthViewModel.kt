@@ -32,11 +32,11 @@ class AuthViewModel(
         }
     }
 
-    fun signUp(email: String, password: String) {
+    fun signUp(name: String, email: String, password: String) {
         viewModelScope.launch {
             _authState.value = AuthState.Loading
 
-            signUpUseCase(email, password).fold(
+            signUpUseCase(name, email, password).fold(
                 onSuccess = { user ->
                     _authState.value = AuthState.Success(user)
                 },

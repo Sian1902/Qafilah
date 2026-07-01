@@ -4,6 +4,10 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
@@ -17,6 +21,8 @@ import com.example.qafilah.features.auth.presentation.screens.SignUpScreen
 import com.example.qafilah.features.cart.presentation.CartScreen
 import com.example.qafilah.features.home.presentation.HomeScreen
 import com.example.qafilah.features.onboarding.OnboardingScreen
+import com.example.qafilah.features.search.SearchScreen
+import com.example.qafilah.features.search.domain.model.ChipState
 import com.example.qafilah.features.splash.SplashScreen
 import com.example.qafilah.features.wishlist.WishlistScreen
 import com.example.qafilah.features.product_detail.presentation.ProductDetailScreen
@@ -138,9 +144,35 @@ fun AppNavHost(
         }
 
         composable(NavItem.Search.route) {
-            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text("Search")
+            // Temporary presentation holders until ViewModel injection is configured
+            var temporaryQueryString by remember { mutableStateOf("") }
+
+            val sampleRecentSearches = remember {
+                listOf(
+                    ChipState(id = "1", name = "Silk Kaftans"),
+                    ChipState(id = "2", name = "Oud Perfume")
+                )
             }
+
+            val sampleTrendingSearches = remember {
+                listOf("Artisan Silver", "Woven Throws", "Hand-carved Oud")
+            }
+
+            SearchScreen(
+                searchQuery = temporaryQueryString,
+                onSearchQueryChange = { temporaryQueryString = it },
+                recentSearches = sampleRecentSearches,
+                trendingSearches = sampleTrendingSearches,
+                searchResults = emptyList(), // Your teammate hooks up their live domain data stream here!
+                onProductClick = { product ->
+                    navController.navigate(Screen.ProductDetail.createRoute(product.id))
+                },
+                onFavoriteClick = { product -> /* Toggle data storage layer status */ },
+                onRemoveRecentSearch = { id -> },
+                onClearAllRecentSearches = { },
+                onBackClick = { navController.popBackStack() },
+                onFilterClick = { }
+            )
         }
 
         composable(NavItem.Cart.route) {
@@ -163,7 +195,9 @@ fun AppNavHost(
                     navController.navigate(NavItem.Home.route) {
                         popUpTo(NavItem.Wishlist.route) { inclusive = true }
                     }
-                }
+                },
+                onProductClick = {},
+                onFavoriteClick = {}
             )
         }
 

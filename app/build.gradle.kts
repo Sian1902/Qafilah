@@ -108,6 +108,12 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation("io.coil-kt:coil-compose:2.7.0")
 
+    // Jetpack DataStore
+    implementation(libs.androidx.datastore.preferences.v111)
+
+    // Google Tink for secure, reliable encryption
+    implementation(libs.tink.android)
+
 }
 
 apollo {

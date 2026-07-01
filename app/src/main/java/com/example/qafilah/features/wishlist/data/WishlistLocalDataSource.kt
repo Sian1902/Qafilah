@@ -1,6 +1,5 @@
 package com.example.qafilah.features.wishlist.data
 
-import WishlistDao
 import android.content.Context
 import com.example.qafilah.features.wishlist.domain.model.WishlistItem
 import kotlinx.coroutines.Dispatchers
