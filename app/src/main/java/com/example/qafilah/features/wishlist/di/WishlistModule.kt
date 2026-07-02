@@ -38,5 +38,5 @@ val wishlistModule = module {
     factory { RemoveFromWishlistUseCase(get()) }
     factory { ClearWishlistUseCase(get()) }
 
-    viewModel { WishlistViewModel(get(), get(),get()) }
+    viewModel { WishlistViewModel(get(), get(),get(),get()) }
 }

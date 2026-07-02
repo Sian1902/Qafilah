@@ -1,6 +1,5 @@
-package com.example.qafilah.features.wishlist
+package com.example.qafilah.features.wishlist.presentation
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -28,9 +27,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.example.qafilah.features.wishlist.presentation.WishlistEvent
-import com.example.qafilah.features.wishlist.presentation.WishlistIntent
-import com.example.qafilah.features.wishlist.presentation.WishlistViewModel
 import com.example.ui_kit.components.home.ProductCard
 import com.example.ui_kit.components.home.ProductUiModel
 import com.example.ui_kit.components.login.LoginPromptBottomSheet
@@ -81,7 +77,6 @@ fun WishlistScreen(
                     )
                 }
                 state.items.isEmpty() -> {
-                    // --- EMPTY STATE VIEW ---
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()

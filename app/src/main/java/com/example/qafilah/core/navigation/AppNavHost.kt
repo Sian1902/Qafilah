@@ -1,5 +1,6 @@
 package com.example.qafilah.core.navigation
 
+import android.net.Uri
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Text
@@ -21,11 +22,11 @@ import com.example.qafilah.features.auth.presentation.screens.SignUpScreen
 import com.example.qafilah.features.cart.presentation.CartScreen
 import com.example.qafilah.features.home.presentation.HomeScreen
 import com.example.qafilah.features.onboarding.OnboardingScreen
+import com.example.qafilah.features.product_detail.presentation.ProductDetailScreen
 import com.example.qafilah.features.search.SearchScreen
 import com.example.qafilah.features.search.domain.model.ChipState
 import com.example.qafilah.features.splash.SplashScreen
-import com.example.qafilah.features.wishlist.WishlistScreen
-import com.example.qafilah.features.product_detail.presentation.ProductDetailScreen
+import com.example.qafilah.features.wishlist.presentation.WishlistScreen
 
 @Composable
 fun AppNavHost(
@@ -65,7 +66,7 @@ fun AppNavHost(
                 },
                 onNavigateToHome = { _: AppUser ->
                     navController.navigate(NavItem.Home.route) {
-                        popUpTo(0) { inclusive = true } // Clear auth history completely
+                        popUpTo(0) { inclusive = true }
                     }
                 },
                 onContinueAsGuest = {
@@ -128,23 +129,17 @@ fun AppNavHost(
                 onSearchClick = {
                     navController.navigate(NavItem.Search.route)
                 },
-                onNotificationClick = {
-                },
-                onCategoryClick = { category ->
-
-                },
-                onViewAllCategoriesClick = {
-                },
-                onBrandClick = { brand ->
-                },
+                onNotificationClick = { },
+                onCategoryClick = { },
+                onViewAllCategoriesClick = { },
+                onBrandClick = { },
                 onProductClick = { product ->
-                    navController.navigate(Screen.ProductDetail.createRoute(product.id))
+                    navController.navigate(Screen.ProductDetail.createRoute(Uri.encode(product.id)))
                 }
             )
         }
 
         composable(NavItem.Search.route) {
-            // Temporary presentation holders until ViewModel injection is configured
             var temporaryQueryString by remember { mutableStateOf("") }
 
             val sampleRecentSearches = remember {
@@ -163,12 +158,12 @@ fun AppNavHost(
                 onSearchQueryChange = { temporaryQueryString = it },
                 recentSearches = sampleRecentSearches,
                 trendingSearches = sampleTrendingSearches,
-                searchResults = emptyList(), // Your teammate hooks up their live domain data stream here!
+                searchResults = emptyList(),
                 onProductClick = { product ->
-                    navController.navigate(Screen.ProductDetail.createRoute(product.id))
+                    navController.navigate(Screen.ProductDetail.createRoute(Uri.encode(product.id)))
                 },
-                onFavoriteClick = { product -> /* Toggle data storage layer status */ },
-                onRemoveRecentSearch = { id -> },
+                onFavoriteClick = { },
+                onRemoveRecentSearch = { },
                 onClearAllRecentSearches = { },
                 onBackClick = { navController.popBackStack() },
                 onFilterClick = { }
@@ -196,8 +191,10 @@ fun AppNavHost(
                         popUpTo(NavItem.Wishlist.route) { inclusive = true }
                     }
                 },
-                onProductClick = {},
-                onFavoriteClick = {}
+                onProductClick = { product ->
+                    navController.navigate(Screen.ProductDetail.createRoute(Uri.encode(product.id)))
+                },
+                onFavoriteClick = { }
             )
         }
 

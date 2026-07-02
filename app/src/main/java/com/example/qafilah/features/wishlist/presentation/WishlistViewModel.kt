@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.qafilah.features.auth.domain.util.RequireAuth
 import com.example.qafilah.features.wishlist.domain.model.WishlistItem
 import com.example.qafilah.features.wishlist.domain.usecase.GetWishlistUseCase
+import com.example.qafilah.features.wishlist.domain.usecase.IsProductWishlistedUseCase
 import com.example.qafilah.features.wishlist.domain.usecase.RemoveFromWishlistUseCase
 import com.example.ui_kit.components.home.ProductUiModel
 import kotlinx.coroutines.channels.Channel
@@ -21,8 +22,6 @@ sealed interface WishlistIntent {
     object NavigateToSignUp : WishlistIntent
     object DismissLoginPrompt : WishlistIntent
     data class RemoveFromWishlist(val productId: String) : WishlistIntent
-
-    // FIX: Cleanly moved inside WishlistIntent architectural scope
     data class PromptRemove(val product: ProductUiModel) : WishlistIntent
     object ConfirmRemoval : WishlistIntent
     object DismissRemoval : WishlistIntent
@@ -45,6 +44,7 @@ data class WishlistState(
 class WishlistViewModel(
     private val requireAuth: RequireAuth,
     private val getWishlistUseCase: GetWishlistUseCase,
+    private val isProductWishlistedUseCase: IsProductWishlistedUseCase,
     private val removeFromWishlistUseCase: RemoveFromWishlistUseCase
 ) : ViewModel() {
 
@@ -70,15 +70,11 @@ class WishlistViewModel(
                 _events.trySend(WishlistEvent.NavigateToHome)
             }
             is WishlistIntent.RemoveFromWishlist -> removeItemFromDb(intent.productId)
-
-            // FIX: Handled as valid WishlistIntent cases
             is WishlistIntent.PromptRemove -> {
                 _state.update { it.copy(productToConfirmRemove = intent.product) }
             }
             WishlistIntent.ConfirmRemoval -> {
-                state.value.productToConfirmRemove?.let { product ->
-                    removeItemFromDb(product.id)
-                }
+                state.value.productToConfirmRemove?.let { removeItemFromDb(it.id) }
                 _state.update { it.copy(productToConfirmRemove = null) }
             }
             WishlistIntent.DismissRemoval -> {
@@ -98,11 +94,10 @@ class WishlistViewModel(
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true, errorMessage = null) }
             try {
-                getWishlistUseCase().collect { actualDomainItems ->
-                    val uiModels = actualDomainItems.map { it.toUiModel() }
-                    _state.update {
-                        it.copy(isLoading = false, items = uiModels)
-                    }
+                getWishlistUseCase().collect { domainItems ->
+                    val uiModels = domainItems.map { it.toUiModel() }
+                    _state.update { it.copy(isLoading = false, items = uiModels) }
+                    domainItems.forEach { item -> observeWishlistState(item.productId) }
                 }
             } catch (e: Exception) {
                 _state.update {
@@ -112,39 +107,43 @@ class WishlistViewModel(
         }
     }
 
-    private fun removeItemFromDb(productId: String) {
-        _state.update { state ->
-            state.copy(
-                items = state.items.map { item ->
-                    if (item.id == productId) item.copy(isFavorite = false) else item
-                }
-            )
-        }
-
+    private fun observeWishlistState(productId: String) {
         viewModelScope.launch {
-            try {
-                removeFromWishlistUseCase(productId)
-            } catch (e: Exception) {
+            isProductWishlistedUseCase(productId).collect { isWishlisted ->
                 _state.update { state ->
                     state.copy(
-                        items = state.items.map { item ->
-                            if (item.id == productId) item.copy(isFavorite = true) else item
-                        },
-                        errorMessage = e.message ?: "Failed to remove item"
+                        items = if (isWishlisted) {
+                            state.items.map { item ->
+                                if (item.id == productId) item.copy(isFavorite = true) else item
+                            }
+                        } else {
+                            state.items.filter { it.id != productId }
+                        }
                     )
                 }
             }
         }
     }
 
-    private fun WishlistItem.toUiModel(): ProductUiModel {
-        return ProductUiModel(
-            id = this.productId,
-            imageUrl = this.remoteImageUrl ?: this.localImagePath ?: "",
-            category = this.vendor ?: "Unknown Category",
-            name = this.title,
-            price = "${this.currencyCode} ${this.price}",
-            isFavorite = true
-        )
+    private fun removeItemFromDb(productId: String) {
+        _state.update { state ->
+            state.copy(items = state.items.filter { it.id != productId })
+        }
+        viewModelScope.launch {
+            try {
+                removeFromWishlistUseCase(productId)
+            } catch (e: Exception) {
+                _state.update { it.copy(errorMessage = e.message ?: "Failed to remove item") }
+            }
+        }
     }
+
+    private fun WishlistItem.toUiModel(): ProductUiModel = ProductUiModel(
+        id = productId,
+        imageUrl = remoteImageUrl ?: localImagePath ?: "",
+        category = vendor ?: "Unknown Category",
+        name = title,
+        price = "$currencyCode $price",
+        isFavorite = true
+    )
 }

@@ -2,21 +2,26 @@ package com.example.qafilah.features.product_detail.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.qafilah.features.catalog.domain.usecases.GetSingleProductUseCase
 import com.example.qafilah.features.catalog.domain.model.ProductVariant
+import com.example.qafilah.features.catalog.domain.usecases.GetSingleProductUseCase
+import com.example.qafilah.features.wishlist.domain.usecase.AddToWishlistUseCase
+import com.example.qafilah.features.wishlist.domain.usecase.IsProductWishlistedUseCase
+import com.example.qafilah.features.wishlist.domain.usecase.RemoveFromWishlistUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 class ProductDetailViewModel(
-    private val getProductDetailUseCase: GetSingleProductUseCase
+    private val getProductDetailUseCase: GetSingleProductUseCase,
+    private val isProductWishlistedUseCase: IsProductWishlistedUseCase,
+    private val addToWishlistUseCase: AddToWishlistUseCase,
+    private val removeFromWishlistUseCase: RemoveFromWishlistUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<ProductDetailUiState>(ProductDetailUiState.Loading)
     val uiState: StateFlow<ProductDetailUiState> = _uiState.asStateFlow()
 
-    private var localFavoriteState = false
     private var lastLoadedId: String? = null
 
     fun loadProduct(productId: String) {
@@ -41,8 +46,10 @@ class ProductDetailViewModel(
                             options = emptyMap()
                         ),
                         selectedOptions = initialOptions,
-                        isFavorite = localFavoriteState
+                        isFavorite = false
                     )
+
+                    observeWishlistState(productId)
                 }
                 .onFailure { error ->
                     _uiState.value = ProductDetailUiState.Error(
@@ -52,24 +59,49 @@ class ProductDetailViewModel(
         }
     }
 
-    fun selectOption(name: String, value: String) {
-        val currentState = _uiState.value as? ProductDetailUiState.Success ?: return
-        val updatedOptions = currentState.selectedOptions.toMutableMap().apply {
-            put(name, value)
+    private fun observeWishlistState(productId: String) {
+        viewModelScope.launch {
+            isProductWishlistedUseCase(productId).collect { isWishlisted ->
+                val current = _uiState.value as? ProductDetailUiState.Success ?: return@collect
+                _uiState.value = current.copy(isFavorite = isWishlisted)
+            }
         }
-        val matchingVariant = currentState.product.variants.find { variant ->
-            variant.options.all { (optName, optValue) -> updatedOptions[optName] == optValue }
-        } ?: currentState.selectedVariant
+    }
 
-        _uiState.value = currentState.copy(
+    fun selectOption(name: String, value: String) {
+        val current = _uiState.value as? ProductDetailUiState.Success ?: return
+        val updatedOptions = current.selectedOptions.toMutableMap().apply { put(name, value) }
+        val matchingVariant = current.product.variants.find { variant ->
+            variant.options.all { (optName, optValue) -> updatedOptions[optName] == optValue }
+        } ?: current.selectedVariant
+
+        _uiState.value = current.copy(
             selectedVariant = matchingVariant,
             selectedOptions = updatedOptions
         )
     }
 
     fun toggleFavorite() {
-        val currentState = _uiState.value as? ProductDetailUiState.Success ?: return
-        localFavoriteState = !currentState.isFavorite
-        _uiState.value = currentState.copy(isFavorite = localFavoriteState)
+        val current = _uiState.value as? ProductDetailUiState.Success ?: return
+        val product = current.product
+        val wasFavorite = current.isFavorite
+
+        viewModelScope.launch {
+            try {
+                if (wasFavorite) {
+                    removeFromWishlistUseCase(product.id)
+                } else {
+                    addToWishlistUseCase(
+                        productId = product.id,
+                        handle = product.id,
+                        title = product.title,
+                        imageUrl = product.images.firstOrNull(),
+                        vendor = product.vendor,
+                        price = product.variants.firstOrNull()?.price?.toDoubleOrNull() ?: 0.0,
+                        currencyCode = "USD"
+                    )
+                }
+            } catch (_: Exception) { }
+        }
     }
 }
