@@ -22,14 +22,16 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
 
 
 data class CategoryUiModel(
     val id: String,
     val label: String,
-    @DrawableRes val icon: Int
+    val imageUrl: String? = null
 )
 
 @Composable
@@ -53,12 +55,13 @@ fun CategoryItem(
                 .clip(CircleShape)
                 .background(MaterialTheme.colorScheme.surface)
         ) {
-            Icon(
-                painter = painterResource(id = category.icon),
-                contentDescription = category.label,
-                tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(24.dp)
+            AsyncImage(
+                model = category.imageUrl,
+                contentDescription = "Optional description for accessibility",
+                modifier = Modifier.size(24.dp),
+                contentScale = ContentScale.Crop
             )
+
         }
 
         Spacer(modifier = Modifier.height(8.dp))

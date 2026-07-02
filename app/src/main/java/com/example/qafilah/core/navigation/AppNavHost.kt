@@ -18,6 +18,8 @@ import com.example.qafilah.features.auth.domain.model.AppUser
 import com.example.qafilah.features.auth.presentation.screens.LoginScreen
 import com.example.qafilah.features.auth.presentation.screens.SignUpScreen
 import com.example.qafilah.features.cart.presentation.ui.CartScreen
+import com.example.qafilah.features.catalog.presentation.CatalogProductsScreen
+import com.example.qafilah.features.catalog.presentation.CatalogScreen
 import com.example.qafilah.features.home.presentation.HomeScreen
 import com.example.qafilah.features.onboarding.OnboardingScreen
 import com.example.qafilah.features.product_detail.presentation.ProductDetailScreen
@@ -125,15 +127,48 @@ fun AppNavHost(
 
         composable(NavItem.Home.route) {
             HomeScreen(
-                onSearchClick = {
-                    navController.navigate(NavItem.Search.route)
-                },
+                onSearchClick = { navController.navigate(NavItem.Search.route) },
                 onNotificationClick = { },
-                onCategoryClick = { },
-                onViewAllCategoriesClick = { },
                 onBrandClick = { },
+                onCategoryClick = { categoryUiModel ->
+                    navController.navigate(
+                        Screen.CatalogProducts.createRoute(categoryUiModel.id, categoryUiModel.label)
+                    )
+                },
+                onViewAllCategoriesClick = {
+                    navController.navigate(Screen.Catalog.route)
+                },
                 onProductClick = { product ->
-                    navController.navigate(Screen.ProductDetail.createRoute(Uri.encode(product.id)))
+                    navController.navigate(Screen.ProductDetail.createRoute(product.id))
+                }
+            )
+        }
+        composable(Screen.Catalog.route) {
+            CatalogScreen(
+                onBackClick = { navController.popBackStack() },
+                onCategoryClick = { categoryId, categoryTitle ->
+                    navController.navigate(
+                        Screen.CatalogProducts.createRoute(categoryId, categoryTitle)
+                    )
+                }
+            )
+        }
+        composable(
+            route = Screen.CatalogProducts.route,
+            arguments = listOf(
+                navArgument("categoryId") { type = NavType.StringType },
+                navArgument("categoryTitle") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val categoryId = backStackEntry.arguments?.getString("categoryId") ?: ""
+            val categoryTitle = backStackEntry.arguments?.getString("categoryTitle") ?: ""
+
+            CatalogProductsScreen(
+                categoryId = categoryId,
+                categoryTitle = categoryTitle,
+                onBackClick = { navController.popBackStack() },
+                onProductClick = { product ->
+                    navController.navigate(Screen.ProductDetail.createRoute(product.id))
                 }
             )
         }
@@ -200,5 +235,6 @@ fun AppNavHost(
                 Text("Profile")
             }
         }
+
     }
 }
