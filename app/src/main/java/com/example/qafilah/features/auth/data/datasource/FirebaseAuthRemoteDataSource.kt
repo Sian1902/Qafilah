@@ -7,4 +7,5 @@ interface FirebaseAuthRemoteDataSource {
     suspend fun signInPrimary(email: String, password: String): AppUser
     fun getCurrentUser(): AppUser?
     fun signOut()
+    suspend fun signInWithGoogle(idToken: String): AppUser
 }

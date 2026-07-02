@@ -2,8 +2,9 @@ package com.example.qafilah.features.product_detail.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.qafilah.features.catalog.domain.model.ProductVariant
+import com.example.qafilah.features.cart.domain.usecase.AddCartItemUseCase
 import com.example.qafilah.features.catalog.domain.usecases.GetSingleProductUseCase
+import com.example.qafilah.features.catalog.domain.model.ProductVariant
 import com.example.qafilah.features.wishlist.domain.usecase.AddToWishlistUseCase
 import com.example.qafilah.features.wishlist.domain.usecase.IsProductWishlistedUseCase
 import com.example.qafilah.features.wishlist.domain.usecase.RemoveFromWishlistUseCase
@@ -16,7 +17,8 @@ class ProductDetailViewModel(
     private val getProductDetailUseCase: GetSingleProductUseCase,
     private val isProductWishlistedUseCase: IsProductWishlistedUseCase,
     private val addToWishlistUseCase: AddToWishlistUseCase,
-    private val removeFromWishlistUseCase: RemoveFromWishlistUseCase
+    private val removeFromWishlistUseCase: RemoveFromWishlistUseCase,
+    private val addCartItemUseCase: AddCartItemUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<ProductDetailUiState>(ProductDetailUiState.Loading)
@@ -104,4 +106,29 @@ class ProductDetailViewModel(
             } catch (_: Exception) { }
         }
     }
+
+    fun addToCart(variantId: String, quantity: Int = 1) {
+        val currentState = _uiState.value as? ProductDetailUiState.Success ?: return
+
+        viewModelScope.launch {
+            _uiState.value = currentState.copy(isAddingToCart = true, addToCartError = null)
+
+            try {
+                addCartItemUseCase(variantId, quantity)
+
+                _uiState.value = currentState.copy(isAddingToCart = false)
+            } catch (e: Exception) {
+                _uiState.value = currentState.copy(
+                    isAddingToCart = false,
+                    addToCartError = e.message ?: "Failed to add item to cart"
+                )
+            }
+        }
+    }
+
+    fun dismissCartError() {
+        val currentState = _uiState.value as? ProductDetailUiState.Success ?: return
+        _uiState.value = currentState.copy(addToCartError = null)
+    }
+
 }
