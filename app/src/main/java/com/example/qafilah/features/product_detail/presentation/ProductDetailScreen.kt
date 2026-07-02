@@ -92,6 +92,15 @@ fun ProductDetailScreen(
             val selectedVariant = state.selectedVariant
             val selectedOptions = state.selectedOptions
             val isFavorite = state.isFavorite
+            val isAddingToCart = state.isAddingToCart
+            val addToCartError = state.addToCartError
+
+            LaunchedEffect(addToCartError) {
+                if (addToCartError != null) {
+                    Toast.makeText(context, addToCartError, Toast.LENGTH_LONG).show()
+                    viewModel.dismissCartError()
+                }
+            }
 
             val optionGroups = remember(product.variants) {
                 val groups = mutableMapOf<String, MutableList<String>>()
@@ -212,10 +221,12 @@ fun ProductDetailScreen(
 
                 StickyBottomBar(
                     price = "$${selectedVariant.price}",
+                     isLoading = isAddingToCart,
                     onAddToCartClick = {
+                        viewModel.addToCart(variantId = selectedVariant.id)
                         Toast.makeText(
                             context,
-                            "Added variant: ${selectedVariant.title} to cart",
+                            "Adding to cart...",
                             Toast.LENGTH_SHORT
                         ).show()
                     }

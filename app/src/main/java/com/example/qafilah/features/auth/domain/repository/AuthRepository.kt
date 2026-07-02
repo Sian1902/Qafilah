@@ -4,6 +4,7 @@ import com.example.qafilah.features.auth.domain.model.AppUser
 
 interface AuthRepository {
 
+    suspend fun authenticateWithGoogle(idToken: String): Result<AppUser>
 
     suspend fun authenticatePrimary(email: String, password: String): Result<AppUser>
 

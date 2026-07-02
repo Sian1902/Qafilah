@@ -16,15 +16,20 @@ class AuthRepositoryImpl(
     private val tokenLocalDataSource: TokenLocalDataSource
 ) : AuthRepository {
 
-    override suspend fun authenticatePrimary(email: String, password: String): Result<AppUser> =
-        runCatching {
-            firebaseDataSource.signInPrimary(email, password)
+    override suspend fun authenticateWithGoogle(idToken: String): Result<AppUser> {
+        return runCatching {
+            firebaseDataSource.signInWithGoogle(idToken)
         }
+    }
+
+    override suspend fun authenticatePrimary(
+        email: String, password: String
+    ): Result<AppUser> = runCatching {
+        firebaseDataSource.signInPrimary(email, password)
+    }
 
     override suspend fun registerPrimary(
-        email: String,
-        password: String,
-        fullName: String
+        email: String, password: String, fullName: String
     ): Result<AppUser> = runCatching {
         firebaseDataSource.signUpPrimary(email, password, fullName)
     }
@@ -43,12 +48,8 @@ class AuthRepositoryImpl(
         }
 
     override suspend fun registerStorefront(
-        email: String,
-        password: String,
-        firstName: String?,
-        lastName: String?
-    )
-            : Result<Unit> = runCatching {
+        email: String, password: String, firstName: String?, lastName: String?
+    ): Result<Unit> = runCatching {
         val registerInput = CustomerCreateInput(
             email = email,
             password = password,

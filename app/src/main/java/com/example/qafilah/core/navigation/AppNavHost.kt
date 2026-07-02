@@ -1,13 +1,12 @@
 package com.example.qafilah.core.navigation
 
+import android.net.Uri
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
@@ -18,7 +17,7 @@ import androidx.navigation.navArgument
 import com.example.qafilah.features.auth.domain.model.AppUser
 import com.example.qafilah.features.auth.presentation.screens.LoginScreen
 import com.example.qafilah.features.auth.presentation.screens.SignUpScreen
-import com.example.qafilah.features.cart.presentation.CartScreen
+import com.example.qafilah.features.cart.presentation.ui.CartScreen
 import com.example.qafilah.features.home.presentation.HomeScreen
 import com.example.qafilah.features.onboarding.OnboardingScreen
 import com.example.qafilah.features.product_detail.presentation.ProductDetailScreen
@@ -28,8 +27,9 @@ import com.example.qafilah.features.profile.presentation.persondetails.PersonalD
 import com.example.qafilah.features.profile.presentation.profile.ProfileViewModel
 import com.example.qafilah.features.search.SearchScreen
 import com.example.qafilah.features.search.domain.model.ChipState
+import com.example.qafilah.features.search.presentation.SearchViewModel
 import com.example.qafilah.features.splash.SplashScreen
-import com.example.qafilah.features.wishlist.WishlistScreen
+import com.example.qafilah.features.wishlist.presentation.WishlistScreen
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
@@ -133,52 +133,52 @@ fun AppNavHost(
                 onSearchClick = {
                     navController.navigate(NavItem.Search.route)
                 },
-                onNotificationClick = {
-                },
-                onCategoryClick = { category ->
-
-                },
-                onViewAllCategoriesClick = {
-                },
-                onBrandClick = { brand ->
-                },
+                onNotificationClick = { },
+                onCategoryClick = { },
+                onViewAllCategoriesClick = { },
+                onBrandClick = { },
                 onProductClick = { product ->
-                    navController.navigate(Screen.ProductDetail.createRoute(product.id))
+                    navController.navigate(Screen.ProductDetail.createRoute(Uri.encode(product.id)))
                 }
             )
         }
 
         composable(NavItem.Search.route) {
-            var temporaryQueryString by remember { mutableStateOf("") }
-
-            val sampleRecentSearches = remember {
-                listOf(
-                    ChipState(id = "1", name = "Silk Kaftans"),
-                    ChipState(id = "2", name = "Oud Perfume")
-                )
-            }
-
-            val sampleTrendingSearches = remember {
-                listOf("Artisan Silver", "Woven Throws", "Hand-carved Oud")
-            }
+            val searchViewModel: SearchViewModel = koinViewModel()
+            val uiState by searchViewModel.uiState.collectAsState()
 
             SearchScreen(
-                searchQuery = temporaryQueryString,
-                onSearchQueryChange = { temporaryQueryString = it },
-                recentSearches = sampleRecentSearches,
-                trendingSearches = sampleTrendingSearches,
-                searchResults = emptyList(),
+                searchQuery = uiState.searchQuery,
+                isLoading = uiState.isLoading,
+                onSearchQueryChange = { searchViewModel.onSearchQueryChanged(it) },
+                recentSearches = uiState.recentSearches,
+                trendingSearches = uiState.trendingSearches,
+                searchResults = uiState.searchResults,
+                availableCategories = uiState.availableCategories,
+                availableBrands = uiState.availableBrands,
+                onCategoryFilterSelect = { searchViewModel.toggleCategoryFilter(it) },
+                onBrandFilterSelect = { searchViewModel.toggleBrandFilter(it) },
+                onResetFilters = { searchViewModel.resetFilters() },
                 onProductClick = { product ->
-                    navController.navigate(Screen.ProductDetail.createRoute(product.id))
+                    searchViewModel.commitSearchQuery(uiState.searchQuery)
+                    navController.navigate(
+                        Screen.ProductDetail.createRoute(Uri.encode(product.id))
+                    )
                 },
-                onFavoriteClick = { product -> },
-                onRemoveRecentSearch = { id -> },
-                onClearAllRecentSearches = { },
-                onBackClick = { navController.popBackStack() },
-                onFilterClick = { }
+                onFavoriteClick = { product ->
+                    searchViewModel.toggleFavorite(product.id)
+                },
+                onRemoveRecentSearch = { query ->
+                    searchViewModel.removeRecentSearch(query)
+                },
+                onClearAllRecentSearches = {
+                    searchViewModel.clearAllRecentSearches()
+                },
+                onBackClick = {
+                    navController.popBackStack()
+                }
             )
         }
-
         composable(NavItem.Cart.route) {
             CartScreen(
                 onNavigateToLogin = { navController.navigate(Screen.Login.route) },
@@ -200,8 +200,10 @@ fun AppNavHost(
                         popUpTo(NavItem.Wishlist.route) { inclusive = true }
                     }
                 },
-                onProductClick = {},
-                onFavoriteClick = {}
+                onProductClick = { product ->
+                    navController.navigate(Screen.ProductDetail.createRoute(Uri.encode(product.id)))
+                },
+                onFavoriteClick = { }
             )
         }
 

@@ -8,6 +8,7 @@ import com.example.qafilah.features.catalog.domain.model.StoreCollection
 import com.example.qafilah.features.catalog.domain.usecases.GetBestSellingUseCase
 import com.example.qafilah.features.catalog.domain.usecases.GetCollectionsUseCase
 import com.example.qafilah.features.wishlist.domain.usecase.AddToWishlistUseCase
+import com.example.qafilah.features.wishlist.domain.usecase.IsProductWishlistedUseCase
 import com.example.qafilah.features.wishlist.domain.usecase.RemoveFromWishlistUseCase
 import com.example.ui_kit.components.home.CategoryUiModel
 import com.example.ui_kit.components.home.ProductUiModel
@@ -29,12 +30,16 @@ sealed interface HomeEvent {
 class HomeViewModel(
     private val getBestSellingUseCase: GetBestSellingUseCase,
     private val getCollectionsUseCase: GetCollectionsUseCase,
+    private val isProductWishlistedUseCase: IsProductWishlistedUseCase,
     private val addToWishlistUseCase: AddToWishlistUseCase,
     private val removeFromWishlistUseCase: RemoveFromWishlistUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(HomeUiState())
     val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
+
+    private val _events = Channel<HomeEvent>(Channel.BUFFERED)
+    val events = _events.receiveAsFlow()
 
     private var domainProductsCache: List<Product> = emptyList()
 
@@ -43,50 +48,51 @@ class HomeViewModel(
     }
 
     fun loadHome() {
-
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = null) }
             try {
                 val products = getBestSellingUseCase(limit = PRODUCTS_LIMIT, after = null)
                 val collections = getCollectionsUseCase(limit = COLLECTIONS_LIMIT, after = null)
                 domainProductsCache = products
+
                 _uiState.update {
                     it.copy(
                         isLoading = false,
                         categories = staticCategories,
-                        brands = collections.map { collection -> collection.toBrandLabel() },
-                        products = products.map { product ->
-                            product.toUiModel()
-                        }
-
+                        brands = collections.map { it.toBrandLabel() },
+                        products = products.map { it.toUiModel() }
                     )
                 }
+
+                products.forEach { product -> observeWishlistState(product.id) }
+
             } catch (e: Exception) {
                 _uiState.update {
                     it.copy(isLoading = false, error = e.message ?: "Something went wrong")
                 }
             }
         }
-
     }
 
-
-    private val _events = Channel<HomeEvent>(Channel.BUFFERED)
-    val events = _events.receiveAsFlow()
+    private fun observeWishlistState(productId: String) {
+        viewModelScope.launch {
+            isProductWishlistedUseCase(productId).collect { isWishlisted ->
+                _uiState.update { state ->
+                    state.copy(
+                        products = state.products.map { product ->
+                            if (product.id == productId) product.copy(isFavorite = isWishlisted)
+                            else product
+                        }
+                    )
+                }
+            }
+        }
+    }
 
     fun toggleFavorite(productId: String) {
         val uiProduct = _uiState.value.products.find { it.id == productId } ?: return
         val domainProduct = domainProductsCache.find { it.id == productId } ?: return
-
         val wasFavorite = uiProduct.isFavorite
-
-        _uiState.update { state ->
-            state.copy(
-                products = state.products.map { p ->
-                    if (p.id == productId) p.copy(isFavorite = !wasFavorite) else p
-                }
-            )
-        }
 
         viewModelScope.launch {
             try {
@@ -106,12 +112,7 @@ class HomeViewModel(
                 }
             } catch (e: Exception) {
                 _uiState.update { state ->
-                    state.copy(
-                        products = state.products.map { p ->
-                            if (p.id == productId) p.copy(isFavorite = wasFavorite) else p
-                        },
-                        error = e.message ?: "Failed to update wishlist"
-                    )
+                    state.copy(error = e.message ?: "Failed to update wishlist")
                 }
             }
         }
