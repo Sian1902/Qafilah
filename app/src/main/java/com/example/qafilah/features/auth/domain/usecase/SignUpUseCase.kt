@@ -5,7 +5,11 @@ import com.example.qafilah.features.auth.domain.repository.AuthRepository
 
 class SignUpUseCase(private val repository: AuthRepository) {
 
-    suspend operator fun invoke(fullName: String, email: String, password: String): Result<AppUser> {
+    suspend operator fun invoke(
+        fullName: String,
+        email: String,
+        password: String
+    ): Result<AppUser> {
         if (email.isBlank() || password.isBlank() || fullName.isBlank()) {
             return Result.failure(IllegalArgumentException("Fields cannot be empty"))
         }

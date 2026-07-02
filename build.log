@@ -1,0 +1,233 @@
+﻿To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/9.4.1/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preDebugBuild UP-TO-DATE
+> Task :app:mergeDebugNativeDebugMetadata NO-SOURCE
+> Task :app:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :app:generateDebugBuildConfig UP-TO-DATE
+> Task :app:generateStorefrontApolloOptions UP-TO-DATE
+> Task :app:generateStorefrontApolloSources UP-TO-DATE
+> Task :ui_kit:preBuild UP-TO-DATE
+> Task :ui_kit:preDebugBuild UP-TO-DATE
+> Task :ui_kit:writeDebugAarMetadata UP-TO-DATE
+> Task :app:checkDebugAarMetadata UP-TO-DATE
+> Task :ui_kit:processDebugNavigationResources UP-TO-DATE
+> Task :app:processDebugNavigationResources UP-TO-DATE
+> Task :app:compileDebugNavigationResources UP-TO-DATE
+> Task :app:generateDebugResValues UP-TO-DATE
+> Task :app:processDebugGoogleServices UP-TO-DATE
+> Task :ui_kit:generateDebugResValues UP-TO-DATE
+> Task :ui_kit:generateDebugResources UP-TO-DATE
+> Task :ui_kit:packageDebugResources UP-TO-DATE
+> Task :app:mapDebugSourceSetPaths UP-TO-DATE
+> Task :app:generateDebugResources UP-TO-DATE
+> Task :app:mergeDebugResources UP-TO-DATE
+> Task :app:packageDebugResources UP-TO-DATE
+> Task :app:parseDebugLocalResources UP-TO-DATE
+> Task :app:createDebugCompatibleScreenManifests UP-TO-DATE
+> Task :app:extractDeepLinksDebug UP-TO-DATE
+> Task :ui_kit:extractDeepLinksDebug UP-TO-DATE
+> Task :ui_kit:processDebugManifest UP-TO-DATE
+> Task :app:processDebugMainManifest UP-TO-DATE
+> Task :app:processDebugManifest UP-TO-DATE
+> Task :app:processDebugManifestForPackage UP-TO-DATE
+> Task :ui_kit:compileDebugLibraryResources UP-TO-DATE
+> Task :ui_kit:parseDebugLocalResources UP-TO-DATE
+> Task :ui_kit:generateDebugRFile UP-TO-DATE
+> Task :app:processDebugResources UP-TO-DATE
+> Task :ui_kit:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :ui_kit:compileDebugKotlin UP-TO-DATE
+> Task :ui_kit:javaPreCompileDebug UP-TO-DATE
+> Task :ui_kit:compileDebugJavaWithJavac NO-SOURCE
+> Task :ui_kit:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :app:kspDebugKotlin UP-TO-DATE
+> Task :app:javaPreCompileDebug UP-TO-DATE
+> Task :app:mergeDebugShaders UP-TO-DATE
+> Task :app:compileDebugShaders NO-SOURCE
+> Task :app:generateDebugAssets UP-TO-DATE
+> Task :ui_kit:mergeDebugShaders UP-TO-DATE
+> Task :ui_kit:compileDebugShaders NO-SOURCE
+> Task :ui_kit:generateDebugAssets UP-TO-DATE
+> Task :ui_kit:mergeDebugAssets UP-TO-DATE
+> Task :app:mergeDebugAssets UP-TO-DATE
+> Task :app:compressDebugAssets UP-TO-DATE
+> Task :ui_kit:processDebugJavaRes UP-TO-DATE
+> Task :app:checkDebugDuplicateClasses UP-TO-DATE
+> Task :app:desugarDebugFileDependencies UP-TO-DATE
+> Task :app:mergeExtDexDebug UP-TO-DATE
+> Task :ui_kit:bundleLibRuntimeToDirDebug UP-TO-DATE
+> Task :app:mergeDebugJniLibFolders UP-TO-DATE
+> Task :ui_kit:mergeDebugJniLibFolders UP-TO-DATE
+> Task :ui_kit:mergeDebugNativeLibs NO-SOURCE
+> Task :ui_kit:copyDebugJniLibsProjectOnly UP-TO-DATE
+> Task :app:mergeDebugNativeLibs UP-TO-DATE
+> Task :app:mergeLibDexDebug UP-TO-DATE
+> Task :app:stripDebugDebugSymbols UP-TO-DATE
+> Task :app:validateSigningDebug UP-TO-DATE
+> Task :app:writeDebugAppMetadata UP-TO-DATE
+> Task :app:writeDebugSigningConfigVersions UP-TO-DATE
+> Task :app:preReleaseBuild UP-TO-DATE
+> Task :app:mergeReleaseJniLibFolders UP-TO-DATE
+> Task :ui_kit:preReleaseBuild UP-TO-DATE
+> Task :ui_kit:mergeReleaseJniLibFolders UP-TO-DATE
+> Task :ui_kit:mergeReleaseNativeLibs NO-SOURCE
+> Task :ui_kit:copyReleaseJniLibsProjectOnly UP-TO-DATE
+> Task :app:mergeReleaseNativeLibs UP-TO-DATE
+> Task :app:stripReleaseDebugSymbols UP-TO-DATE
+> Task :app:extractReleaseNativeSymbolTables UP-TO-DATE
+> Task :app:mergeReleaseNativeDebugMetadata NO-SOURCE
+> Task :ui_kit:generateReleaseResValues UP-TO-DATE
+> Task :ui_kit:generateReleaseResources UP-TO-DATE
+> Task :ui_kit:packageReleaseResources UP-TO-DATE
+> Task :ui_kit:processReleaseNavigationResources UP-TO-DATE
+> Task :ui_kit:parseReleaseLocalResources UP-TO-DATE
+> Task :ui_kit:generateReleaseRFile UP-TO-DATE
+> Task :ui_kit:compileReleaseKotlin UP-TO-DATE
+> Task :ui_kit:javaPreCompileRelease UP-TO-DATE
+> Task :ui_kit:compileReleaseJavaWithJavac NO-SOURCE
+> Task :ui_kit:bundleLibRuntimeToDirRelease UP-TO-DATE
+> Task :app:checkReleaseDuplicateClasses UP-TO-DATE
+> Task :app:buildKotlinToolingMetadata UP-TO-DATE
+> Task :app:generateReleaseBuildConfig UP-TO-DATE
+> Task :ui_kit:writeReleaseAarMetadata UP-TO-DATE
+> Task :app:checkReleaseAarMetadata UP-TO-DATE
+> Task :app:processReleaseNavigationResources UP-TO-DATE
+> Task :app:compileReleaseNavigationResources UP-TO-DATE
+> Task :app:generateReleaseResValues UP-TO-DATE
+> Task :app:processReleaseGoogleServices UP-TO-DATE
+> Task :app:mapReleaseSourceSetPaths UP-TO-DATE
+> Task :app:generateReleaseResources UP-TO-DATE
+> Task :app:mergeReleaseResources UP-TO-DATE
+> Task :app:packageReleaseResources UP-TO-DATE
+> Task :app:parseReleaseLocalResources UP-TO-DATE
+> Task :app:createReleaseCompatibleScreenManifests UP-TO-DATE
+> Task :app:extractDeepLinksRelease UP-TO-DATE
+> Task :ui_kit:extractDeepLinksRelease UP-TO-DATE
+> Task :ui_kit:processReleaseManifest UP-TO-DATE
+> Task :app:processReleaseMainManifest UP-TO-DATE
+> Task :app:processReleaseManifest UP-TO-DATE
+> Task :app:processReleaseManifestForPackage UP-TO-DATE
+> Task :ui_kit:compileReleaseLibraryResources UP-TO-DATE
+> Task :app:processReleaseResources UP-TO-DATE
+> Task :ui_kit:bundleLibCompileToJarRelease UP-TO-DATE
+> Task :app:javaPreCompileRelease UP-TO-DATE
+> Task :app:desugarReleaseFileDependencies UP-TO-DATE
+> Task :app:mergeReleaseStartupProfile UP-TO-DATE
+> Task :app:mergeExtDexRelease UP-TO-DATE
+> Task :ui_kit:prepareReleaseArtProfile UP-TO-DATE
+> Task :app:mergeReleaseArtProfile UP-TO-DATE
+> Task :ui_kit:bundleLibRuntimeToJarRelease UP-TO-DATE
+> Task :app:mergeReleaseShaders UP-TO-DATE
+> Task :app:compileReleaseShaders NO-SOURCE
+> Task :app:generateReleaseAssets UP-TO-DATE
+> Task :ui_kit:mergeReleaseShaders UP-TO-DATE
+> Task :ui_kit:compileReleaseShaders NO-SOURCE
+> Task :ui_kit:generateReleaseAssets UP-TO-DATE
+> Task :ui_kit:mergeReleaseAssets UP-TO-DATE
+> Task :app:mergeReleaseAssets UP-TO-DATE
+> Task :app:compressReleaseAssets UP-TO-DATE
+> Task :app:extractReleaseVersionControlInfo UP-TO-DATE
+> Task :app:extractProguardFiles UP-TO-DATE
+> Task :ui_kit:processReleaseJavaRes UP-TO-DATE
+> Task :ui_kit:createFullJarRelease UP-TO-DATE
+> Task :ui_kit:extractProguardFiles UP-TO-DATE
+> Task :ui_kit:generateReleaseLintModel UP-TO-DATE
+> Task :ui_kit:prepareLintJarForPublish UP-TO-DATE
+> Task :ui_kit:checkReleaseAarMetadata UP-TO-DATE
+> Task :ui_kit:stripReleaseDebugSymbols NO-SOURCE
+> Task :ui_kit:copyReleaseJniLibsProjectAndLocalJars UP-TO-DATE
+> Task :ui_kit:extractDeepLinksForAarRelease UP-TO-DATE
+> Task :ui_kit:extractReleaseAnnotations UP-TO-DATE
+> Task :ui_kit:mergeReleaseGeneratedProguardFiles UP-TO-DATE
+> Task :ui_kit:mergeReleaseConsumerProguardFiles UP-TO-DATE
+> Task :ui_kit:mergeReleaseJavaResource UP-TO-DATE
+> Task :ui_kit:syncReleaseLibJars UP-TO-DATE
+> Task :ui_kit:bundleReleaseLocalLintAar UP-TO-DATE
+> Task :ui_kit:lintVitalAnalyzeRelease UP-TO-DATE
+> Task :ui_kit:writeReleaseLintModelMetadata UP-TO-DATE
+> Task :ui_kit:generateReleaseLintVitalModel UP-TO-DATE
+> Task :app:optimizeReleaseResources UP-TO-DATE
+> Task :app:collectReleaseDependencies UP-TO-DATE
+> Task :app:sdkReleaseDependencyData UP-TO-DATE
+> Task :app:writeReleaseAppMetadata UP-TO-DATE
+> Task :app:writeReleaseSigningConfigVersions UP-TO-DATE
+> Task :ui_kit:checkDebugAarMetadata UP-TO-DATE
+> Task :ui_kit:stripDebugDebugSymbols NO-SOURCE
+> Task :ui_kit:copyDebugJniLibsProjectAndLocalJars UP-TO-DATE
+> Task :ui_kit:extractDebugAnnotations UP-TO-DATE
+> Task :ui_kit:extractDeepLinksForAarDebug UP-TO-DATE
+> Task :ui_kit:mergeDebugGeneratedProguardFiles UP-TO-DATE
+> Task :ui_kit:mergeDebugConsumerProguardFiles UP-TO-DATE
+> Task :ui_kit:prepareDebugArtProfile UP-TO-DATE
+> Task :ui_kit:mergeDebugJavaResource UP-TO-DATE
+> Task :ui_kit:syncDebugLibJars UP-TO-DATE
+> Task :ui_kit:bundleDebugLocalLintAar UP-TO-DATE
+> Task :app:preDebugAndroidTestBuild SKIPPED
+> Task :app:generateDebugAndroidTestResValues UP-TO-DATE
+> Task :ui_kit:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :ui_kit:createFullJarDebug UP-TO-DATE
+> Task :ui_kit:writeDebugLintModelMetadata UP-TO-DATE
+> Task :ui_kit:generateDebugLintModel UP-TO-DATE
+> Task :app:preDebugUnitTestBuild UP-TO-DATE
+> Task :ui_kit:lintAnalyzeDebug UP-TO-DATE
+> Task :ui_kit:preDebugAndroidTestBuild UP-TO-DATE
+> Task :ui_kit:generateDebugAndroidTestResValues UP-TO-DATE
+> Task :ui_kit:generateDebugAndroidTestLintModel UP-TO-DATE
+> Task :ui_kit:preDebugUnitTestBuild UP-TO-DATE
+> Task :ui_kit:generateDebugUnitTestLintModel UP-TO-DATE
+> Task :ui_kit:lintAnalyzeDebugAndroidTest UP-TO-DATE
+> Task :ui_kit:lintAnalyzeDebugUnitTest UP-TO-DATE
+> Task :ui_kit:bundleDebugAar UP-TO-DATE
+> Task :ui_kit:assembleDebug UP-TO-DATE
+> Task :ui_kit:bundleReleaseAar UP-TO-DATE
+> Task :ui_kit:mapReleaseSourceSetPaths UP-TO-DATE
+> Task :ui_kit:mergeReleaseResources UP-TO-DATE
+> Task :ui_kit:verifyReleaseResources UP-TO-DATE
+> Task :ui_kit:assembleRelease UP-TO-DATE
+> Task :ui_kit:assemble UP-TO-DATE
+> Task :ui_kit:generateDebugLintReportModel UP-TO-DATE
+> Task :ui_kit:lintReportDebug UP-TO-DATE
+> Task :ui_kit:lintDebug
+> Task :ui_kit:lint
+> Task :ui_kit:check
+> Task :ui_kit:build
+
+> Task :app:compileDebugKotlin FAILED
+./gradlew : e: 
+file:///D:/Qafilah/app/src/main/java/com/example/qafilah/features/profile/data/mapper/ProfileMapper.kt:52:31 Argument 
+type mismatch: actual type is 'Any', but 'String' was expected.
+At line:2 char:16
++ ... D:\Qafilah; ./gradlew build -x test --no-daemon 2>&1 > build.log; Get ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (e: file:///D:/Q...' was expected.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+e: file:///D:/Qafilah/app/src/main/java/com/example/qafilah/features/profile/data/mapper/ProfileMapper.kt:69:40 
+Argument type mismatch: actual type is 'Any?', but 'String?' was expected.
+
+> Task :app:kspReleaseKotlin
+
+[Incubating] Problems report is available at: file:///D:/Qafilah/build/reports/problems/problems-report.html
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':app:compileDebugKotlin'.
+> A failure occurred while executing 
+org.jetbrains.kotlin.compilerRunner.GradleCompilerRunnerWithWorkers$GradleKotlinCompilerWorkAction
+   > Compilation error. See log for more details
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights from a Build Scan (powered by Develocity).
+> Get more help at https://help.gradle.org.
+
+BUILD FAILED in 31s
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 10.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/9.4.1/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+159 actionable tasks: 3 executed, 156 up-to-date

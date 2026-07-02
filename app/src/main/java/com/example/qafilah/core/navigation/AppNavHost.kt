@@ -21,11 +21,16 @@ import com.example.qafilah.features.auth.presentation.screens.SignUpScreen
 import com.example.qafilah.features.cart.presentation.CartScreen
 import com.example.qafilah.features.home.presentation.HomeScreen
 import com.example.qafilah.features.onboarding.OnboardingScreen
+import com.example.qafilah.features.product_detail.presentation.ProductDetailScreen
+import com.example.qafilah.features.profile.presentation.ProfileScreen
+import com.example.qafilah.features.profile.presentation.editprofile.EditProfileScreen
+import com.example.qafilah.features.profile.presentation.persondetails.PersonalDetailsScreen
+import com.example.qafilah.features.profile.presentation.profile.ProfileViewModel
 import com.example.qafilah.features.search.SearchScreen
 import com.example.qafilah.features.search.domain.model.ChipState
 import com.example.qafilah.features.splash.SplashScreen
 import com.example.qafilah.features.wishlist.WishlistScreen
-import com.example.qafilah.features.product_detail.presentation.ProductDetailScreen
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun AppNavHost(
@@ -65,7 +70,7 @@ fun AppNavHost(
                 },
                 onNavigateToHome = { _: AppUser ->
                     navController.navigate(NavItem.Home.route) {
-                        popUpTo(0) { inclusive = true } // Clear auth history completely
+                        popUpTo(0) { inclusive = true }
                     }
                 },
                 onContinueAsGuest = {
@@ -144,7 +149,6 @@ fun AppNavHost(
         }
 
         composable(NavItem.Search.route) {
-            // Temporary presentation holders until ViewModel injection is configured
             var temporaryQueryString by remember { mutableStateOf("") }
 
             val sampleRecentSearches = remember {
@@ -163,11 +167,11 @@ fun AppNavHost(
                 onSearchQueryChange = { temporaryQueryString = it },
                 recentSearches = sampleRecentSearches,
                 trendingSearches = sampleTrendingSearches,
-                searchResults = emptyList(), // Your teammate hooks up their live domain data stream here!
+                searchResults = emptyList(),
                 onProductClick = { product ->
                     navController.navigate(Screen.ProductDetail.createRoute(product.id))
                 },
-                onFavoriteClick = { product -> /* Toggle data storage layer status */ },
+                onFavoriteClick = { product -> },
                 onRemoveRecentSearch = { id -> },
                 onClearAllRecentSearches = { },
                 onBackClick = { navController.popBackStack() },
@@ -202,8 +206,62 @@ fun AppNavHost(
         }
 
         composable(NavItem.Profile.route) {
+            val profileViewModel: ProfileViewModel = koinViewModel()
+            ProfileScreen(
+                viewModel = profileViewModel,
+                onEditProfileClick = {
+                    navController.navigate(Screen.EditProfile.route)
+                },
+                onPersonalDetailsClick = {
+                    navController.navigate(Screen.PersonalDetails.route)
+                },
+                onSavedPaymentsClick = {
+                },
+                onShippingAddressesClick = {
+                    navController.navigate(Screen.AddAddress.route)
+                },
+                onSignOutClick = {
+                    navController.navigate(Screen.Login.route) {
+                        popUpTo(0) { inclusive = true }
+                    }
+                },
+                onNavigateToLogin = {
+                    navController.navigate(Screen.Login.route) {
+                        popUpTo(0) { inclusive = true }
+                    }
+                }
+            )
+        }
+
+        composable(Screen.PersonalDetails.route) {
+            PersonalDetailsScreen(
+                onBackClick = { navController.popBackStack() },
+                onEditClick = { navController.navigate(Screen.EditProfile.route) }
+            )
+        }
+
+        composable(Screen.EditProfile.route) {
+            EditProfileScreen(
+                onBackClick = { navController.popBackStack() },
+                onCancelClick = { navController.popBackStack() }
+            )
+        }
+
+        composable(Screen.AddAddress.route) {
             Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text("Profile")
+                Text("Add Address (Work in Progress)")
+            }
+        }
+
+        composable(
+            route = Screen.EditAddress.route,
+            arguments = listOf(
+                navArgument("addressId") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val addressId = backStackEntry.arguments?.getString("addressId") ?: return@composable
+            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                Text("Edit Address: $addressId (Work in Progress)")
             }
         }
     }
