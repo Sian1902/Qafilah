@@ -7,6 +7,8 @@ import com.example.qafilah.core.di.networkModule
 import com.example.qafilah.features.cart.di.cartModule
 import com.example.qafilah.features.catalog.di.catalogModule
 import com.example.qafilah.features.home.di.homeModule
+import com.example.qafilah.features.product_detail.di.productDetailsModule
+import com.example.qafilah.features.wishlist.di.wishlistModule
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
 import org.koin.core.context.GlobalContext
@@ -18,6 +20,9 @@ class QafilahApp : Application() {
         catalogModule,
         authModule,
         homeModule,
+        productDetailsModule,
+        wishlistModule,
+        databaseModule,
         databaseModule,
         cartModule
     )

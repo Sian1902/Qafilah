@@ -6,10 +6,9 @@ import com.example.qafilah.BuildConfig
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 
-
 object ShopifyClient {
 
-    private val okHttpClient = OkHttpClient.Builder()
+    private val storefrontOkHttp = OkHttpClient.Builder()
         .addInterceptor(Interceptor { chain ->
             val request = chain.request().newBuilder()
                 .addHeader("X-Shopify-Storefront-Access-Token", BuildConfig.SHOPIFY_API_KEY)
@@ -20,6 +19,9 @@ object ShopifyClient {
 
     val instance: ApolloClient = ApolloClient.Builder()
         .serverUrl("https://mad46-and8.myshopify.com/api/2024-01/graphql.json")
-        .okHttpClient(okHttpClient)
+        .okHttpClient(storefrontOkHttp)
         .build()
+
+
+
 }

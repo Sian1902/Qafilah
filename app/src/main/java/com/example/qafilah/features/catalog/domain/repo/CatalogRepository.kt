@@ -4,7 +4,6 @@ import com.example.qafilah.core.model.Product
 import com.example.qafilah.features.catalog.domain.model.CollectionWithProducts
 import com.example.qafilah.features.catalog.domain.model.ProductDetails
 import com.example.qafilah.features.catalog.domain.model.StoreCollection
-import com.example.qafilah.graphql.storefront.type.ProductCollectionSortKeys
 
 interface CatalogRepository {
     suspend fun searchProducts(query: String, limit: Int): Result<List<Product>>

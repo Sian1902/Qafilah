@@ -106,6 +106,7 @@ dependencies {
     implementation(libs.compose.material.icons.extended)
 
     implementation(libs.androidx.navigation.compose)
+    implementation("io.coil-kt:coil-compose:2.7.0")
 
     // Jetpack DataStore
     implementation(libs.androidx.datastore.preferences.v111)
@@ -126,4 +127,5 @@ apollo {
             headers.put("X-Shopify-Storefront-Access-Token", shopifyApiKey)
         }
     }
+
 }

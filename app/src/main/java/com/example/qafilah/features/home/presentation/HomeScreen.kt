@@ -1,5 +1,6 @@
 package com.example.qafilah.features.home.presentation
 
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -11,10 +12,15 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -29,11 +35,7 @@ import com.example.ui_kit.components.shared.SectionHeader
 import com.example.ui_kit.components.shared.WelcomeHeader
 import org.koin.androidx.compose.koinViewModel
 
-/**
- * Stateful entry point: grabs [HomeViewModel] via Koin, collects its state,
- * and decides between loading / error / content. All the actual layout lives
- * in [HomeContent], which stays a plain stateless composable.
- */
+
 @Composable
 fun HomeScreen(
     onSearchClick: () -> Unit,
@@ -43,42 +45,61 @@ fun HomeScreen(
     onBrandClick: (String) -> Unit,
     onProductClick: (ProductUiModel) -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: HomeViewModel = koinViewModel()
+    viewModel: HomeViewModel = koinViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
-    when {
-        uiState.isLoading && uiState.products.isEmpty() -> {
-            Box(modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator()
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    LaunchedEffect(Unit) {
+        viewModel.events.collect { event ->
+            when (event) {
+                is HomeEvent.ShowSnackbar -> {
+                    snackbarHostState.showSnackbar(message = event.message)
+                }
             }
         }
+    }
+    Scaffold(
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
+    ) { paddingValues ->
+        Box(modifier = Modifier.padding(paddingValues)) {
+            when {
+                uiState.isLoading && uiState.products.isEmpty() -> {
+                    Box(modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        CircularProgressIndicator()
+                    }
+                }
 
-        uiState.error != null && uiState.products.isEmpty() -> {
-            Box(modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text(
-                    text = uiState.error ?: "Something went wrong",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.error
-                )
+
+                uiState.error != null && uiState.products.isEmpty() -> {
+                    Box(modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        Text(
+                            text = uiState.error ?: "Something went wrong",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.error
+                        )
+                    }
+                }
+
+                else -> {
+                    HomeContent(
+                        uiState = uiState,
+                        onSearchClick = onSearchClick,
+                        onNotificationClick = onNotificationClick,
+                        onCategoryClick = onCategoryClick,
+                        onViewAllCategoriesClick = onViewAllCategoriesClick,
+                        onBrandClick = onBrandClick,
+                        onProductClick = onProductClick,
+                        onFavoriteClick = { product -> viewModel.toggleFavorite(product.id) },
+                        modifier = modifier
+                    )
+                }
             }
-        }
-
-        else -> {
-            HomeContent(
-                uiState = uiState,
-                onSearchClick = onSearchClick,
-                onNotificationClick = onNotificationClick,
-                onCategoryClick = onCategoryClick,
-                onViewAllCategoriesClick = onViewAllCategoriesClick,
-                onBrandClick = onBrandClick,
-                onProductClick = onProductClick,
-                onFavoriteClick = { product -> viewModel.toggleFavorite(product.id) },
-                modifier = modifier
-            )
         }
     }
 }
+
 
 @Composable
 private fun HomeContent(
@@ -96,7 +117,8 @@ private fun HomeContent(
         modifier = modifier.fillMaxSize(),
         contentPadding = PaddingValues(top = 24.dp, bottom = 120.dp),
         verticalArrangement = Arrangement.spacedBy(28.dp)
-    ) {
+    )
+    {
         item {
             WelcomeHeader(
                 userName = "Traveler",
@@ -119,7 +141,7 @@ private fun HomeContent(
                 imageUrl = "https://example.com/dune-collection.jpg",
                 title = "Dune Collection",
                 ctaText = "SHOP NOW",
-                onCtaClick = {  },
+                onCtaClick = { },
                 modifier = Modifier.padding(horizontal = 20.dp)
             )
         }
@@ -174,6 +196,7 @@ private fun HomeContent(
                         onFavoriteClick = onFavoriteClick,
                         modifier = Modifier.weight(1f)
                     )
+                    Log.d("id", "Product: ${product.id}")
                 }
                 if (rowProducts.size < 2) {
                     Spacer(modifier = Modifier.weight(1f))
@@ -182,3 +205,4 @@ private fun HomeContent(
         }
     }
 }
+
