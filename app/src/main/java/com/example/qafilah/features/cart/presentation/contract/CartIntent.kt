@@ -10,4 +10,8 @@ sealed interface CartIntent {
     data class DecreaseQuantity(val lineId: String) : CartIntent
     data class RemoveItem(val lineId: String) : CartIntent
     object DismissError : CartIntent
+
+    data class UpdateDiscountInput(val code: String) : CartIntent
+    object ApplyDiscountCode : CartIntent
+    data class RemoveDiscountCode(val code: String) : CartIntent
 }

@@ -22,6 +22,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -31,9 +34,11 @@ import com.example.qafilah.features.cart.domain.model.StoreCart
 import com.example.qafilah.features.cart.presentation.contract.CartEvent
 import com.example.qafilah.features.cart.presentation.contract.CartIntent
 import com.example.qafilah.features.cart.presentation.viewmodel.CartViewModel
+import com.example.ui_kit.components.cart.AddDiscountDialog
 import com.example.ui_kit.components.cart.CartItemCard
 import com.example.ui_kit.components.cart.CartSummaryCard
 import com.example.ui_kit.components.cart.CartEmptyView
+import com.example.ui_kit.components.cart.DiscountCodesCard
 import com.example.ui_kit.components.login.LoginPromptBottomSheet
 import org.koin.androidx.compose.koinViewModel
 import java.math.RoundingMode
@@ -49,6 +54,7 @@ fun CartScreen(
     viewModel: CartViewModel = koinViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    var showDiscountDialog by rememberSaveable { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         viewModel.onIntent(CartIntent.EnterScreen)
@@ -80,7 +86,12 @@ fun CartScreen(
                 onRemoveItem = { lineId ->
                     viewModel.onIntent(CartIntent.RemoveItem(lineId))
                 },
-                onCheckout = onNavigateToCheckout
+                onCheckout = onNavigateToCheckout,
+                onAddDiscountClick = {
+                    viewModel.onIntent(CartIntent.DismissError)
+                    showDiscountDialog = true
+                },
+                onRemoveDiscount = { code -> viewModel.onIntent(CartIntent.RemoveDiscountCode(code)) }
             )
         }
 
@@ -101,6 +112,23 @@ fun CartScreen(
             onNavigateToSignUp = { viewModel.onIntent(CartIntent.NavigateToSignUp) }
         )
     }
+
+    if (showDiscountDialog) {
+        AddDiscountDialog(
+            inputValue = state.discountInput,
+            onInputValueChange = { viewModel.onIntent(CartIntent.UpdateDiscountInput(it)) },
+            isApplying = state.isApplyingDiscount,
+            errorMessage = state.discountError,
+            onApply = { viewModel.onIntent(CartIntent.ApplyDiscountCode) },
+            onDismiss = { showDiscountDialog = false }
+        )
+    }
+
+    LaunchedEffect(state.isApplyingDiscount) {
+        if (!state.isApplyingDiscount && state.discountError == null && state.discountInput.isEmpty()) {
+            showDiscountDialog = false
+        }
+    }
 }
 
 @Composable
@@ -110,7 +138,9 @@ private fun CartContent(
     onIncreaseQuantity: (String) -> Unit,
     onDecreaseQuantity: (String) -> Unit,
     onRemoveItem: (String) -> Unit,
-    onCheckout: () -> Unit
+    onCheckout: () -> Unit,
+    onAddDiscountClick: () -> Unit,
+    onRemoveDiscount: (String) -> Unit
 ) {
     val colorScheme = MaterialTheme.colorScheme
 
@@ -137,6 +167,12 @@ private fun CartContent(
                     )
                 }
             }
+
+            DiscountCodesCard(
+                appliedCodes = storeCart.appliedDiscounts.map { it.code },
+                onAddClick = onAddDiscountClick,
+                onRemoveDiscount = onRemoveDiscount
+            )
 
             CartSummaryCard(
                 subTotalAmount = storeCart.cost.subtotalAmount.toDisplayString(),

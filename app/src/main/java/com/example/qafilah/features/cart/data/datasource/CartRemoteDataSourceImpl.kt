@@ -4,6 +4,7 @@ import com.apollographql.apollo.ApolloClient
 import com.apollographql.apollo.api.Optional
 import com.example.qafilah.core.network.safeApiCall
 import com.example.qafilah.graphql.storefront.AddCartLinesMutation
+import com.example.qafilah.graphql.storefront.CartDiscountCodesUpdateMutation
 import com.example.qafilah.graphql.storefront.CreateCartMutation
 import com.example.qafilah.graphql.storefront.GetCartQuery
 import com.example.qafilah.graphql.storefront.RemoveCartLinesMutation
@@ -98,5 +99,28 @@ class CartRemoteDataSourceImpl(
         if (!userErrors.isNullOrEmpty()) {
             throw Exception(userErrors.first().message)
         }
+    }
+
+
+    override suspend fun updateDiscountCodes(
+        cartId: String,
+        discountCodes: List<String>
+    ): CartDiscountCodesUpdateMutation.Cart? {
+
+        val data = safeApiCall {
+            apolloClient.mutation(
+                CartDiscountCodesUpdateMutation(
+                    cartId = cartId,
+                    discountCodes = Optional.present(discountCodes)
+                )
+            ).execute()
+        }
+
+        val userErrors = data.cartDiscountCodesUpdate?.userErrors
+        if (!userErrors.isNullOrEmpty()) {
+            throw Exception(userErrors.first().message)
+        }
+
+        return data.cartDiscountCodesUpdate?.cart
     }
 }

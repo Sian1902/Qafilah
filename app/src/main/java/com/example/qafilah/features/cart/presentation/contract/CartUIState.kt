@@ -6,5 +6,9 @@ data class CartUIState(
     val isLoading: Boolean = false,
     val showLoginPrompt: Boolean = false,
     val errorMessage: String? = null,
-    val cart: StoreCart? = null
+    val cart: StoreCart? = null,
+
+    val discountInput: String = "",
+    val isApplyingDiscount: Boolean = false,
+    val discountError: String? = null
 )
