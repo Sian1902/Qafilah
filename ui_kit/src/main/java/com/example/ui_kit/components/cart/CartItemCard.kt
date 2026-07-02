@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
@@ -105,68 +106,63 @@ fun CartItemCard(
                 overflow = TextOverflow.Ellipsis
             )
 
+            Spacer(modifier = Modifier.height(8.dp))
+
+            val displayedPrice = if (currencyCode.isNotBlank() && !price.trim().startsWith(currencyCode)) {
+                "${currencyCode.trim()} ${price.trim()}"
+            } else {
+                price
+            }
+
+            Text(
+                text = displayedPrice,
+                style = MaterialTheme.typography.titleMedium,
+                color = colorScheme.primary,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+
             Spacer(modifier = Modifier.height(14.dp))
 
             Row(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(end = 8.dp),
+                    .clip(quantityShape)
+                    .background(colorScheme.surfaceVariant.copy(alpha = 0.95f))
+                    .border(1.dp, colorScheme.onSurface.copy(alpha = 0.14f), quantityShape)
+                    .padding(horizontal = 10.dp, vertical = 4.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Row(
-                    modifier = Modifier
-                        .clip(quantityShape)
-                        .background(colorScheme.surfaceVariant.copy(alpha = 0.95f))
-                        .border(1.dp, colorScheme.onSurface.copy(alpha = 0.14f), quantityShape)
-                        .padding(horizontal = 10.dp, vertical = 4.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                IconButton(
+                    onClick = onDecreaseQuantity,
+                    enabled = quantity > 1
                 ) {
-                    IconButton(
-                        onClick = onDecreaseQuantity,
-                        enabled = quantity > 1
-                    ) {
-                        Icon(
-                            imageVector = Icons.Outlined.Remove,
-                            contentDescription = "Decrease quantity",
-                            tint = colorScheme.onSurfaceVariant
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.size(2.dp))
-
-                    Text(
-                        text = quantity.toString(),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = colorScheme.onSurface
+                    Icon(
+                        imageVector = Icons.Outlined.Remove,
+                        contentDescription = "Decrease quantity",
+                        tint = colorScheme.onSurfaceVariant
                     )
-
-                    Spacer(modifier = Modifier.size(2.dp))
-
-                    IconButton(
-                        onClick = onIncreaseQuantity,
-                        enabled = quantityAvailable != null && quantity < quantityAvailable
-                    ) {
-                        Icon(
-                            imageVector = Icons.Outlined.Add,
-                            contentDescription = "Increase quantity",
-                            tint = colorScheme.onSurfaceVariant
-                        )
-                    }
                 }
 
-                val displayedPrice = if (currencyCode.isNotBlank() && !price.trim().startsWith(currencyCode)) {
-                    "${currencyCode.trim()} ${price.trim()}"
-                } else {
-                    price
-                }
-
-                Spacer(modifier = Modifier.weight(1f))
+                Spacer(modifier = Modifier.size(2.dp))
 
                 Text(
-                    text = displayedPrice,
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = colorScheme.primary
+                    text = quantity.toString(),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = colorScheme.onSurface
                 )
+
+                Spacer(modifier = Modifier.size(2.dp))
+
+                IconButton(
+                    onClick = onIncreaseQuantity,
+                    enabled = quantityAvailable != null && quantity < quantityAvailable
+                ) {
+                    Icon(
+                        imageVector = Icons.Outlined.Add,
+                        contentDescription = "Increase quantity",
+                        tint = colorScheme.onSurfaceVariant
+                    )
+                }
             }
         }
 
