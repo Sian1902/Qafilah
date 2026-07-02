@@ -17,3 +17,4 @@ interface CatalogRemoteDataSource {
     suspend fun getCollections(limit: Int, after: String?): GetCollectionsQuery.Data
     suspend fun getProductsByCollection(id: String): GetProductsByCollectionQuery.Data
 }
+

@@ -1,8 +1,8 @@
 package com.example.qafilah.features.auth.domain.usecase
 
 import com.example.qafilah.features.auth.domain.model.AppUser
-import com.example.qafilah.features.auth.domain.repository.AuthRepository
 import com.example.qafilah.features.auth.domain.model.AuthError
+import com.example.qafilah.features.auth.domain.repository.AuthRepository
 
 class SignInUseCase(private val repository: AuthRepository) {
 

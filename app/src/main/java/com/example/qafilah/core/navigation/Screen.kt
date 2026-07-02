@@ -16,6 +16,13 @@ sealed class Screen(val route: String) {
         fun createRoute(orderId: String) = "order_confirmation/$orderId"
     }
 
+    object PersonalDetails : Screen("personal_details")
+    object EditProfile : Screen("edit_profile")
+    object AddAddress : Screen("add_address")
+    object EditAddress : Screen("edit_address/{addressId}") {
+        fun createRoute(addressId: String) = "edit_address/$addressId"
+    }
+
     companion object {
         val hiddenRoutes = setOf(
             Splash.route,
@@ -24,7 +31,11 @@ sealed class Screen(val route: String) {
             Register.route,
             Checkout.route,
             "product_detail?productId={productId}",
-            "order_confirmation/{orderId}"
+            "order_confirmation/{orderId}",
+            PersonalDetails.route,
+            EditProfile.route,
+            AddAddress.route,
+            "edit_address/{addressId}"
         )
     }
 }
