@@ -1,22 +1,22 @@
 package com.example.ui_kit.components.cart
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 
 @Composable
@@ -28,29 +28,49 @@ fun AddDiscountDialog(
     onApply: () -> Unit,
     onDismiss: () -> Unit
 ) {
+    val colorScheme = MaterialTheme.colorScheme
+
     AlertDialog(
         onDismissRequest = {
             if (!isApplying) onDismiss()
         },
-        title = { Text(text = "Add Promo Code") },
+        containerColor = colorScheme.surface,
+        titleContentColor = colorScheme.onBackground,
+        textContentColor = colorScheme.onBackground,
+        title = {
+            Text(
+                text = "Add Promo Code",
+                style = MaterialTheme.typography.headlineMedium
+            )
+        },
         text = {
             Column(modifier = Modifier.fillMaxWidth()) {
                 OutlinedTextField(
                     value = inputValue,
                     onValueChange = onInputValueChange,
-                    label = { Text("Code") },
+                    label = {
+                        Text(
+                            text = "Code",
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    },
                     singleLine = true,
                     isError = errorMessage != null,
                     enabled = !isApplying,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    textStyle = MaterialTheme.typography.bodyLarge,
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = colorScheme.primary,
+                        cursorColor = colorScheme.primary
+                    )
                 )
 
                 if (errorMessage != null) {
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
                         text = errorMessage,
-                        color = MaterialTheme.colorScheme.error,
-                        style = MaterialTheme.typography.bodySmall
+                        color = colorScheme.error,
+                        style = MaterialTheme.typography.labelSmall
                     )
                 }
             }
@@ -58,16 +78,23 @@ fun AddDiscountDialog(
         confirmButton = {
             Button(
                 onClick = onApply,
-                enabled = inputValue.isNotBlank() && !isApplying
+                enabled = inputValue.isNotBlank() && !isApplying,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = colorScheme.primary
+                )
             ) {
                 if (isApplying) {
                     CircularProgressIndicator(
                         modifier = Modifier.size(18.dp),
-                        color = MaterialTheme.colorScheme.onPrimary,
+                        color = colorScheme.onPrimary,
                         strokeWidth = 2.dp
                     )
                 } else {
-                    Text("Apply")
+                    Text(
+                        text = "Apply",
+                        color = colorScheme.onPrimary,
+                        fontWeight = FontWeight.SemiBold
+                    )
                 }
             }
         },
@@ -76,7 +103,10 @@ fun AddDiscountDialog(
                 onClick = onDismiss,
                 enabled = !isApplying
             ) {
-                Text("Cancel")
+                Text(
+                    text = "Cancel",
+                    color = colorScheme.onBackground
+                )
             }
         }
     )
