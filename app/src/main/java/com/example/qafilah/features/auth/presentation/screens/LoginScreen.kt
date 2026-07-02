@@ -190,30 +190,25 @@ private fun LoginContent(
         )
     }
         if (state is AuthState.Loading) {
-            AuthFooter(
-                isInLogin = true,
-                onLoginAsGuest = onLoginAsGuest,
-                onNavigate = onNavigateToSignUp
-            )
-        }
             Box(
                 modifier = Modifier
                     .fillMaxSize() 
-            .background(Color.Black.copy(alpha = 0.5f)) 
-            .clickable( 
-            interactionSource = remember { MutableInteractionSource() }, 
-            indication = null 
-            ) {}, 
-            contentAlignment = Alignment.Center 
+                    .background(Color.Black.copy(alpha = 0.5f)) 
+                    .clickable( 
+                        interactionSource = remember { MutableInteractionSource() }, 
+                        indication = null 
+                    ) {}, 
+                contentAlignment = Alignment.Center 
             ) {
                 CircularProgressIndicator(
                     color = MaterialTheme.colorScheme.primary, 
-                modifier = Modifier.size(64.dp), 
-                strokeWidth = 6.dp 
+                    modifier = Modifier.size(64.dp), 
+                    strokeWidth = 6.dp 
                 )
             }
         }
     }
+}
 
 @Preview(showSystemUi = true)
 @Composable
