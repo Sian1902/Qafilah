@@ -15,12 +15,19 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
@@ -33,15 +40,14 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.qafilah.R
+import com.example.qafilah.features.auth.domain.model.AppUser
 import com.example.qafilah.features.auth.presentation.AuthState
 import com.example.qafilah.features.auth.presentation.AuthViewModel
 import com.example.ui_kit.components.auth.AuthFooter
 import com.example.ui_kit.components.auth.SignUpCard
 import com.example.ui_kit.theme.QafilahTheme
 import org.koin.androidx.compose.koinViewModel
-import com.example.qafilah.R
-import com.example.qafilah.features.auth.domain.model.AppUser
-import androidx.compose.material3.Text
 import com.example.ui_kit.components.auth.SocialLoginSection
 import kotlinx.coroutines.launch
 
@@ -127,7 +133,12 @@ fun SignUpScreen(
             }
         },
         onLoginAsGuest = {
-            onNavigateToHome(AppUser(id = "Guest", email = "alooo@alooo.com"))
+            onNavigateToHome(
+                AppUser(
+                    id = "Guest",
+                    email = "alooo@alooo.com",
+                )
+            )
         },
         onNavigateToLogin = {
             onNavigateToLogin()
@@ -211,6 +222,7 @@ private fun SignUpContent(
                         interactionSource = remember { MutableInteractionSource() },
                         indication = null
                     ) {},
+
                 contentAlignment = Alignment.Center
             ) {
                 CircularProgressIndicator(

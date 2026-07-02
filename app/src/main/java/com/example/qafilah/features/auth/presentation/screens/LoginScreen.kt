@@ -172,8 +172,7 @@ private fun LoginContent(
         horizontalAlignment = Alignment.CenterHorizontally, 
         verticalArrangement = Arrangement.SpaceBetween 
         ) {
-        Spacer(modifier = Modifier.height(48.dp)) 
-
+        Spacer(modifier = Modifier.height(48.dp))
         LoginTitle(
             logoPainter = painterResource(id = R.drawable.ic_logo), 
         )
@@ -190,8 +189,13 @@ private fun LoginContent(
         onNavigate = onNavigateToSignUp 
         )
     }
-
-        if (state is AuthState.Loading) { 
+        if (state is AuthState.Loading) {
+            AuthFooter(
+                isInLogin = true,
+                onLoginAsGuest = onLoginAsGuest,
+                onNavigate = onNavigateToSignUp
+            )
+        }
             Box(
                 modifier = Modifier
                     .fillMaxSize() 
@@ -210,7 +214,6 @@ private fun LoginContent(
             }
         }
     }
-}
 
 @Preview(showSystemUi = true)
 @Composable

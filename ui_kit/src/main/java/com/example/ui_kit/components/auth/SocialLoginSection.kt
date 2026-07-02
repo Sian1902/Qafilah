@@ -60,10 +60,6 @@ fun SocialLoginSection(
             verticalAlignment = Alignment.CenterVertically
         ) {
             SocialIconButton(icon = googleIcon, onClick = onGoogleClick)
-//            Spacer(modifier = Modifier.width(16.dp))
-//            SocialIconButton(icon = Icons.Default.Phone, onClick = onAppleClick)
-//            Spacer(modifier = Modifier.width(16.dp))
-//            SocialIconButton(icon = Icons.Default.Email, onClick = onEmailClick)
         }
     }
 }

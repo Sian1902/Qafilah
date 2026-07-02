@@ -1,7 +1,7 @@
 package com.example.qafilah.features.catalog.domain.usecases
 
-import com.example.qafilah.features.catalog.domain.repo.CatalogRepository
 import com.example.qafilah.core.model.Product
+import com.example.qafilah.features.catalog.domain.repo.CatalogRepository
 
 class SearchProductsUseCase(
     private val homeRepository: CatalogRepository

@@ -1,5 +1,6 @@
 package com.example.qafilah.features.home.presentation
 
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -34,11 +35,7 @@ import com.example.ui_kit.components.shared.SectionHeader
 import com.example.ui_kit.components.shared.WelcomeHeader
 import org.koin.androidx.compose.koinViewModel
 
-/**
- * Stateful entry point: grabs [HomeViewModel] via Koin, collects its state,
- * and decides between loading / error / content. All the actual layout lives
- * in [HomeContent], which stays a plain stateless composable.
- */
+
 @Composable
 fun HomeScreen(
     onSearchClick: () -> Unit,
@@ -48,7 +45,7 @@ fun HomeScreen(
     onBrandClick: (String) -> Unit,
     onProductClick: (ProductUiModel) -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: HomeViewModel = koinViewModel()
+    viewModel: HomeViewModel = koinViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
@@ -73,6 +70,7 @@ fun HomeScreen(
                         CircularProgressIndicator()
                     }
                 }
+
 
                 uiState.error != null && uiState.products.isEmpty() -> {
                     Box(modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -102,6 +100,7 @@ fun HomeScreen(
     }
 }
 
+
 @Composable
 private fun HomeContent(
     uiState: HomeUiState,
@@ -118,7 +117,8 @@ private fun HomeContent(
         modifier = modifier.fillMaxSize(),
         contentPadding = PaddingValues(top = 24.dp, bottom = 120.dp),
         verticalArrangement = Arrangement.spacedBy(28.dp)
-    ) {
+    )
+    {
         item {
             WelcomeHeader(
                 userName = "Traveler",
@@ -141,7 +141,7 @@ private fun HomeContent(
                 imageUrl = "https://example.com/dune-collection.jpg",
                 title = "Dune Collection",
                 ctaText = "SHOP NOW",
-                onCtaClick = {  },
+                onCtaClick = { },
                 modifier = Modifier.padding(horizontal = 20.dp)
             )
         }
@@ -196,6 +196,7 @@ private fun HomeContent(
                         onFavoriteClick = onFavoriteClick,
                         modifier = Modifier.weight(1f)
                     )
+                    Log.d("id", "Product: ${product.id}")
                 }
                 if (rowProducts.size < 2) {
                     Spacer(modifier = Modifier.weight(1f))
@@ -204,3 +205,4 @@ private fun HomeContent(
         }
     }
 }
+
