@@ -21,7 +21,12 @@ import com.example.qafilah.features.cart.presentation.ui.CartScreen
 import com.example.qafilah.features.home.presentation.HomeScreen
 import com.example.qafilah.features.onboarding.OnboardingScreen
 import com.example.qafilah.features.product_detail.presentation.ProductDetailScreen
+import com.example.qafilah.features.profile.presentation.ProfileScreen
+import com.example.qafilah.features.profile.presentation.editprofile.EditProfileScreen
+import com.example.qafilah.features.profile.presentation.persondetails.PersonalDetailsScreen
+import com.example.qafilah.features.profile.presentation.profile.ProfileViewModel
 import com.example.qafilah.features.search.SearchScreen
+import com.example.qafilah.features.search.domain.model.ChipState
 import com.example.qafilah.features.search.presentation.SearchViewModel
 import com.example.qafilah.features.splash.SplashScreen
 import com.example.qafilah.features.wishlist.presentation.WishlistScreen
@@ -156,17 +161,24 @@ fun AppNavHost(
                 onResetFilters = { searchViewModel.resetFilters() },
                 onProductClick = { product ->
                     searchViewModel.commitSearchQuery(uiState.searchQuery)
-                    navController.navigate(Screen.ProductDetail.createRoute(Uri.encode(product.id)))
+                    navController.navigate(
+                        Screen.ProductDetail.createRoute(Uri.encode(product.id))
+                    )
                 },
                 onFavoriteClick = { product ->
                     searchViewModel.toggleFavorite(product.id)
                 },
-                onRemoveRecentSearch = { query -> searchViewModel.removeRecentSearch(query) },
-                onClearAllRecentSearches = { searchViewModel.clearAllRecentSearches() },
-                onBackClick = { navController.popBackStack() }
+                onRemoveRecentSearch = { query ->
+                    searchViewModel.removeRecentSearch(query)
+                },
+                onClearAllRecentSearches = {
+                    searchViewModel.clearAllRecentSearches()
+                },
+                onBackClick = {
+                    navController.popBackStack()
+                }
             )
         }
-
         composable(NavItem.Cart.route) {
             CartScreen(
                 onNavigateToLogin = { navController.navigate(Screen.Login.route) },
@@ -196,8 +208,62 @@ fun AppNavHost(
         }
 
         composable(NavItem.Profile.route) {
+            val profileViewModel: ProfileViewModel = koinViewModel()
+            ProfileScreen(
+                viewModel = profileViewModel,
+                onEditProfileClick = {
+                    navController.navigate(Screen.EditProfile.route)
+                },
+                onPersonalDetailsClick = {
+                    navController.navigate(Screen.PersonalDetails.route)
+                },
+                onSavedPaymentsClick = {
+                },
+                onShippingAddressesClick = {
+                    navController.navigate(Screen.AddAddress.route)
+                },
+                onSignOutClick = {
+                    navController.navigate(Screen.Login.route) {
+                        popUpTo(0) { inclusive = true }
+                    }
+                },
+                onNavigateToLogin = {
+                    navController.navigate(Screen.Login.route) {
+                        popUpTo(0) { inclusive = true }
+                    }
+                }
+            )
+        }
+
+        composable(Screen.PersonalDetails.route) {
+            PersonalDetailsScreen(
+                onBackClick = { navController.popBackStack() },
+                onEditClick = { navController.navigate(Screen.EditProfile.route) }
+            )
+        }
+
+        composable(Screen.EditProfile.route) {
+            EditProfileScreen(
+                onBackClick = { navController.popBackStack() },
+                onCancelClick = { navController.popBackStack() }
+            )
+        }
+
+        composable(Screen.AddAddress.route) {
             Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text("Profile")
+                Text("Add Address (Work in Progress)")
+            }
+        }
+
+        composable(
+            route = Screen.EditAddress.route,
+            arguments = listOf(
+                navArgument("addressId") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val addressId = backStackEntry.arguments?.getString("addressId") ?: return@composable
+            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                Text("Edit Address: $addressId (Work in Progress)")
             }
         }
     }
