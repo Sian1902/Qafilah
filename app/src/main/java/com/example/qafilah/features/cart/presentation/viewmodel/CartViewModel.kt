@@ -6,9 +6,11 @@ import androidx.lifecycle.viewModelScope
 import com.example.qafilah.features.auth.domain.util.RequireAuth
 import com.example.qafilah.features.cart.domain.model.CartItemCommand
 import com.example.qafilah.features.cart.domain.model.StoreCart
+import com.example.qafilah.features.cart.domain.usecase.ApplyDiscountUseCase
 import com.example.qafilah.features.cart.domain.usecase.FetchCartUseCase
 import com.example.qafilah.features.cart.domain.usecase.ManageCartItemUseCase
 import com.example.qafilah.features.cart.domain.usecase.ObserveCartStateUseCase
+import com.example.qafilah.features.cart.domain.usecase.RemoveDiscountUseCase
 import com.example.qafilah.features.cart.presentation.contract.CartEvent
 import com.example.qafilah.features.cart.presentation.contract.CartIntent
 import com.example.qafilah.features.cart.presentation.contract.CartUIState
@@ -34,7 +36,9 @@ class CartViewModel(
     private val requireAuth: RequireAuth,
     private val observeCartStateUseCase: ObserveCartStateUseCase,
     private val fetchCartUseCase: FetchCartUseCase,
-    private val manageCartItemUseCase: ManageCartItemUseCase
+    private val manageCartItemUseCase: ManageCartItemUseCase,
+    private val applyDiscountUseCase: ApplyDiscountUseCase,
+    private val removeDiscountUseCase: RemoveDiscountUseCase
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(CartUIState())
@@ -74,6 +78,11 @@ class CartViewModel(
             is CartIntent.DecreaseQuantity -> handleDecreaseQuantity(intent.lineId)
             is CartIntent.RemoveItem -> handleRemoveItem(intent.lineId)
             is CartIntent.DismissError -> _state.update { it.copy(errorMessage = null) }
+            is CartIntent.UpdateDiscountInput -> {
+                _state.update { it.copy(discountInput = intent.code, discountError = null) }
+            }
+            is CartIntent.ApplyDiscountCode -> handleApplyDiscount()
+            is CartIntent.RemoveDiscountCode -> handleRemoveDiscount(intent.code)
         }
     }
 
@@ -189,5 +198,44 @@ class CartViewModel(
 
     private fun currentLineQuantity(lineId: String): Int? {
         return _state.value.cart?.lines?.firstOrNull { it.id == lineId }?.quantity
+    }
+
+    private fun handleApplyDiscount() {
+        val codeToApply = _state.value.discountInput.trim()
+        if (codeToApply.isEmpty()) return
+
+        _state.update { it.copy(isApplyingDiscount = true, discountError = null) }
+
+        viewModelScope.launch {
+            try {
+                applyDiscountUseCase(codeToApply)
+
+                _state.update { it.copy(
+                    isApplyingDiscount = false,
+                    discountInput = ""
+                )}
+            } catch (e: Exception) {
+                _state.update { it.copy(
+                    isApplyingDiscount = false,
+                    discountError = e.message ?: "Failed to apply discount"
+                )}
+            }
+        }
+    }
+
+    private fun handleRemoveDiscount(codeToRemove: String) {
+        _state.update { it.copy(isApplyingDiscount = true, discountError = null) }
+
+        viewModelScope.launch {
+            try {
+                removeDiscountUseCase(codeToRemove)
+                _state.update { it.copy(isApplyingDiscount = false) }
+            } catch (e: Exception) {
+                _state.update { it.copy(
+                    isApplyingDiscount = false,
+                    errorMessage = e.message ?: "Failed to remove discount"
+                )}
+            }
+        }
     }
 }
