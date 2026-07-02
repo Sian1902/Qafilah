@@ -1,0 +1,8 @@
+mutation CreateCart($input: CartInput!) {
+    cartCreate(input: $input) {
+        cart {
+            ...CartDetails
+        }
+        userErrors { code field message }
+    }
+}
