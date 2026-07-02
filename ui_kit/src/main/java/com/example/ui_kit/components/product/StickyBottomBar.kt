@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ShoppingCart
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -27,6 +28,7 @@ import androidx.compose.ui.unit.sp
 @Composable
 fun StickyBottomBar(
     price: String,
+    isLoading: Boolean = false,
     onAddToCartClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -61,28 +63,39 @@ fun StickyBottomBar(
         Row(
             modifier = Modifier
                 .clip(RoundedCornerShape(30.dp))
-                .background(MaterialTheme.colorScheme.primary)
-                .clickable { onAddToCartClick() }
+                .background(
+                    if (isLoading) MaterialTheme.colorScheme.primary.copy(alpha = 0.7f)
+                    else MaterialTheme.colorScheme.primary
+                )
+                .clickable(enabled = !isLoading) { onAddToCartClick() }
                 .padding(horizontal = 28.dp, vertical = 16.dp),
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Icon(
-                imageVector = Icons.Default.ShoppingCart,
-                contentDescription = "Add to cart",
-                tint = MaterialTheme.colorScheme.onPrimary,
-                modifier = Modifier.size(20.dp)
-            )
-            Spacer(modifier = Modifier.width(10.dp))
-            Text(
-                text = "ADD TO CART",
-                style = MaterialTheme.typography.labelSmall.copy(
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Bold,
+            if (isLoading) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(20.dp),
                     color = MaterialTheme.colorScheme.onPrimary,
-                    letterSpacing = 1.sp
+                    strokeWidth = 2.dp
                 )
-            )
+            } else {
+                Icon(
+                    imageVector = Icons.Default.ShoppingCart,
+                    contentDescription = "Add to cart",
+                    tint = MaterialTheme.colorScheme.onPrimary,
+                    modifier = Modifier.size(20.dp)
+                )
+                Spacer(modifier = Modifier.width(10.dp))
+                Text(
+                    text = "ADD TO CART",
+                    style = MaterialTheme.typography.labelSmall.copy(
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onPrimary,
+                        letterSpacing = 1.sp
+                    )
+                )
+            }
         }
     }
 }

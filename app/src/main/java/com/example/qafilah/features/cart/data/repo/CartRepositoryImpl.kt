@@ -63,4 +63,8 @@ class CartRepositoryImpl(
 
         remoteDataSource.removeCartItem(cartId, lineId)
     }
+
+    override suspend fun hasActiveCart(): Boolean {
+        return localDataSource.getCartId() != null
+    }
 }
