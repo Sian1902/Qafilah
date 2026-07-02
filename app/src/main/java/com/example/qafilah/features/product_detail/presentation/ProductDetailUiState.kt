@@ -10,7 +10,9 @@ sealed interface ProductDetailUiState {
         val product: ProductDetails,
         val selectedVariant: ProductVariant,
         val selectedOptions: Map<String, String>,
-        val isFavorite: Boolean
+        val isFavorite: Boolean,
+        val isAddingToCart: Boolean = false,
+        val addToCartError: String? = null
     ) : ProductDetailUiState
 
     data class Error(val message: String) : ProductDetailUiState

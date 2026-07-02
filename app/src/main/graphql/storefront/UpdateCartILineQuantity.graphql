@@ -1,0 +1,8 @@
+mutation UpdateCartLines($cartId: ID!, $lines: [CartLineUpdateInput!]!) {
+    cartLinesUpdate(cartId: $cartId, lines: $lines) {
+        cart {
+            ...CartDetails
+        }
+        userErrors { code field message }
+    }
+}

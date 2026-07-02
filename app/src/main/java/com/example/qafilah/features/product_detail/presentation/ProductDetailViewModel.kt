@@ -2,6 +2,7 @@ package com.example.qafilah.features.product_detail.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.qafilah.features.cart.domain.usecase.AddCartItemUseCase
 import com.example.qafilah.features.catalog.domain.usecases.GetSingleProductUseCase
 import com.example.qafilah.features.catalog.domain.model.ProductVariant
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -10,7 +11,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 class ProductDetailViewModel(
-    private val getProductDetailUseCase: GetSingleProductUseCase
+    private val getProductDetailUseCase: GetSingleProductUseCase,
+    private val addCartItemUseCase: AddCartItemUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<ProductDetailUiState>(ProductDetailUiState.Loading)
@@ -72,4 +74,29 @@ class ProductDetailViewModel(
         localFavoriteState = !currentState.isFavorite
         _uiState.value = currentState.copy(isFavorite = localFavoriteState)
     }
+
+    fun addToCart(variantId: String, quantity: Int = 1) {
+        val currentState = _uiState.value as? ProductDetailUiState.Success ?: return
+
+        viewModelScope.launch {
+            _uiState.value = currentState.copy(isAddingToCart = true, addToCartError = null)
+
+            try {
+                addCartItemUseCase(variantId, quantity)
+
+                _uiState.value = currentState.copy(isAddingToCart = false)
+            } catch (e: Exception) {
+                _uiState.value = currentState.copy(
+                    isAddingToCart = false,
+                    addToCartError = e.message ?: "Failed to add item to cart"
+                )
+            }
+        }
+    }
+
+    fun dismissCartError() {
+        val currentState = _uiState.value as? ProductDetailUiState.Success ?: return
+        _uiState.value = currentState.copy(addToCartError = null)
+    }
+
 }
