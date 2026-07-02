@@ -1,5 +1,6 @@
 package com.example.qafilah.features.cart.presentation.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.qafilah.features.auth.domain.util.RequireAuth
@@ -76,6 +77,7 @@ class CartViewModel(
 
             try {
                 fetchCartUseCase()
+                Log.d("CartViewModel", "Cart loaded successfully: ${state.value.cart}")
             } catch (e: Exception) {
                 _state.update {
                     it.copy(

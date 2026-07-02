@@ -23,6 +23,7 @@ class CartRepositoryImpl(
 
     override suspend fun fetchCart(): StoreCart? {
         val cartId = localDataSource.getCartId() ?: return null
+
         val remoteCart = remoteDataSource.getCart(cartId) ?: return null
 
         val storeCart = remoteCart.cartDetails.toDomain()
