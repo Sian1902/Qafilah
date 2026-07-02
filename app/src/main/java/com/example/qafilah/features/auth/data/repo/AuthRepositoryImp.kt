@@ -19,6 +19,11 @@ class AuthRepositoryImpl(
     private val shopifyDataSource: ShopifyAuthRemoteDataSource,
     private val tokenLocalDataSource: TokenLocalDataSource
 ): AuthRepository {
+    override suspend fun authenticateWithGoogle(idToken: String): Result<AppUser> {
+        return runCatching {
+            firebaseDataSource.signInWithGoogle(idToken)
+        }
+    }
 
     override suspend fun authenticatePrimary(email: String, password: String): Result<AppUser> = runCatching {
         firebaseDataSource.signInPrimary(email, password)
