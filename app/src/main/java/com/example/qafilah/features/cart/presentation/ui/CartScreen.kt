@@ -142,6 +142,7 @@ private fun CartContent(
                         title = line.merchandise.product.title,
                         price = line.cost.totalAmount.toDisplayString(),
                         quantity = line.quantity,
+                        quantityAvailable = line.merchandise.quantityAvailable,
                         onIncreaseQuantity = { onIncreaseQuantity(line.id) },
                         onDecreaseQuantity = { onDecreaseQuantity(line.id) },
                         onRemoveItem = { onRemoveItem(line.id) }

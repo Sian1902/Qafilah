@@ -40,6 +40,7 @@ fun CartItemCard(
     price: String,
     currencyCode: String = "",
     quantity: Int,
+    quantityAvailable: Int?,
     onIncreaseQuantity: () -> Unit,
     onDecreaseQuantity: () -> Unit,
     onRemoveItem: () -> Unit
@@ -120,7 +121,10 @@ fun CartItemCard(
                         .padding(horizontal = 10.dp, vertical = 4.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    IconButton(onClick = onDecreaseQuantity) {
+                    IconButton(
+                        onClick = onDecreaseQuantity,
+                        enabled = quantity > 1
+                    ) {
                         Icon(
                             imageVector = Icons.Outlined.Remove,
                             contentDescription = "Decrease quantity",
@@ -138,7 +142,10 @@ fun CartItemCard(
 
                     Spacer(modifier = Modifier.size(2.dp))
 
-                    IconButton(onClick = onIncreaseQuantity) {
+                    IconButton(
+                        onClick = onIncreaseQuantity,
+                        enabled = quantityAvailable != null && quantity < quantityAvailable
+                    ) {
                         Icon(
                             imageVector = Icons.Outlined.Add,
                             contentDescription = "Increase quantity",
@@ -183,6 +190,7 @@ private fun CartItemCardPreview() {
                 title = "Oud Burner",
                 price = "$120.00",
                 quantity = 1,
+                quantityAvailable = 5,
                 onIncreaseQuantity = {},
                 onDecreaseQuantity = {},
                 onRemoveItem = {}

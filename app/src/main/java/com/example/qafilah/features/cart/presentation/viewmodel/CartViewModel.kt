@@ -4,27 +4,37 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.qafilah.features.auth.domain.util.RequireAuth
+import com.example.qafilah.features.cart.domain.model.CartItemCommand
+import com.example.qafilah.features.cart.domain.model.StoreCart
 import com.example.qafilah.features.cart.domain.usecase.FetchCartUseCase
+import com.example.qafilah.features.cart.domain.usecase.ManageCartItemUseCase
 import com.example.qafilah.features.cart.domain.usecase.ObserveCartStateUseCase
-import com.example.qafilah.features.cart.domain.usecase.RemoveCartItemUseCase
-import com.example.qafilah.features.cart.domain.usecase.UpdateCartItemQuantityUseCase
 import com.example.qafilah.features.cart.presentation.contract.CartEvent
 import com.example.qafilah.features.cart.presentation.contract.CartIntent
 import com.example.qafilah.features.cart.presentation.contract.CartUIState
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlin.coroutines.cancellation.CancellationException
+import kotlin.time.Duration.Companion.milliseconds
+
+
+private data class SyncPayload(
+    val command: CartItemCommand,
+    val fallbackCart: StoreCart
+)
 
 class CartViewModel(
     private val requireAuth: RequireAuth,
     private val observeCartStateUseCase: ObserveCartStateUseCase,
     private val fetchCartUseCase: FetchCartUseCase,
-    private val updateCartItemQuantityUseCase: UpdateCartItemQuantityUseCase,
-    private val removeCartItemUseCase: RemoveCartItemUseCase
+    private val manageCartItemUseCase: ManageCartItemUseCase
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(CartUIState())
@@ -32,6 +42,9 @@ class CartViewModel(
 
     private val _events = Channel<CartEvent>(Channel.BUFFERED)
     val events = _events.receiveAsFlow()
+
+    private val syncJobs = mutableMapOf<String, Job>()
+    private val fallbackStates = mutableMapOf<String, StoreCart>()
 
     init {
         viewModelScope.launch {
@@ -91,46 +104,85 @@ class CartViewModel(
     }
 
     private fun handleIncreaseQuantity(lineId: String) {
-        val currentQuantity = currentLineQuantity(lineId) ?: run {
-            _state.update { it.copy(errorMessage = "Cart item not found") }
-            return
-        }
+        val currentCart = _state.value.cart ?: return
+        val currentQuantity = currentLineQuantity(lineId) ?: return
+        val newQuantity = currentQuantity + 1
 
-        viewModelScope.launch {
-            try {
-                updateCartItemQuantityUseCase(lineId, currentQuantity + 1)
-            } catch (e: Exception) {
-                _state.update { it.copy(errorMessage = e.message) }
-            }
-        }
+        executeOptimisticUpdate(lineId, newQuantity, currentCart)
     }
 
     private fun handleDecreaseQuantity(lineId: String) {
-        val currentQuantity = currentLineQuantity(lineId) ?: run {
-            _state.update { it.copy(errorMessage = "Cart item not found") }
-            return
-        }
+        val currentCart = _state.value.cart ?: return
+        val currentQuantity = currentLineQuantity(lineId) ?: return
 
         if (currentQuantity <= 1) {
             handleRemoveItem(lineId)
             return
         }
 
+        val newQuantity = currentQuantity - 1
+        executeOptimisticUpdate(lineId, newQuantity, currentCart)
+    }
+
+    private fun handleRemoveItem(lineId: String) {
+        val currentCart = _state.value.cart ?: return
+
+        if (!fallbackStates.containsKey(lineId)) {
+            fallbackStates[lineId] = currentCart
+        }
+
         viewModelScope.launch {
+            manageCartItemUseCase(CartItemCommand.OptimisticRemove(lineId))
+        }
+
+        scheduleSync(lineId, CartItemCommand.SyncRemoteRemoval(lineId))
+    }
+
+    private fun executeOptimisticUpdate(lineId: String, newQuantity: Int, currentCart: StoreCart) {
+        if (!fallbackStates.containsKey(lineId)) {
+            fallbackStates[lineId] = currentCart
+        }
+
+        viewModelScope.launch {
+            manageCartItemUseCase(CartItemCommand.OptimisticUpdate(lineId, newQuantity))
+        }
+
+        scheduleSync(lineId, CartItemCommand.SyncRemoteQuantity(lineId, newQuantity))
+    }
+
+    private fun scheduleSync(lineId: String, command: CartItemCommand) {
+        syncJobs[lineId]?.cancel()
+
+        syncJobs[lineId] = viewModelScope.launch {
+            delay(500L.milliseconds)
             try {
-                updateCartItemQuantityUseCase(lineId, currentQuantity - 1)
+                manageCartItemUseCase(command)
+                fallbackStates.remove(lineId)
             } catch (e: Exception) {
+                if (e is CancellationException) throw e
+
+                val fallback = fallbackStates.remove(lineId)
+                if (fallback != null) {
+                    manageCartItemUseCase(CartItemCommand.Rollback(fallback))
+                }
                 _state.update { it.copy(errorMessage = e.message) }
+            } finally {
+                syncJobs.remove(lineId)
+
+                if (syncJobs.isEmpty()) {
+                    fetchFinalCartState()
+                }
             }
         }
     }
 
-    private fun handleRemoveItem(lineId: String) {
+    private fun fetchFinalCartState() {
         viewModelScope.launch {
             try {
-                removeCartItemUseCase(lineId)
+                fetchCartUseCase()
             } catch (e: Exception) {
-                _state.update { it.copy(errorMessage = e.message) }
+
+                Log.e("CartViewModel", "Failed to sync final cart math: ${e.message}")
             }
         }
     }

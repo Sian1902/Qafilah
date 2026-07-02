@@ -8,9 +8,8 @@ import com.example.qafilah.features.cart.data.repo.CartRepositoryImpl
 import com.example.qafilah.features.cart.domain.repo.CartRepository
 import com.example.qafilah.features.cart.domain.usecase.AddCartItemUseCase
 import com.example.qafilah.features.cart.domain.usecase.FetchCartUseCase
+import com.example.qafilah.features.cart.domain.usecase.ManageCartItemUseCase
 import com.example.qafilah.features.cart.domain.usecase.ObserveCartStateUseCase
-import com.example.qafilah.features.cart.domain.usecase.RemoveCartItemUseCase
-import com.example.qafilah.features.cart.domain.usecase.UpdateCartItemQuantityUseCase
 import com.example.qafilah.features.cart.presentation.viewmodel.CartViewModel
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
@@ -22,9 +21,8 @@ val cartModule = module {
 
     factory<AddCartItemUseCase> { AddCartItemUseCase(get()) }
     factory<FetchCartUseCase> { FetchCartUseCase(get()) }
-    factory<UpdateCartItemQuantityUseCase> { UpdateCartItemQuantityUseCase(get()) }
-    factory<RemoveCartItemUseCase> { RemoveCartItemUseCase(get()) }
     factory<ObserveCartStateUseCase> { ObserveCartStateUseCase(get()) }
+    factory<ManageCartItemUseCase> { ManageCartItemUseCase(get()) }
 
 
     viewModel { CartViewModel(
@@ -32,6 +30,6 @@ val cartModule = module {
         get(),
         get(),
         get(),
-        get() )
+        )
     }
 }
