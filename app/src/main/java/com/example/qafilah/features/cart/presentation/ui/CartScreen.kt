@@ -33,6 +33,7 @@ import com.example.qafilah.features.cart.presentation.contract.CartIntent
 import com.example.qafilah.features.cart.presentation.viewmodel.CartViewModel
 import com.example.ui_kit.components.cart.CartItemCard
 import com.example.ui_kit.components.cart.CartSummaryCard
+import com.example.ui_kit.components.cart.CartEmptyView
 import com.example.ui_kit.components.login.LoginPromptBottomSheet
 import org.koin.androidx.compose.koinViewModel
 import java.math.RoundingMode
@@ -113,29 +114,16 @@ private fun CartContent(
 ) {
     val colorScheme = MaterialTheme.colorScheme
 
-    Column(
-        modifier = modifier.padding(16.dp)
-    ) {
-        LazyColumn(
-            modifier = Modifier.weight(1f),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+    if (storeCart.lines.isEmpty()) {
+        CartEmptyView(modifier = modifier.padding(16.dp))
+    } else {
+        Column(
+            modifier = modifier.padding(16.dp)
         ) {
-            if (storeCart.lines.isEmpty()) {
-                item {
-                    Surface(
-                        shape = RoundedCornerShape(24.dp),
-                        color = colorScheme.surface,
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Text(
-                            text = "Your cart is empty",
-                            style = MaterialTheme.typography.headlineSmall,
-                            color = colorScheme.onSurface,
-                            modifier = Modifier.padding(24.dp)
-                        )
-                    }
-                }
-            } else {
+            LazyColumn(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
                 items(storeCart.lines, key = { it.id }) { line ->
                     CartItemCard(
                         imageUrl = line.merchandise.image?.url.orEmpty(),
@@ -149,29 +137,29 @@ private fun CartContent(
                     )
                 }
             }
-        }
 
-        CartSummaryCard(
-            subTotalAmount = storeCart.cost.subtotalAmount.toDisplayString(),
-            totalAmount = storeCart.cost.totalAmount.toDisplayString(),
-            totalTaxAmount = storeCart.cost.totalTaxAmount?.toDisplayString(),
-            checkoutChargeAmount = storeCart.cost.checkoutChargeAmount.toDisplayString(),
-            currencyCode = storeCart.cost.totalAmount.currencyCode
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Button(
-            onClick = onCheckout,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(56.dp),
-            shape = RoundedCornerShape(28.dp)
-        ) {
-            Text(
-                text = "Proceed to Checkout",
-                style = MaterialTheme.typography.titleMedium
+            CartSummaryCard(
+                subTotalAmount = storeCart.cost.subtotalAmount.toDisplayString(),
+                totalAmount = storeCart.cost.totalAmount.toDisplayString(),
+                totalTaxAmount = storeCart.cost.totalTaxAmount?.toDisplayString(),
+                checkoutChargeAmount = storeCart.cost.checkoutChargeAmount.toDisplayString(),
+                currencyCode = storeCart.cost.totalAmount.currencyCode
             )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Button(
+                onClick = onCheckout,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp),
+                shape = RoundedCornerShape(28.dp)
+            ) {
+                Text(
+                    text = "Proceed to Checkout",
+                    style = MaterialTheme.typography.titleMedium
+                )
+            }
         }
     }
 }

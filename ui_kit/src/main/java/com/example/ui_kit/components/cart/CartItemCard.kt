@@ -23,7 +23,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
+import com.example.ui_kit.components.shared.QafilahConfirmationDialog
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
@@ -49,6 +52,22 @@ fun CartItemCard(
     val colorScheme = MaterialTheme.colorScheme
     val cardShape = RoundedCornerShape(28.dp)
     val quantityShape = RoundedCornerShape(28.dp)
+    val showConfirmDialog = remember { mutableStateOf(false) }
+
+    QafilahConfirmationDialog(
+        message = "Are you sure you want to remove this item from your cart?",
+        title = "Remove Item",
+        onYes = {
+            showConfirmDialog.value = false
+            onRemoveItem()
+        },
+        onNo = {
+            showConfirmDialog.value = false
+        },
+        isVisible = showConfirmDialog.value,
+        yesButtonText = "Remove",
+        noButtonText = "Cancel"
+    )
 
     Row(
         modifier = modifier
@@ -166,7 +185,7 @@ fun CartItemCard(
             }
         }
 
-        IconButton(onClick = onRemoveItem) {
+        IconButton(onClick = { showConfirmDialog.value = true }) {
             Icon(
                 imageVector = Icons.Outlined.Delete,
                 contentDescription = "Remove item",
