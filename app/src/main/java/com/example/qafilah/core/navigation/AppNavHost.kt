@@ -5,10 +5,8 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
@@ -24,9 +22,10 @@ import com.example.qafilah.features.home.presentation.HomeScreen
 import com.example.qafilah.features.onboarding.OnboardingScreen
 import com.example.qafilah.features.product_detail.presentation.ProductDetailScreen
 import com.example.qafilah.features.search.SearchScreen
-import com.example.qafilah.features.search.domain.model.ChipState
+import com.example.qafilah.features.search.presentation.SearchViewModel
 import com.example.qafilah.features.splash.SplashScreen
 import com.example.qafilah.features.wishlist.presentation.WishlistScreen
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun AppNavHost(
@@ -140,33 +139,31 @@ fun AppNavHost(
         }
 
         composable(NavItem.Search.route) {
-            var temporaryQueryString by remember { mutableStateOf("") }
-
-            val sampleRecentSearches = remember {
-                listOf(
-                    ChipState(id = "1", name = "Silk Kaftans"),
-                    ChipState(id = "2", name = "Oud Perfume")
-                )
-            }
-
-            val sampleTrendingSearches = remember {
-                listOf("Artisan Silver", "Woven Throws", "Hand-carved Oud")
-            }
+            val searchViewModel: SearchViewModel = koinViewModel()
+            val uiState by searchViewModel.uiState.collectAsState()
 
             SearchScreen(
-                searchQuery = temporaryQueryString,
-                onSearchQueryChange = { temporaryQueryString = it },
-                recentSearches = sampleRecentSearches,
-                trendingSearches = sampleTrendingSearches,
-                searchResults = emptyList(),
+                searchQuery = uiState.searchQuery,
+                isLoading = uiState.isLoading,
+                onSearchQueryChange = { searchViewModel.onSearchQueryChanged(it) },
+                recentSearches = uiState.recentSearches,
+                trendingSearches = uiState.trendingSearches,
+                searchResults = uiState.searchResults,
+                availableCategories = uiState.availableCategories,
+                availableBrands = uiState.availableBrands,
+                onCategoryFilterSelect = { searchViewModel.toggleCategoryFilter(it) },
+                onBrandFilterSelect = { searchViewModel.toggleBrandFilter(it) },
+                onResetFilters = { searchViewModel.resetFilters() },
                 onProductClick = { product ->
+                    searchViewModel.commitSearchQuery(uiState.searchQuery)
                     navController.navigate(Screen.ProductDetail.createRoute(Uri.encode(product.id)))
                 },
-                onFavoriteClick = { },
-                onRemoveRecentSearch = { },
-                onClearAllRecentSearches = { },
-                onBackClick = { navController.popBackStack() },
-                onFilterClick = { }
+                onFavoriteClick = { product ->
+                    searchViewModel.toggleFavorite(product.id)
+                },
+                onRemoveRecentSearch = { query -> searchViewModel.removeRecentSearch(query) },
+                onClearAllRecentSearches = { searchViewModel.clearAllRecentSearches() },
+                onBackClick = { navController.popBackStack() }
             )
         }
 

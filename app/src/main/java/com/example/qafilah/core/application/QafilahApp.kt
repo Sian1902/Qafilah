@@ -2,6 +2,8 @@ package com.example.qafilah.core.application
 
 import android.app.Application
 import com.example.qafilah.core.di.databaseModule
+import com.example.qafilah.core.di.networkModule
+import com.example.qafilah.di.searchModule
 import com.example.qafilah.features.auth.di.authModule
 import com.example.qafilah.core.di.networkModule
 import com.example.qafilah.features.cart.di.cartModule
@@ -23,8 +25,8 @@ class QafilahApp : Application() {
         productDetailsModule,
         wishlistModule,
         databaseModule,
-        databaseModule,
-        cartModule
+        cartModule,
+        searchModule
     )
 
     override fun onCreate() {
