@@ -19,7 +19,9 @@ import com.example.qafilah.features.auth.domain.model.AppUser
 import com.example.qafilah.features.auth.presentation.screens.LoginScreen
 import com.example.qafilah.features.auth.presentation.screens.SignUpScreen
 import com.example.qafilah.features.cart.presentation.ui.CartScreen
-import com.example.qafilah.features.home.presentation.HomeScreen
+import com.example.qafilah.features.home.presentation.ui.HomeScreen
+import com.example.qafilah.features.catalog.presentation.CatalogProductsScreen
+import com.example.qafilah.features.catalog.presentation.CatalogScreen
 import com.example.qafilah.features.onboarding.OnboardingScreen
 import com.example.qafilah.features.product_detail.presentation.ProductDetailScreen
 import com.example.qafilah.features.profile.presentation.ProfileScreen
@@ -130,25 +132,48 @@ fun AppNavHost(
 
         composable(NavItem.Home.route) {
             HomeScreen(
-                onSearchClick = {
-                    navController.navigate(NavItem.Search.route)
-                },
+                onSearchClick = { navController.navigate(NavItem.Search.route) },
                 onNotificationClick = { },
-                onCategoryClick = { category ->
-                    navController.currentBackStackEntry
-                        ?.savedStateHandle
-                        ?.set("search_category", category.id)
-                    navController.navigate(NavItem.Search.route)
+                onBrandClick = { },
+                onCategoryClick = { categoryUiModel ->
+                    navController.navigate(
+                        Screen.CatalogProducts.createRoute(categoryUiModel.id, categoryUiModel.label)
+                    )
                 },
-                onViewAllCategoriesClick = { },
-                onBrandClick = { brand ->
-                    navController.currentBackStackEntry
-                        ?.savedStateHandle
-                        ?.set("search_brand", brand)
-                    navController.navigate(NavItem.Search.route)
+                onViewAllCategoriesClick = {
+                    navController.navigate(Screen.Catalog.route)
                 },
                 onProductClick = { product ->
-                    navController.navigate(Screen.ProductDetail.createRoute(Uri.encode(product.id)))
+                    navController.navigate(Screen.ProductDetail.createRoute(product.id))
+                }
+            )
+        }
+        composable(Screen.Catalog.route) {
+            CatalogScreen(
+                onBackClick = { navController.popBackStack() },
+                onCategoryClick = { categoryId, categoryTitle ->
+                    navController.navigate(
+                        Screen.CatalogProducts.createRoute(categoryId, categoryTitle)
+                    )
+                }
+            )
+        }
+        composable(
+            route = Screen.CatalogProducts.route,
+            arguments = listOf(
+                navArgument("categoryId") { type = NavType.StringType },
+                navArgument("categoryTitle") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val categoryId = backStackEntry.arguments?.getString("categoryId") ?: ""
+            val categoryTitle = backStackEntry.arguments?.getString("categoryTitle") ?: ""
+
+            CatalogProductsScreen(
+                categoryId = categoryId,
+                categoryTitle = categoryTitle,
+                onBackClick = { navController.popBackStack() },
+                onProductClick = { product ->
+                    navController.navigate(Screen.ProductDetail.createRoute(product.id))
                 }
             )
         }
@@ -292,5 +317,6 @@ fun AppNavHost(
                 Text("Edit Address: $addressId (Work in Progress)")
             }
         }
+
     }
 }
