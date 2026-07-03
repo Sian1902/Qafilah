@@ -27,6 +27,7 @@ sealed class Screen(val route: String) {
 
     object PersonalDetails : Screen("personal_details")
     object EditProfile : Screen("edit_profile")
+    object ShippingAddresses : Screen("shipping_addresses")
     object AddAddress : Screen("add_address")
     object EditAddress : Screen("edit_address/{addressId}") {
         fun createRoute(addressId: String) = "edit_address/$addressId"
@@ -43,6 +44,7 @@ sealed class Screen(val route: String) {
             "order_confirmation/{orderId}",
             PersonalDetails.route,
             EditProfile.route,
+            ShippingAddresses.route,
             AddAddress.route,
             "edit_address/{addressId}"
         )

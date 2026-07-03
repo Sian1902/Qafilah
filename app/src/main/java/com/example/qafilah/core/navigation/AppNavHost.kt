@@ -25,6 +25,8 @@ import com.example.qafilah.features.catalog.presentation.CatalogScreen
 import com.example.qafilah.features.checkout.presentation.shared.CheckoutScreen
 import com.example.qafilah.features.onboarding.OnboardingScreen
 import com.example.qafilah.features.product_detail.presentation.ProductDetailScreen
+import com.example.qafilah.features.address.presentation.AddressViewModel
+import com.example.qafilah.features.address.presentation.ShippingAddressesScreen
 import com.example.qafilah.features.profile.presentation.ProfileScreen
 import com.example.qafilah.features.profile.presentation.editprofile.EditProfileScreen
 import com.example.qafilah.features.profile.presentation.persondetails.PersonalDetailsScreen
@@ -275,7 +277,7 @@ fun AppNavHost(
                 onSavedPaymentsClick = {
                 },
                 onShippingAddressesClick = {
-                    navController.navigate(Screen.AddAddress.route)
+                    navController.navigate(Screen.ShippingAddresses.route)
                 },
                 onSignOutClick = {
                     navController.navigate(Screen.Login.route) {
@@ -302,6 +304,36 @@ fun AppNavHost(
                 onBackClick = { navController.popBackStack() },
                 onCancelClick = { navController.popBackStack() }
             )
+        }
+
+        composable(Screen.ShippingAddresses.route) {
+            val addressViewModel: AddressViewModel = koinViewModel()
+            val uiState by addressViewModel.uiState.collectAsState()
+
+            LaunchedEffect(Unit) {
+                addressViewModel.loadAddresses()
+            }
+
+            ShippingAddressesScreen(
+                uiState = uiState,
+                onBackClick = { navController.popBackStack() },
+                onSaveNewAddress = { address ->
+                    addressViewModel.createAddress(address)
+                },
+                onEditAddress = { address ->
+                    addressViewModel.updateAddress(address)
+                },
+                onDeleteAddress = { addressId ->
+                    addressViewModel.deleteAddress(addressId)
+                },
+                onSetDefaultAddress = { addressId ->
+                    addressViewModel.setDefaultAddress(addressId)
+                },
+                onConsumeOperationResult = {
+                    addressViewModel.consumeOperationResult()
+                }
+            )
+
         }
 
         composable(Screen.AddAddress.route) {
