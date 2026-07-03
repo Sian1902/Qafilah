@@ -1,4 +1,6 @@
 package com.example.qafilah.features.checkout.presentation.payment
 
-class CheckoutPaymentViewModel {
+import androidx.lifecycle.ViewModel
+
+class CheckoutPaymentViewModel : ViewModel() {
 }
