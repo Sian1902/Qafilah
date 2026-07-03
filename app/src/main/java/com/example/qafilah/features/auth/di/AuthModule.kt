@@ -1,6 +1,7 @@
 package com.example.qafilah.features.auth.di
 
 
+import com.example.qafilah.core.network.ShopifyClient
 import com.example.qafilah.features.auth.data.datasource.FirebaseAuthRemoteDataSource
 import com.example.qafilah.features.auth.data.datasource.FirebaseAuthRemoteDataSourceImpl
 import com.example.qafilah.features.auth.data.repo.AuthRepositoryImpl
@@ -17,13 +18,14 @@ import com.example.qafilah.features.cart.presentation.viewmodel.CartViewModel
 import com.example.qafilah.features.wishlist.presentation.WishlistViewModel
 import com.google.firebase.auth.FirebaseAuth
 import org.koin.androidx.viewmodel.dsl.viewModel
+import org.koin.core.qualifier.named
 import org.koin.dsl.module
 
 val authModule = module {
     single { FirebaseAuth.getInstance() }
 
     single<ShopifyAuthRemoteDataSource> {
-        ShopifyAuthRemoteDataSourceImpl(apolloClient = get())
+        ShopifyAuthRemoteDataSourceImpl(apolloClient = get(named(ShopifyClient.QUALIFIER_STOREFRONT)))
     }
 
     single<FirebaseAuthRemoteDataSource>{

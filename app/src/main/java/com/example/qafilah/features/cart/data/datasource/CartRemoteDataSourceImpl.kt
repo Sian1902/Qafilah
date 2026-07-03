@@ -111,7 +111,7 @@ class CartRemoteDataSourceImpl(
             apolloClient.mutation(
                 CartDiscountCodesUpdateMutation(
                     cartId = cartId,
-                    discountCodes = Optional.present(discountCodes)
+                    discountCodes = discountCodes
                 )
             ).execute()
         }

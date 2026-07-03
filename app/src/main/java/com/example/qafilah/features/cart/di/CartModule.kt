@@ -1,5 +1,6 @@
 package com.example.qafilah.features.cart.di
 
+import com.example.qafilah.core.network.ShopifyClient
 import com.example.qafilah.features.cart.data.datasource.CartLocalDataSource
 import com.example.qafilah.features.cart.data.datasource.CartLocalDataSourceImpl
 import com.example.qafilah.features.cart.data.datasource.CartRemoteDataSource
@@ -15,11 +16,12 @@ import com.example.qafilah.features.cart.domain.usecase.RemoveDiscountUseCase
 import com.example.qafilah.features.cart.presentation.viewmodel.CartViewModel
 import com.example.qafilah.features.catalog.domain.usecases.GetPendingAdCouponUseCase
 import org.koin.androidx.viewmodel.dsl.viewModel
+import org.koin.core.qualifier.named
 import org.koin.dsl.module
 
 val cartModule = module {
     single<CartRepository> { CartRepositoryImpl(get(), get()) }
-    single<CartRemoteDataSource> { CartRemoteDataSourceImpl(get()) }
+    single<CartRemoteDataSource> { CartRemoteDataSourceImpl(get(named(ShopifyClient.QUALIFIER_STOREFRONT))) }
     single<CartLocalDataSource> { CartLocalDataSourceImpl(get()) }
 
     factory<AddCartItemUseCase> { AddCartItemUseCase(get()) }

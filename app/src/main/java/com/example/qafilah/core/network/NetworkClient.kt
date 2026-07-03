@@ -8,20 +8,34 @@ import okhttp3.OkHttpClient
 
 object ShopifyClient {
 
+    const val QUALIFIER_STOREFRONT = "storefront_client"
+    const val QUALIFIER_ADMIN = "admin_client"
+
     private val storefrontOkHttp = OkHttpClient.Builder()
-        .addInterceptor(Interceptor { chain ->
+        .addInterceptor { chain ->
             val request = chain.request().newBuilder()
                 .addHeader("X-Shopify-Storefront-Access-Token", BuildConfig.SHOPIFY_API_KEY)
                 .build()
             chain.proceed(request)
-        })
+        }
         .build()
 
-    val instance: ApolloClient = ApolloClient.Builder()
-        .serverUrl("https://mad46-and8.myshopify.com/api/2024-01/graphql.json")
+    val storefront: ApolloClient = ApolloClient.Builder()
+        .serverUrl(BuildConfig.STOREFRONT_ENDPOINT)
         .okHttpClient(storefrontOkHttp)
         .build()
 
+    private val adminOkHttp = OkHttpClient.Builder()
+        .addInterceptor { chain ->
+            val request = chain.request().newBuilder()
+                .addHeader("X-Shopify-Access-Token", BuildConfig.ADMIN_API_KEY)
+                .build()
+            chain.proceed(request)
+        }
+        .build()
 
-
+    val admin: ApolloClient = ApolloClient.Builder()
+        .serverUrl(BuildConfig.ADMIN_ENDPOINT)
+        .okHttpClient(adminOkHttp)
+        .build()
 }
