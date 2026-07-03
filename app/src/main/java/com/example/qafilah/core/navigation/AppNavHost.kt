@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -23,6 +24,8 @@ import com.example.qafilah.features.catalog.presentation.CatalogProductsScreen
 import com.example.qafilah.features.catalog.presentation.CatalogScreen
 import com.example.qafilah.features.onboarding.OnboardingScreen
 import com.example.qafilah.features.product_detail.presentation.ProductDetailScreen
+import com.example.qafilah.features.address.presentation.AddressViewModel
+import com.example.qafilah.features.address.presentation.ShippingAddressesScreen
 import com.example.qafilah.features.profile.presentation.ProfileScreen
 import com.example.qafilah.features.profile.presentation.editprofile.EditProfileScreen
 import com.example.qafilah.features.profile.presentation.persondetails.PersonalDetailsScreen
@@ -255,7 +258,7 @@ fun AppNavHost(
                 onSavedPaymentsClick = {
                 },
                 onShippingAddressesClick = {
-                    navController.navigate(Screen.AddAddress.route)
+                    navController.navigate(Screen.ShippingAddresses.route)
                 },
                 onSignOutClick = {
                     navController.navigate(Screen.Login.route) {
@@ -281,6 +284,29 @@ fun AppNavHost(
             EditProfileScreen(
                 onBackClick = { navController.popBackStack() },
                 onCancelClick = { navController.popBackStack() }
+            )
+        }
+
+        composable(Screen.ShippingAddresses.route) {
+            val addressViewModel: AddressViewModel = koinViewModel()
+            val uiState by addressViewModel.uiState.collectAsState()
+
+            LaunchedEffect(Unit) {
+                addressViewModel.loadAddresses()
+            }
+
+            ShippingAddressesScreen(
+                uiState = uiState,
+                onBackClick = { navController.popBackStack() },
+                onSaveNewAddress = { address ->
+                    addressViewModel.createAddress(address)
+                },
+                onEditAddress = { address ->
+                    addressViewModel.updateAddress(address)
+                },
+                onDeleteAddress = { addressId ->
+                    addressViewModel.deleteAddress(addressId)
+                }
             )
         }
 

@@ -21,7 +21,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.example.qafilah.features.address.domain.model.ShippingAddress
 import com.example.qafilah.features.address.domain.model.ShippingAddressesUiState
+import com.example.qafilah.features.address.domain.model.toUiModel
 import com.example.ui_kit.components.address.DashedAddButton
 import com.example.ui_kit.components.address.GlassAddressCard
 import com.example.ui_kit.components.address.QafilahTextField
@@ -32,11 +34,14 @@ import kotlinx.coroutines.launch
 fun ShippingAddressesScreen(
     uiState: ShippingAddressesUiState,
     onBackClick: () -> Unit,
-    onSaveNewAddress: () -> Unit // Pass actual parameters in a real app
+    onSaveNewAddress: (ShippingAddress) -> Unit,
+    onEditAddress: (ShippingAddress) -> Unit,
+    onDeleteAddress: (String) -> Unit
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val scope = rememberCoroutineScope()
     var showBottomSheet by remember { mutableStateOf(false) }
+    var editingAddress by remember { mutableStateOf<ShippingAddress?>(null) }
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
@@ -74,9 +79,12 @@ fun ShippingAddressesScreen(
         ) {
             items(uiState.addresses) { address ->
                 GlassAddressCard(
-                    address = address,
+                    address = address.toUiModel(),
                     onClick = { /* Handle Selection */ },
-                    onEditClick = { /* Handle Edit */ }
+                    onEditClick = {
+                        editingAddress = address
+                        showBottomSheet = true
+                    }
                 )
             }
 
@@ -92,7 +100,10 @@ fun ShippingAddressesScreen(
                             modifier = Modifier.size(32.dp)
                         )
                     },
-                    onClick = { showBottomSheet = true }
+                    onClick = {
+                        editingAddress = null
+                        showBottomSheet = true
+                    }
                 )
             }
         }
@@ -105,11 +116,26 @@ fun ShippingAddressesScreen(
                 dragHandle = { BottomSheetDefaults.DragHandle(color = Color.White.copy(alpha = 0.12f)) }
             ) {
                 AddAddressSheetContent(
-                    onSaveClick = {
-                        onSaveNewAddress()
+                    initialAddress = editingAddress,
+                    onSaveClick = { address ->
+                        if (editingAddress != null) {
+                            onEditAddress(address)
+                        } else {
+                            onSaveNewAddress(address)
+                        }
                         scope.launch { sheetState.hide() }.invokeOnCompletion {
                             if (!sheetState.isVisible) {
                                 showBottomSheet = false
+                                editingAddress = null
+                            }
+                        }
+                    },
+                    onDeleteClick = { addressId ->
+                        onDeleteAddress(addressId)
+                        scope.launch { sheetState.hide() }.invokeOnCompletion {
+                            if (!sheetState.isVisible) {
+                                showBottomSheet = false
+                                editingAddress = null
                             }
                         }
                     }
@@ -120,14 +146,17 @@ fun ShippingAddressesScreen(
 }
 
 @Composable
-fun AddAddressSheetContent(onSaveClick: () -> Unit) {
-    // Form State (Can be hoisted to a ViewModel later)
-    var street by remember { mutableStateOf("") }
-    var city by remember { mutableStateOf("") }
-    var province by remember { mutableStateOf("") }
-    var country by remember { mutableStateOf("") }
-    var zipCode by remember { mutableStateOf("") }
-    var isDefault by remember { mutableStateOf(false) }
+fun AddAddressSheetContent(
+    initialAddress: ShippingAddress?,
+    onSaveClick: (ShippingAddress) -> Unit,
+    onDeleteClick: (String) -> Unit
+) {
+    var street by remember(initialAddress?.id) { mutableStateOf(initialAddress?.street.orEmpty()) }
+    var city by remember(initialAddress?.id) { mutableStateOf(initialAddress?.locationDetails.orEmpty()) }
+    var province by remember(initialAddress?.id) { mutableStateOf("") }
+    var country by remember(initialAddress?.id) { mutableStateOf("") }
+    var zipCode by remember(initialAddress?.id) { mutableStateOf("") }
+    var isDefault by remember(initialAddress?.id) { mutableStateOf(initialAddress?.isDefault ?: false) }
 
     Column(
         modifier = Modifier
@@ -137,7 +166,7 @@ fun AddAddressSheetContent(onSaveClick: () -> Unit) {
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         Text(
-            text = "New Address",
+            text = if (initialAddress == null) "New Address" else "Edit Address",
             style = MaterialTheme.typography.headlineMedium,
             color = MaterialTheme.colorScheme.primary,
             modifier = Modifier.padding(bottom = 8.dp)
@@ -187,7 +216,17 @@ fun AddAddressSheetContent(onSaveClick: () -> Unit) {
         }
 
         Button(
-            onClick = onSaveClick,
+            onClick = {
+                val address = ShippingAddress(
+                    id = initialAddress?.id ?: "",
+                    label = if (initialAddress == null) "Home" else initialAddress.label,
+                    icon = Icons.Default.Home,
+                    street = street.trim(),
+                    locationDetails = listOfNotNull(city.trim().ifBlank { null }, province.trim().ifBlank { null }, country.trim().ifBlank { null }, zipCode.trim().ifBlank { null }).joinToString(", "),
+                    isDefault = isDefault
+                )
+                onSaveClick(address)
+            },
             modifier = Modifier
                 .fillMaxWidth()
                 .height(56.dp),
@@ -195,11 +234,24 @@ fun AddAddressSheetContent(onSaveClick: () -> Unit) {
             shape = RoundedCornerShape(50)
         ) {
             Text(
-                text = "Save Address",
+                text = if (initialAddress == null) "Save Address" else "Update Address",
                 color = MaterialTheme.colorScheme.background,
                 fontWeight = FontWeight.Bold,
                 style = MaterialTheme.typography.bodyLarge
             )
+        }
+
+        if (initialAddress != null) {
+            OutlinedButton(
+                onClick = { onDeleteClick(initialAddress.id) },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp),
+                shape = RoundedCornerShape(50),
+                colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error)
+            ) {
+                Text("Delete Address")
+            }
         }
     }
 }

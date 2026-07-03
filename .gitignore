@@ -20,3 +20,4 @@ app/build.gradle.kts
 .idea/compiler.xml
 .idea/gradle.xml
 /.idea
+.vscode/settings.json
