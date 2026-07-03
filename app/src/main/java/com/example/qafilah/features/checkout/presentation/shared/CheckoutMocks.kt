@@ -12,7 +12,7 @@ object CheckoutMocks {
             quantity = 1,
             price = CheckoutMoney.from("749.95", "USD"),
             imageUrl = "https://cdn.shopify.com/s/files/1/0715/6128/1613/files/Main_b13ad453-477c-4ed1-9b43-81f3345adfd6.jpg"
-        )
+        ),
     )
 
 

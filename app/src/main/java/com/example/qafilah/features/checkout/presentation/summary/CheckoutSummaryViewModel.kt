@@ -6,17 +6,15 @@ import com.example.qafilah.features.checkout.domain.model.CheckoutCart
 import com.example.qafilah.features.checkout.domain.usecase.UpdateDeliveryOptionUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class CheckoutSummaryViewModel(
     private val updateDeliveryOptionUseCase: UpdateDeliveryOptionUseCase
 ) : ViewModel() {
 
-    private val _isShippingUpdating = MutableStateFlow(false)
-    val isShippingUpdating = _isShippingUpdating.asStateFlow()
-
-    private val _selectedShippingHandle = MutableStateFlow<String?>(null)
-    val selectedShippingHandle = _selectedShippingHandle.asStateFlow()
+    private val _uiState = MutableStateFlow(CheckoutSummaryUIState())
+    val uiState = _uiState.asStateFlow()
 
     fun selectShippingOption(
         cartId: String,
@@ -24,11 +22,26 @@ class CheckoutSummaryViewModel(
         handle: String,
         onSuccess: (CheckoutCart) -> Unit
     ) {
-        _selectedShippingHandle.value = handle
+
+        val currentState = _uiState.value
+
+        if (currentState.isRecalculating) return
+
+        if (currentState.selectedDeliveryHandle == handle) return
+
+        _uiState.update { currentState ->
+            currentState.copy(
+                selectedDeliveryHandle = handle,
+                isRecalculating = true
+            )
+        }
+
         viewModelScope.launch {
-            _isShippingUpdating.value = true
             val result = updateDeliveryOptionUseCase(cartId, groupId, handle)
-            _isShippingUpdating.value = false
+
+            _uiState.update { currentState ->
+                currentState.copy(isRecalculating = false)
+            }
 
             result.onSuccess { updatedCart ->
                 onSuccess(updatedCart)
