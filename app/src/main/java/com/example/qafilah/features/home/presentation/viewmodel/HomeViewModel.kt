@@ -64,7 +64,14 @@ class HomeViewModel(
                 _uiState.update {
                     it.copy(
                         isLoading = false,
-                        categories = staticCategories,
+                        // 1. REPLACED staticCategories with the actual fetched collections
+                        categories = collections.map { collection ->
+                            CategoryUiModel(
+                                id = collection.id,
+                                label = collection.title.uppercase(),
+                                imageUrl = collection.imageUrl
+                            )
+                        },
                         brands = collections.map { it.toBrandLabel() },
                         products = products.map { it.toUiModel() }
                     )
@@ -149,13 +156,13 @@ private fun Product.toUiModel(): ProductUiModel = ProductUiModel(
 
 private fun StoreCollection.toBrandLabel(): String = title
 
-private val staticCategories = listOf(
-    CategoryUiModel("jewelry", "JEWELRY", R.drawable.onboarding_ring),
-    CategoryUiModel("attire", "ATTIRE", R.drawable.onboarding_fabric),
-    CategoryUiModel("scent", "SCENT", R.drawable.ic_logo),
-    CategoryUiModel("home", "HOME", R.drawable.home),
-    CategoryUiModel("gear", "GEAR", R.drawable.onboarding_bag)
-)
+//private val staticCategories = listOf(
+//    CategoryUiModel("jewelry", "JEWELRY", R.drawable.onboarding_ring),
+//    CategoryUiModel("attire", "ATTIRE", R.drawable.onboarding_fabric),
+//    CategoryUiModel("scent", "SCENT", R.drawable.ic_logo),
+//    CategoryUiModel("home", "HOME", R.drawable.home),
+//    CategoryUiModel("gear", "GEAR", R.drawable.onboarding_bag)
+//)
 
 private val promos = listOf(
     PromoUiModel(

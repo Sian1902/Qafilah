@@ -48,7 +48,10 @@ val catalogModule = module {
             getSingleProductUseCase = get(),
             getBestSellingUseCase = get(),
             getCollectionsUseCase = get(),
-            getCollectionProductsUseCase = get()
+            getCollectionProductsUseCase = get(),
+            get(),
+            get(),
+            get()
         )
     }
 }
