@@ -16,7 +16,9 @@ if (localPropertiesFile.exists()) {
 }
 
 val shopifyApiKey = localProperties.getProperty("SHOPIFY_API_KEY") ?: ""
-
+val adminApiKey = localProperties.getProperty("ADMIN_API_KEY") ?: ""
+val storefrontEndpoint = localProperties.getProperty("STOREFRONT_ENDPOINT") ?: ""
+val adminEndpoint = localProperties.getProperty("ADMIN_ENDPOINT") ?: ""
 
 android {
     namespace = "com.example.qafilah"
@@ -34,6 +36,9 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         buildConfigField("String", "SHOPIFY_API_KEY", "\"$shopifyApiKey\"")
+        buildConfigField("String", "ADMIN_API_KEY", "\"$adminApiKey\"")
+        buildConfigField("String", "STOREFRONT_ENDPOINT", "\"$storefrontEndpoint\"")
+        buildConfigField("String", "ADMIN_ENDPOINT", "\"$adminEndpoint\"")
     }
 
     buildTypes {
@@ -128,9 +133,19 @@ apollo {
         srcDir("src/main/graphql/storefront")
 
         introspection {
-            endpointUrl.set("https://mad46-and8.myshopify.com/api/2024-01/graphql.json")
+            endpointUrl.set("$storefrontEndpoint")
             schemaFile.set(file("src/main/graphql/storefront/schema.graphqls"))
             headers.put("X-Shopify-Storefront-Access-Token", shopifyApiKey)
+        }
+    }
+    service("admin") {
+        packageName.set("com.example.qafilah.graphql.admin")
+        srcDir("src/main/graphql/admin")
+
+        introspection {
+            endpointUrl.set("$adminEndpoint")
+            schemaFile.set(file("src/main/graphql/admin/schema.graphqls"))
+            headers.put("X-Shopify-Access-Token", adminApiKey)
         }
     }
 

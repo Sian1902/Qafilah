@@ -1,5 +1,6 @@
 package com.example.qafilah.features.catalog.di
 
+import com.example.qafilah.core.network.ShopifyClient
 import com.example.qafilah.features.catalog.data.datasource.AdsCouponDataStore
 import com.example.qafilah.features.catalog.data.datasource.AdsCouponDataStoreImpl
 import com.example.qafilah.features.catalog.data.datasource.CatalogRemoteDataSource
@@ -20,10 +21,11 @@ import com.example.qafilah.features.catalog.domain.usecases.SaveAdCouponUseCase
 import com.example.qafilah.features.catalog.domain.usecases.SearchProductsUseCase
 import com.example.qafilah.features.catalog.presentation.CatalogViewModel
 import org.koin.androidx.viewmodel.dsl.viewModel
+import org.koin.core.qualifier.named
 import org.koin.dsl.module
 
 val catalogModule = module {
-    single<CatalogRemoteDataSource> { CatalogRemoteDataSourceImpl(apolloClient = get()) }
+    single<CatalogRemoteDataSource> { CatalogRemoteDataSourceImpl(apolloClient = get(named(ShopifyClient.QUALIFIER_STOREFRONT))) }
     single<AdsCouponDataStore>{ AdsCouponDataStoreImpl(get()) }
 
     single<CatalogRepository> {

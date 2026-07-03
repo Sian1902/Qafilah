@@ -1,4 +1,4 @@
-mutation CartDiscountCodesUpdate($cartId: ID!, $discountCodes: [String!]) {
+mutation CartDiscountCodesUpdate($cartId: ID!, $discountCodes: [String!]!) {
     cartDiscountCodesUpdate(cartId: $cartId, discountCodes: $discountCodes) {
         cart {
             ...CartDetails
