@@ -8,6 +8,7 @@ import com.example.qafilah.features.address.domain.usecase.CreateAddressUseCase
 import com.example.qafilah.features.address.domain.usecase.DeleteAddressUseCase
 import com.example.qafilah.features.address.domain.usecase.GetAddressesUseCase
 import com.example.qafilah.features.address.domain.usecase.UpdateAddressUseCase
+import com.example.qafilah.features.address.domain.usecase.SetDefaultAddressUseCase
 import com.example.qafilah.features.address.presentation.AddressViewModel
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
@@ -25,6 +26,7 @@ val addressModule = module {
     factory { CreateAddressUseCase(repository = get()) }
     factory { UpdateAddressUseCase(repository = get()) }
     factory { DeleteAddressUseCase(repository = get()) }
+    factory { SetDefaultAddressUseCase(repository = get()) }
 
     viewModel {
         AddressViewModel(
@@ -32,6 +34,7 @@ val addressModule = module {
             createAddressUseCase = get(),
             updateAddressUseCase = get(),
             deleteAddressUseCase = get(),
+            setDefaultAddressUseCase = get(),
             tokenProvider = get()
         )
     }

@@ -1,6 +1,9 @@
 package com.example.qafilah.features.address.presentation
 
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -27,6 +30,7 @@ import com.example.qafilah.features.address.domain.model.toUiModel
 import com.example.ui_kit.components.address.DashedAddButton
 import com.example.ui_kit.components.address.GlassAddressCard
 import com.example.ui_kit.components.address.QafilahTextField
+import com.example.ui_kit.components.shared.QafilahConfirmationDialog
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -36,15 +40,52 @@ fun ShippingAddressesScreen(
     onBackClick: () -> Unit,
     onSaveNewAddress: (ShippingAddress) -> Unit,
     onEditAddress: (ShippingAddress) -> Unit,
-    onDeleteAddress: (String) -> Unit
+    onDeleteAddress: (String) -> Unit,
+    onSetDefaultAddress: (String) -> Unit,
+    onConsumeOperationResult: () -> Unit
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val scope = rememberCoroutineScope()
     var showBottomSheet by remember { mutableStateOf(false) }
     var editingAddress by remember { mutableStateOf<ShippingAddress?>(null) }
+    var addressToDeleteId by remember { mutableStateOf<String?>(null) }
+    // Track whether we're waiting for an operation to complete to close the sheet
+    var waitingForSheetClose by remember { mutableStateOf(false) }
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    // Close the bottom sheet when an operation succeeds
+    LaunchedEffect(uiState.operationSuccess) {
+        if (uiState.operationSuccess == true && waitingForSheetClose) {
+            scope.launch { sheetState.hide() }.invokeOnCompletion {
+                if (!sheetState.isVisible) {
+                    showBottomSheet = false
+                    editingAddress = null
+                }
+            }
+            waitingForSheetClose = false
+            onConsumeOperationResult()
+        } else if (uiState.operationSuccess == true) {
+            // Operation succeeded but no sheet to close (e.g. set default from card)
+            onConsumeOperationResult()
+        }
+    }
+
+    // Show snackbar for errors
+    LaunchedEffect(uiState.error) {
+        val errorMsg = uiState.error
+        if (errorMsg != null) {
+            waitingForSheetClose = false
+            snackbarHostState.showSnackbar(
+                message = errorMsg,
+                duration = SnackbarDuration.Short
+            )
+            onConsumeOperationResult()
+        }
+    }
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             CenterAlignedTopAppBar(
                 title = {
@@ -70,92 +111,175 @@ fun ShippingAddressesScreen(
         }
     ) { paddingValues ->
 
-        LazyColumn(
+        Box(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .padding(horizontal = 20.dp, vertical = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            items(uiState.addresses) { address ->
-                GlassAddressCard(
-                    address = address.toUiModel(),
-                    onClick = { /* Handle Selection */ },
-                    onEditClick = {
-                        editingAddress = address
-                        showBottomSheet = true
+            if (uiState.isLoading && uiState.addresses.isEmpty()) {
+                // Initial loading state
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
+                }
+            } else {
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(horizontal = 20.dp, vertical = 16.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    items(uiState.addresses, key = { it.id }) { address ->
+                        GlassAddressCard(
+                            address = address.toUiModel(),
+                            onClick = {
+                                if (!address.isDefault && !uiState.isOperationInProgress) {
+                                    onSetDefaultAddress(address.id)
+                                }
+                            },
+                            onEditClick = {
+                                if (!uiState.isOperationInProgress) {
+                                    editingAddress = address
+                                    showBottomSheet = true
+                                }
+                            }
+                        )
                     }
-                )
+
+                    item {
+                        Spacer(modifier = Modifier.height(16.dp))
+                        DashedAddButton(
+                            text = "Add New Address",
+                            icon = {
+                                Icon(
+                                    Icons.Default.AddCircle,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                                    modifier = Modifier.size(32.dp)
+                                )
+                            },
+                            onClick = {
+                                if (!uiState.isOperationInProgress) {
+                                    editingAddress = null
+                                    showBottomSheet = true
+                                }
+                            }
+                        )
+                    }
+                }
             }
 
-            item {
-                Spacer(modifier = Modifier.height(16.dp))
-                DashedAddButton(
-                    text = "Add New Address",
-                    icon = {
-                        Icon(
-                            Icons.Default.AddCircle,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-                            modifier = Modifier.size(32.dp)
+            // Loading overlay for operations (set default, delete from list, etc.)
+            AnimatedVisibility(
+                visible = uiState.isOperationInProgress && !showBottomSheet,
+                enter = fadeIn(),
+                exit = fadeOut()
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(Color.Black.copy(alpha = 0.3f))
+                        .clickable(enabled = false) { },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Card(
+                        shape = RoundedCornerShape(16.dp),
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.surface
                         )
-                    },
-                    onClick = {
-                        editingAddress = null
-                        showBottomSheet = true
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(horizontal = 24.dp, vertical = 16.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(16.dp)
+                        ) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(24.dp),
+                                strokeWidth = 2.dp,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                            Text(
+                                text = "Updating…",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                        }
                     }
-                )
+                }
             }
         }
 
         if (showBottomSheet) {
             ModalBottomSheet(
-                onDismissRequest = { showBottomSheet = false },
+                onDismissRequest = {
+                    if (!uiState.isOperationInProgress) {
+                        showBottomSheet = false
+                        editingAddress = null
+                        waitingForSheetClose = false
+                    }
+                },
                 sheetState = sheetState,
                 containerColor = MaterialTheme.colorScheme.background,
                 dragHandle = { BottomSheetDefaults.DragHandle(color = Color.White.copy(alpha = 0.12f)) }
             ) {
                 AddAddressSheetContent(
                     initialAddress = editingAddress,
+                    isOperationInProgress = uiState.isOperationInProgress,
                     onSaveClick = { address ->
+                        waitingForSheetClose = true
                         if (editingAddress != null) {
                             onEditAddress(address)
                         } else {
                             onSaveNewAddress(address)
                         }
-                        scope.launch { sheetState.hide() }.invokeOnCompletion {
-                            if (!sheetState.isVisible) {
-                                showBottomSheet = false
-                                editingAddress = null
-                            }
-                        }
                     },
                     onDeleteClick = { addressId ->
-                        onDeleteAddress(addressId)
-                        scope.launch { sheetState.hide() }.invokeOnCompletion {
-                            if (!sheetState.isVisible) {
-                                showBottomSheet = false
-                                editingAddress = null
-                            }
-                        }
+                        addressToDeleteId = addressId
                     }
                 )
             }
         }
+
+        QafilahConfirmationDialog(
+            isVisible = addressToDeleteId != null,
+            title = "Delete address",
+            message = "Are you sure you want to delete this address?",
+            yesButtonText = "Delete",
+            onYes = {
+                addressToDeleteId?.let { id ->
+                    waitingForSheetClose = true
+                    onDeleteAddress(id)
+                }
+                addressToDeleteId = null
+            },
+            onNo = {
+                addressToDeleteId = null
+            }
+        )
     }
 }
 
 @Composable
 fun AddAddressSheetContent(
     initialAddress: ShippingAddress?,
+    isOperationInProgress: Boolean,
     onSaveClick: (ShippingAddress) -> Unit,
     onDeleteClick: (String) -> Unit
 ) {
+    val splitLocation = remember(initialAddress?.id) {
+        initialAddress?.locationDetails
+            ?.split(",")
+            ?.map { it.trim() }
+            ?.filter { it.isNotEmpty() }
+            .orEmpty()
+    }
     var street by remember(initialAddress?.id) { mutableStateOf(initialAddress?.street.orEmpty()) }
-    var city by remember(initialAddress?.id) { mutableStateOf(initialAddress?.locationDetails.orEmpty()) }
-    var province by remember(initialAddress?.id) { mutableStateOf("") }
-    var country by remember(initialAddress?.id) { mutableStateOf("") }
-    var zipCode by remember(initialAddress?.id) { mutableStateOf("") }
+    var city by remember(initialAddress?.id) { mutableStateOf(splitLocation.getOrNull(0).orEmpty()) }
+    var province by remember(initialAddress?.id) { mutableStateOf(splitLocation.getOrNull(1).orEmpty()) }
+    var country by remember(initialAddress?.id) { mutableStateOf(splitLocation.getOrNull(2).orEmpty()) }
+    var zipCode by remember(initialAddress?.id) { mutableStateOf(splitLocation.getOrNull(3).orEmpty()) }
     var isDefault by remember(initialAddress?.id) { mutableStateOf(initialAddress?.isDefault ?: false) }
 
     Column(
@@ -189,7 +313,7 @@ fun AddAddressSheetContent(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(vertical = 16.dp)
-                .clickable { isDefault = !isDefault }
+                .clickable(enabled = !isOperationInProgress) { isDefault = !isDefault }
         ) {
             Box(
                 modifier = Modifier
@@ -215,11 +339,13 @@ fun AddAddressSheetContent(
             )
         }
 
+        val canSave = street.isNotBlank() && !isOperationInProgress
+
         Button(
             onClick = {
                 val address = ShippingAddress(
                     id = initialAddress?.id ?: "",
-                    label = if (initialAddress == null) "Home" else initialAddress.label,
+                    label = if (initialAddress == null) "Address" else initialAddress.label,
                     icon = Icons.Default.Home,
                     street = street.trim(),
                     locationDetails = listOfNotNull(city.trim().ifBlank { null }, province.trim().ifBlank { null }, country.trim().ifBlank { null }, zipCode.trim().ifBlank { null }).joinToString(", "),
@@ -227,23 +353,33 @@ fun AddAddressSheetContent(
                 )
                 onSaveClick(address)
             },
+            enabled = canSave,
             modifier = Modifier
                 .fillMaxWidth()
                 .height(56.dp),
             colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
             shape = RoundedCornerShape(50)
         ) {
-            Text(
-                text = if (initialAddress == null) "Save Address" else "Update Address",
-                color = MaterialTheme.colorScheme.background,
-                fontWeight = FontWeight.Bold,
-                style = MaterialTheme.typography.bodyLarge
-            )
+            if (isOperationInProgress) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(24.dp),
+                    strokeWidth = 2.dp,
+                    color = MaterialTheme.colorScheme.background
+                )
+            } else {
+                Text(
+                    text = if (initialAddress == null) "Save Address" else "Update Address",
+                    color = MaterialTheme.colorScheme.background,
+                    fontWeight = FontWeight.Bold,
+                    style = MaterialTheme.typography.bodyLarge
+                )
+            }
         }
 
         if (initialAddress != null) {
             OutlinedButton(
                 onClick = { onDeleteClick(initialAddress.id) },
+                enabled = !isOperationInProgress,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp),

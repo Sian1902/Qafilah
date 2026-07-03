@@ -10,5 +10,6 @@ data class CustomerAddress(
     val province: String?,
     val country: String?,
     val zip: String?,
-    val phone: String?
+    val phone: String?,
+    val isDefault: Boolean = false
 )

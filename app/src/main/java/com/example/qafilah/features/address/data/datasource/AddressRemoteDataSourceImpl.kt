@@ -6,6 +6,7 @@ import com.example.qafilah.core.network.safeApiCall
 import com.example.qafilah.features.address.domain.model.CustomerAddress
 import com.example.qafilah.graphql.storefront.AddCustomerAddressMutation
 import com.example.qafilah.graphql.storefront.DeleteCustomerAddressMutation
+import com.example.qafilah.graphql.storefront.CustomerDefaultAddressUpdateMutation
 import com.example.qafilah.graphql.storefront.GetCustomerQuery
 import com.example.qafilah.graphql.storefront.UpdateCustomerAddressMutation
 import com.example.qafilah.graphql.storefront.type.MailingAddressInput
@@ -31,7 +32,8 @@ class AddressRemoteDataSourceImpl(
                     province = node.province,
                     country = node.country,
                     zip = node.zip,
-                    phone = node.phone
+                    phone = node.phone,
+                    isDefault = response.customer?.defaultAddress?.id == node.id
                 )
             }
         }.orEmpty()
@@ -72,7 +74,7 @@ class AddressRemoteDataSourceImpl(
             address1 = createdAddress.address1,
             address2 = createdAddress.address2,
             city = createdAddress.city,
-            province = null,
+            province = createdAddress.province,
             country = createdAddress.country,
             zip = createdAddress.zip,
             phone = createdAddress.phone
@@ -110,14 +112,14 @@ class AddressRemoteDataSourceImpl(
         val updatedAddress = payload.customerAddress ?: throw Exception("No address returned")
         return CustomerAddress(
             id = updatedAddress.id,
-            firstName = address.firstName,
-            lastName = address.lastName,
+            firstName = updatedAddress.firstName,
+            lastName = updatedAddress.lastName,
             address1 = updatedAddress.address1,
-            address2 = null,
+            address2 = updatedAddress.address2,
             city = updatedAddress.city,
-            province = null,
+            province = updatedAddress.province,
             country = updatedAddress.country,
-            zip = null,
+            zip = updatedAddress.zip,
             phone = updatedAddress.phone
         )
     }
@@ -133,6 +135,22 @@ class AddressRemoteDataSourceImpl(
         }
 
         val payload = response.customerAddressDelete ?: throw Exception("Delete address failed")
+        if (payload.customerUserErrors.isNotEmpty()) {
+            throw Exception(payload.customerUserErrors.joinToString { it.message ?: "Unknown error" })
+        }
+    }
+
+    override suspend fun setDefaultAddress(accessToken: String, addressId: String) {
+        val response = safeApiCall {
+            apolloClient.mutation(
+                CustomerDefaultAddressUpdateMutation(
+                    customerAccessToken = accessToken,
+                    addressId = addressId
+                )
+            ).execute()
+        }
+
+        val payload = response.customerDefaultAddressUpdate ?: throw Exception("Set default address failed")
         if (payload.customerUserErrors.isNotEmpty()) {
             throw Exception(payload.customerUserErrors.joinToString { it.message ?: "Unknown error" })
         }

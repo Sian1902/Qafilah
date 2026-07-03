@@ -9,6 +9,7 @@ import com.example.qafilah.features.address.domain.usecase.CreateAddressUseCase
 import com.example.qafilah.features.address.domain.usecase.DeleteAddressUseCase
 import com.example.qafilah.features.address.domain.usecase.GetAddressesUseCase
 import com.example.qafilah.features.address.domain.usecase.UpdateAddressUseCase
+import com.example.qafilah.features.address.domain.usecase.SetDefaultAddressUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -18,7 +19,8 @@ class AddressViewModel(
     private val createAddressUseCase: CreateAddressUseCase,
     private val updateAddressUseCase: UpdateAddressUseCase,
     private val deleteAddressUseCase: DeleteAddressUseCase,
-    private val tokenProvider: TokenProvider
+    private val tokenProvider: TokenProvider,
+    private val setDefaultAddressUseCase: SetDefaultAddressUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ShippingAddressesUiState())
@@ -44,63 +46,123 @@ class AddressViewModel(
 
     fun createAddress(address: ShippingAddress) {
         viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(isOperationInProgress = true, error = null, operationSuccess = null)
             val token = tokenProvider.getToken() ?: run {
-                _uiState.value = _uiState.value.copy(error = "Not authenticated")
+                _uiState.value = _uiState.value.copy(isOperationInProgress = false, error = "Not authenticated")
                 return@launch
             }
 
             createAddressUseCase(token, address)
                 .onSuccess { createdAddress ->
-                    _uiState.value = _uiState.value.copy(
-                        addresses = _uiState.value.addresses + createdAddress,
-                        error = null
-                    )
+                    if (address.isDefault) {
+                        setDefaultAddressInternal(token, createdAddress.id)
+                    } else {
+                        refreshAddressesAfterOperation(token)
+                    }
                 }
                 .onFailure { error ->
-                    _uiState.value = _uiState.value.copy(error = error.message ?: "Unable to create address")
+                    _uiState.value = _uiState.value.copy(
+                        isOperationInProgress = false,
+                        operationSuccess = false,
+                        error = error.message ?: "Unable to create address"
+                    )
                 }
         }
     }
 
     fun updateAddress(address: ShippingAddress) {
         viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(isOperationInProgress = true, error = null, operationSuccess = null)
             val token = tokenProvider.getToken() ?: run {
-                _uiState.value = _uiState.value.copy(error = "Not authenticated")
+                _uiState.value = _uiState.value.copy(isOperationInProgress = false, error = "Not authenticated")
                 return@launch
             }
 
             updateAddressUseCase(token, address)
                 .onSuccess { updatedAddress ->
-                    _uiState.value = _uiState.value.copy(
-                        addresses = _uiState.value.addresses.map { existing ->
-                            if (existing.id == updatedAddress.id) updatedAddress else existing
-                        },
-                        error = null
-                    )
+                    if (address.isDefault) {
+                        setDefaultAddressInternal(token, updatedAddress.id)
+                    } else {
+                        refreshAddressesAfterOperation(token)
+                    }
                 }
                 .onFailure { error ->
-                    _uiState.value = _uiState.value.copy(error = error.message ?: "Unable to update address")
+                    _uiState.value = _uiState.value.copy(
+                        isOperationInProgress = false,
+                        operationSuccess = false,
+                        error = error.message ?: "Unable to update address"
+                    )
                 }
         }
     }
 
     fun deleteAddress(addressId: String) {
         viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(isOperationInProgress = true, error = null, operationSuccess = null)
             val token = tokenProvider.getToken() ?: run {
-                _uiState.value = _uiState.value.copy(error = "Not authenticated")
+                _uiState.value = _uiState.value.copy(isOperationInProgress = false, error = "Not authenticated")
                 return@launch
             }
 
             deleteAddressUseCase(token, addressId)
                 .onSuccess {
-                    _uiState.value = _uiState.value.copy(
-                        addresses = _uiState.value.addresses.filterNot { it.id == addressId },
-                        error = null
-                    )
+                    refreshAddressesAfterOperation(token)
                 }
                 .onFailure { error ->
-                    _uiState.value = _uiState.value.copy(error = error.message ?: "Unable to delete address")
+                    _uiState.value = _uiState.value.copy(
+                        isOperationInProgress = false,
+                        operationSuccess = false,
+                        error = error.message ?: "Unable to delete address"
+                    )
                 }
         }
+    }
+
+    fun setDefaultAddress(addressId: String) {
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(isOperationInProgress = true, error = null, operationSuccess = null)
+            val token = tokenProvider.getToken() ?: run {
+                _uiState.value = _uiState.value.copy(isOperationInProgress = false, error = "Not authenticated")
+                return@launch
+            }
+
+            setDefaultAddressInternal(token, addressId)
+        }
+    }
+
+    fun consumeOperationResult() {
+        _uiState.value = _uiState.value.copy(operationSuccess = null, error = null)
+    }
+
+    private suspend fun setDefaultAddressInternal(token: String, addressId: String) {
+        setDefaultAddressUseCase(token, addressId)
+            .onSuccess {
+                refreshAddressesAfterOperation(token)
+            }
+            .onFailure { error ->
+                _uiState.value = _uiState.value.copy(
+                    isOperationInProgress = false,
+                    operationSuccess = false,
+                    error = error.message ?: "Unable to set default address"
+                )
+            }
+    }
+
+    private suspend fun refreshAddressesAfterOperation(token: String) {
+        getAddressesUseCase(token)
+            .onSuccess { addresses ->
+                _uiState.value = _uiState.value.copy(
+                    isOperationInProgress = false,
+                    operationSuccess = true,
+                    addresses = addresses
+                )
+            }
+            .onFailure { error ->
+                _uiState.value = _uiState.value.copy(
+                    isOperationInProgress = false,
+                    operationSuccess = false,
+                    error = error.message ?: "Unable to refresh addresses"
+                )
+            }
     }
 }

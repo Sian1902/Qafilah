@@ -51,4 +51,14 @@ class AddressRepositoryImpl(
                 Result.failure(e)
             }
         }
+
+    override suspend fun setDefaultAddress(accessToken: String, addressId: String): Result<Unit> =
+        withContext(Dispatchers.IO) {
+            try {
+                remoteDataSource.setDefaultAddress(accessToken, addressId)
+                Result.success(Unit)
+            } catch (e: Exception) {
+                Result.failure(e)
+            }
+        }
 }

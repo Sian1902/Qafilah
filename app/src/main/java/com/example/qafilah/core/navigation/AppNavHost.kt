@@ -306,8 +306,15 @@ fun AppNavHost(
                 },
                 onDeleteAddress = { addressId ->
                     addressViewModel.deleteAddress(addressId)
+                },
+                onSetDefaultAddress = { addressId ->
+                    addressViewModel.setDefaultAddress(addressId)
+                },
+                onConsumeOperationResult = {
+                    addressViewModel.consumeOperationResult()
                 }
             )
+
         }
 
         composable(Screen.AddAddress.route) {

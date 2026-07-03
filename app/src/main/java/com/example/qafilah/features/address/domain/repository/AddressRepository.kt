@@ -7,4 +7,5 @@ interface AddressRepository {
     suspend fun createAddress(accessToken: String, address: ShippingAddress): Result<ShippingAddress>
     suspend fun updateAddress(accessToken: String, address: ShippingAddress): Result<ShippingAddress>
     suspend fun deleteAddress(accessToken: String, addressId: String): Result<Unit>
+    suspend fun setDefaultAddress(accessToken: String, addressId: String): Result<Unit>
 }

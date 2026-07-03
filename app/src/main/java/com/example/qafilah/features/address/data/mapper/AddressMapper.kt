@@ -8,11 +8,11 @@ import com.example.qafilah.features.address.domain.model.ShippingAddress
 fun CustomerAddress.toDomain(): ShippingAddress {
     return ShippingAddress(
         id = id,
-        label = if (address1.isNullOrBlank()) "Address" else "Home",
+        label = "Address",
         icon = Icons.Default.Home,
         street = listOfNotNull(address1, address2).filter { it.isNotBlank() }.joinToString(separator = ", "),
         locationDetails = listOfNotNull(city, province, country, zip).filter { it.isNullOrBlank().not() }.joinToString(separator = ", "),
-        isDefault = false
+        isDefault = isDefault
     )
 }
 
