@@ -7,6 +7,7 @@ import com.example.qafilah.core.model.Product
 import com.example.qafilah.features.catalog.domain.model.StoreCollection
 import com.example.qafilah.features.catalog.domain.usecases.GetBestSellingUseCase
 import com.example.qafilah.features.catalog.domain.usecases.GetCollectionsUseCase
+import com.example.qafilah.features.catalog.domain.usecases.GetProductTypesUseCase
 import com.example.qafilah.features.wishlist.domain.usecase.AddToWishlistUseCase
 import com.example.qafilah.features.wishlist.domain.usecase.IsProductWishlistedUseCase
 import com.example.qafilah.features.wishlist.domain.usecase.RemoveFromWishlistUseCase
@@ -22,6 +23,7 @@ import kotlinx.coroutines.launch
 
 private const val PRODUCTS_LIMIT = 10
 private const val COLLECTIONS_LIMIT = 10
+private const val CATEGORIES_LIMIT = 10
 
 sealed interface HomeEvent {
     data class ShowSnackbar(val message: String) : HomeEvent
@@ -30,6 +32,7 @@ sealed interface HomeEvent {
 class HomeViewModel(
     private val getBestSellingUseCase: GetBestSellingUseCase,
     private val getCollectionsUseCase: GetCollectionsUseCase,
+    private val getProductTypesUseCase: GetProductTypesUseCase,
     private val isProductWishlistedUseCase: IsProductWishlistedUseCase,
     private val addToWishlistUseCase: AddToWishlistUseCase,
     private val removeFromWishlistUseCase: RemoveFromWishlistUseCase
@@ -53,12 +56,13 @@ class HomeViewModel(
             try {
                 val products = getBestSellingUseCase(limit = PRODUCTS_LIMIT, after = null)
                 val collections = getCollectionsUseCase(limit = COLLECTIONS_LIMIT, after = null)
+                val productTypes = getProductTypesUseCase(limit = CATEGORIES_LIMIT)
                 domainProductsCache = products
 
                 _uiState.update {
                     it.copy(
                         isLoading = false,
-                        categories = staticCategories,
+                        categories = productTypes.mapIndexed { index, type -> type.toCategoryUiModel(index) },
                         brands = collections.map { it.toBrandLabel() },
                         products = products.map { it.toUiModel() }
                     )
@@ -131,10 +135,16 @@ private fun Product.toUiModel(): ProductUiModel = ProductUiModel(
 
 private fun StoreCollection.toBrandLabel(): String = title
 
-private val staticCategories = listOf(
-    CategoryUiModel("jewelry", "JEWELRY", R.drawable.onboarding_ring),
-    CategoryUiModel("attire", "ATTIRE", R.drawable.onboarding_fabric),
-    CategoryUiModel("scent", "SCENT", R.drawable.ic_logo),
-    CategoryUiModel("home", "HOME", R.drawable.home),
-    CategoryUiModel("gear", "GEAR", R.drawable.onboarding_bag)
+private val categoryIcons = listOf(
+    R.drawable.onboarding_ring,
+    R.drawable.onboarding_fabric,
+    R.drawable.ic_logo,
+    R.drawable.home,
+    R.drawable.onboarding_bag
+)
+
+private fun String.toCategoryUiModel(index: Int): CategoryUiModel = CategoryUiModel(
+    id = this,
+    label = this.uppercase(),
+    icon = categoryIcons[index % categoryIcons.size]
 )

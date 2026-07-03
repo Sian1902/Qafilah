@@ -7,6 +7,7 @@ import com.example.qafilah.features.catalog.domain.model.StoreCollection
 import com.example.qafilah.graphql.storefront.GetBestSellingProductsQuery
 import com.example.qafilah.graphql.storefront.GetProductQuery
 import com.example.qafilah.graphql.storefront.GetProductsByCollectionQuery
+import com.example.qafilah.graphql.storefront.GetProductsByTypeQuery
 import com.example.qafilah.graphql.storefront.SearchProductsQuery
 
 fun GetProductQuery.Product.toDomain(): ProductDetails {
@@ -44,6 +45,7 @@ fun SearchProductsQuery.OnProduct.toDomain(): Product {
         id = this.id,
         title = this.title,
         vendor = this.vendor,
+        productType = this.productType,
 
         imageUrl = this.images.edges.firstOrNull()?.node?.url?.toString(),
 
@@ -57,6 +59,7 @@ fun GetBestSellingProductsQuery.Node.toDomain(): Product {
         id = this.id,
         title = this.title,
         vendor = this.vendor,
+        productType = this.productType,
         imageUrl = this.images.edges.firstOrNull()?.node?.url?.toString(),
         priceAmount = this.priceRange.minVariantPrice.amount.toString(),
         currencyCode = this.priceRange.minVariantPrice.currencyCode.toString()
@@ -68,12 +71,24 @@ fun GetProductsByCollectionQuery.Node.toDomain(): Product {
         id = this.id,
         title = this.title,
         vendor = this.vendor,
+        productType = this.productType,
         imageUrl = this.images.edges.firstOrNull()?.node?.url?.toString(),
         priceAmount = this.priceRange.minVariantPrice.amount.toString(),
         currencyCode = this.priceRange.minVariantPrice.currencyCode.toString()
     )
 }
 
+fun GetProductsByTypeQuery.Node.toDomain(): Product {
+    return Product(
+        id = this.id,
+        title = this.title,
+        vendor = this.vendor,
+        productType = this.productType,
+        imageUrl = this.images.edges.firstOrNull()?.node?.url?.toString(),
+        priceAmount = this.priceRange.minVariantPrice.amount.toString(),
+        currencyCode = this.priceRange.minVariantPrice.currencyCode.toString()
+    )
+}
 
 fun GetProductsByCollectionQuery.Collection.toStoreCollection(): StoreCollection {
     return StoreCollection(

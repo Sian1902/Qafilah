@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -26,7 +27,6 @@ import com.example.qafilah.features.profile.presentation.editprofile.EditProfile
 import com.example.qafilah.features.profile.presentation.persondetails.PersonalDetailsScreen
 import com.example.qafilah.features.profile.presentation.profile.ProfileViewModel
 import com.example.qafilah.features.search.SearchScreen
-import com.example.qafilah.features.search.domain.model.ChipState
 import com.example.qafilah.features.search.presentation.SearchViewModel
 import com.example.qafilah.features.splash.SplashScreen
 import com.example.qafilah.features.wishlist.presentation.WishlistScreen
@@ -134,9 +134,19 @@ fun AppNavHost(
                     navController.navigate(NavItem.Search.route)
                 },
                 onNotificationClick = { },
-                onCategoryClick = { },
+                onCategoryClick = { category ->
+                    navController.currentBackStackEntry
+                        ?.savedStateHandle
+                        ?.set("search_category", category.id)
+                    navController.navigate(NavItem.Search.route)
+                },
                 onViewAllCategoriesClick = { },
-                onBrandClick = { },
+                onBrandClick = { brand ->
+                    navController.currentBackStackEntry
+                        ?.savedStateHandle
+                        ?.set("search_brand", brand)
+                    navController.navigate(NavItem.Search.route)
+                },
                 onProductClick = { product ->
                     navController.navigate(Screen.ProductDetail.createRoute(Uri.encode(product.id)))
                 }
@@ -146,6 +156,21 @@ fun AppNavHost(
         composable(NavItem.Search.route) {
             val searchViewModel: SearchViewModel = koinViewModel()
             val uiState by searchViewModel.uiState.collectAsState()
+
+            val initialCategory = navController.previousBackStackEntry
+                ?.savedStateHandle
+                ?.get<String>("search_category")
+            val initialBrand = navController.previousBackStackEntry
+                ?.savedStateHandle
+                ?.get<String>("search_brand")
+
+            LaunchedEffect(Unit) {
+                if (initialCategory != null || initialBrand != null) {
+                    searchViewModel.applyInitialFilters(initialCategory, initialBrand)
+                    navController.previousBackStackEntry?.savedStateHandle?.remove<String>("search_category")
+                    navController.previousBackStackEntry?.savedStateHandle?.remove<String>("search_brand")
+                }
+            }
 
             SearchScreen(
                 searchQuery = uiState.searchQuery,
@@ -179,6 +204,7 @@ fun AppNavHost(
                 }
             )
         }
+
         composable(NavItem.Cart.route) {
             CartScreen(
                 onNavigateToLogin = { navController.navigate(Screen.Login.route) },

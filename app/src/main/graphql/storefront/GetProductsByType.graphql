@@ -1,5 +1,5 @@
-query GetBestSellingProducts($first: Int!, $after: String) {
-    products(first: $first, after: $after, sortKey: BEST_SELLING) {
+query GetProductsByType($query: String!, $first: Int!, $after: String) {
+    products(first: $first, after: $after, query: $query) {
         edges {
             cursor
             node {
