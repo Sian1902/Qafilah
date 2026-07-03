@@ -11,6 +11,7 @@ val homeModule = module {
         get(),
         get(),
         get(),
+        get(),
         get()
     ) }
 }

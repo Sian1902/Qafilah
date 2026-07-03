@@ -1,0 +1,40 @@
+fragment CheckoutCartDetails on Cart {
+    id
+    cost {
+        subtotalAmount { ...MoneyFields }
+        totalAmount { ...MoneyFields }
+        totalTaxAmount { ...MoneyFields }
+    }
+    deliveryGroups(first: 1) {
+        edges {
+            node {
+                id
+                deliveryOptions {
+                    handle
+                    title
+                    estimatedCost { ...MoneyFields }
+                }
+            }
+        }
+    }
+    lines(first: 20) {
+        edges {
+            node {
+                id
+                quantity
+                merchandise {
+                    ... on ProductVariant {
+                        title
+                        price { ...MoneyFields }
+                        image {
+                            url
+                        }
+                        product {
+                            title
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

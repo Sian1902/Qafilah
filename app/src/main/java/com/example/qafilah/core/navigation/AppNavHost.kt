@@ -22,6 +22,7 @@ import com.example.qafilah.features.cart.presentation.ui.CartScreen
 import com.example.qafilah.features.home.presentation.ui.HomeScreen
 import com.example.qafilah.features.catalog.presentation.CatalogProductsScreen
 import com.example.qafilah.features.catalog.presentation.CatalogScreen
+import com.example.qafilah.features.checkout.presentation.shared.CheckoutScreen
 import com.example.qafilah.features.onboarding.OnboardingScreen
 import com.example.qafilah.features.product_detail.presentation.ProductDetailScreen
 import com.example.qafilah.features.profile.presentation.ProfileScreen
@@ -115,7 +116,7 @@ fun AppNavHost(
 
         composable(Screen.Checkout.route) {
             Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text("Checkout")
+                CheckoutScreen()
             }
         }
 
@@ -238,6 +239,9 @@ fun AppNavHost(
                     navController.navigate(NavItem.Home.route) {
                         popUpTo(NavItem.Cart.route) { inclusive = true }
                     }
+                },
+                onNavigateToCheckout = {
+                    navController.navigate(Screen.Checkout.route)
                 }
             )
         }
