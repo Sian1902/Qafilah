@@ -16,15 +16,6 @@ val searchModule = module {
 
     single<SearchLocalDataSource> { SearchLocalDataSourceImpl(get()) }
 
-    viewModel {
-        SearchViewModel(
-            localDataSource = get(),
-            searchProductsUseCase = get(),
-            getBestSellingUseCase = get(),
-            getCollectionsUseCase = get(),
-            isProductWishlistedUseCase = get(),
-            addToWishlistUseCase = get(),
-            removeFromWishlistUseCase = get()
-        )
-    }
+    viewModel { SearchViewModel(get(), get(), get(), get(), get(),
+        get(), get(), get(), get(), get()) }
 }

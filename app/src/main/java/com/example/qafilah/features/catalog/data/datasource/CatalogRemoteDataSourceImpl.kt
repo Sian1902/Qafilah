@@ -6,7 +6,9 @@ import com.example.qafilah.core.network.safeApiCall
 import com.example.qafilah.graphql.storefront.GetBestSellingProductsQuery
 import com.example.qafilah.graphql.storefront.GetCollectionsQuery
 import com.example.qafilah.graphql.storefront.GetProductQuery
+import com.example.qafilah.graphql.storefront.GetProductTypesQuery
 import com.example.qafilah.graphql.storefront.GetProductsByCollectionQuery
+import com.example.qafilah.graphql.storefront.GetProductsByTypeQuery
 import com.example.qafilah.graphql.storefront.SearchProductsQuery
 import com.example.qafilah.graphql.storefront.type.ProductCollectionSortKeys
 
@@ -67,4 +69,20 @@ class CatalogRemoteDataSourceImpl(
             ).execute()
         }
     }
+
+    override suspend fun getProductTypes(limit: Int): List<String> {
+        val data = safeApiCall {
+            apolloClient.query(GetProductTypesQuery(first = limit)).execute()
+        }
+        return data.productTypes.edges.map { it.node }.filter { it.isNotBlank() }
+    }
+
+    override suspend fun getProductsByType(productType: String, limit: Int): List<GetProductsByTypeQuery.Node> {
+        val filterQuery = "product_type:\"$productType\""
+        val data = safeApiCall {
+            apolloClient.query(GetProductsByTypeQuery(query = filterQuery, first = limit)).execute()
+        }
+        return data.products.edges.map { it.node }
+    }
+
 }
