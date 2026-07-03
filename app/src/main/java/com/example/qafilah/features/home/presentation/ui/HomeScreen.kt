@@ -1,15 +1,19 @@
-package com.example.qafilah.features.home.presentation
+package com.example.qafilah.features.home.presentation.ui
 
 import android.util.Log
+import androidx.compose.foundation.interaction.collectIsDraggedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -24,16 +28,21 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.example.qafilah.features.home.presentation.viewmodel.HomeUiState
+import com.example.qafilah.features.home.presentation.viewmodel.HomeEvent
+import com.example.qafilah.features.home.presentation.viewmodel.HomeViewModel
 import com.example.ui_kit.components.home.BrandRow
 import com.example.ui_kit.components.home.CategoryRow
 import com.example.ui_kit.components.home.CategoryUiModel
 import com.example.ui_kit.components.home.ProductCard
 import com.example.ui_kit.components.home.ProductUiModel
-import com.example.ui_kit.components.home.PromoBannerCard
+import com.example.ui_kit.components.shared.PromoBannerCard
 import com.example.ui_kit.components.shared.SearchField
 import com.example.ui_kit.components.shared.SectionHeader
 import com.example.ui_kit.components.shared.WelcomeHeader
+import kotlinx.coroutines.delay
 import org.koin.androidx.compose.koinViewModel
+import kotlin.time.Duration.Companion.milliseconds
 
 
 @Composable
@@ -92,6 +101,7 @@ fun HomeScreen(
                         onBrandClick = onBrandClick,
                         onProductClick = onProductClick,
                         onFavoriteClick = { product -> viewModel.toggleFavorite(product.id) },
+                        onClaimPromo = { code -> viewModel.claimPromoCode(code) },
                         modifier = modifier
                     )
                 }
@@ -111,6 +121,7 @@ private fun HomeContent(
     onBrandClick: (String) -> Unit,
     onProductClick: (ProductUiModel) -> Unit,
     onFavoriteClick: (ProductUiModel) -> Unit,
+    onClaimPromo: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     LazyColumn(
@@ -136,14 +147,13 @@ private fun HomeContent(
             )
         }
 
-        item {
-            PromoBannerCard(
-                imageUrl = "https://example.com/dune-collection.jpg",
-                title = "Dune Collection",
-                ctaText = "SHOP NOW",
-                onCtaClick = { },
-                modifier = Modifier.padding(horizontal = 20.dp)
-            )
+        if (uiState.promos.isNotEmpty()) {
+            item {
+                PromosPager(
+                    promos = uiState.promos,
+                    onClaimPromo = onClaimPromo
+                )
+            }
         }
 
         item {

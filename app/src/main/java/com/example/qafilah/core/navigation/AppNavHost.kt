@@ -18,7 +18,7 @@ import com.example.qafilah.features.auth.domain.model.AppUser
 import com.example.qafilah.features.auth.presentation.screens.LoginScreen
 import com.example.qafilah.features.auth.presentation.screens.SignUpScreen
 import com.example.qafilah.features.cart.presentation.ui.CartScreen
-import com.example.qafilah.features.home.presentation.HomeScreen
+import com.example.qafilah.features.home.presentation.ui.HomeScreen
 import com.example.qafilah.features.onboarding.OnboardingScreen
 import com.example.qafilah.features.product_detail.presentation.ProductDetailScreen
 import com.example.qafilah.features.profile.presentation.ProfileScreen
@@ -26,7 +26,6 @@ import com.example.qafilah.features.profile.presentation.editprofile.EditProfile
 import com.example.qafilah.features.profile.presentation.persondetails.PersonalDetailsScreen
 import com.example.qafilah.features.profile.presentation.profile.ProfileViewModel
 import com.example.qafilah.features.search.SearchScreen
-import com.example.qafilah.features.search.domain.model.ChipState
 import com.example.qafilah.features.search.presentation.SearchViewModel
 import com.example.qafilah.features.splash.SplashScreen
 import com.example.qafilah.features.wishlist.presentation.WishlistScreen
