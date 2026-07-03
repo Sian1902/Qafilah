@@ -13,6 +13,8 @@ import com.example.qafilah.features.catalog.domain.usecases.ClearPendingAdCoupon
 import com.example.qafilah.features.catalog.domain.usecases.GetBestSellingUseCase
 import com.example.qafilah.features.catalog.domain.usecases.GetCollectionProductsUseCase
 import com.example.qafilah.features.catalog.domain.usecases.GetCollectionsUseCase
+import com.example.qafilah.features.catalog.domain.usecases.GetProductTypesUseCase
+import com.example.qafilah.features.catalog.domain.usecases.GetProductsByTypeUseCase
 import com.example.qafilah.features.catalog.domain.usecases.GetPendingAdCouponUseCase
 import com.example.qafilah.features.catalog.domain.usecases.GetSingleProductUseCase
 import com.example.qafilah.features.catalog.domain.usecases.SaveAdCouponUseCase
@@ -38,10 +40,11 @@ val catalogModule = module {
     factory { GetBestSellingUseCase(catalogRepository = get()) }
     factory { GetCollectionsUseCase(catalogRepository = get()) }
     factory { GetCollectionProductsUseCase(catalogRepository = get()) }
+    factory { GetProductTypesUseCase(catalogRepository = get()) }
+    factory { GetProductsByTypeUseCase(catalogRepository = get()) }
     factory<GetPendingAdCouponUseCase> { GetPendingAdCouponUseCase(repository = get()) }
     factory<SaveAdCouponUseCase>{ SaveAdCouponUseCase(get()) }
     factory<ClearPendingAdCouponUseCase> { ClearPendingAdCouponUseCase(get()) }
-
 
 
     viewModel {

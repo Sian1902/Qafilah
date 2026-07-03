@@ -69,6 +69,9 @@ fun SearchScreen(
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
 
+    val hasActiveFilter = availableCategories.any { it.isSelected } || availableBrands.any { it.isSelected }
+    val showResults = searchQuery.isNotEmpty() || hasActiveFilter
+
     ModalNavigationDrawer(
         drawerState = drawerState,
         drawerContent = {
@@ -163,7 +166,8 @@ fun SearchScreen(
                         Icon(
                             imageVector = Icons.Default.Tune,
                             contentDescription = "Filters",
-                            tint = MaterialTheme.colorScheme.primary
+                            tint = if (hasActiveFilter) MaterialTheme.colorScheme.primary
+                            else MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                 }
@@ -189,7 +193,7 @@ fun SearchScreen(
                     horizontalArrangement = Arrangement.spacedBy(16.dp),
                     verticalArrangement = Arrangement.spacedBy(24.dp)
                 ) {
-                    if (searchQuery.isEmpty()) {
+                    if (!showResults) {
                         if (recentSearches.isNotEmpty()) {
                             item(span = { GridItemSpan(maxLineSpan) }) {
                                 Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {

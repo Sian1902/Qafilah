@@ -76,4 +76,10 @@ class CatalogRepositoryImpl(
             products = products
         )
     }
+
+    override suspend fun getProductTypes(limit: Int): List<String> =
+        remoteDataSource.getProductTypes(limit)
+
+    override suspend fun getProductsByType(productType: String, limit: Int): List<Product> =
+        remoteDataSource.getProductsByType(productType, limit).map { it.toDomain() }
 }

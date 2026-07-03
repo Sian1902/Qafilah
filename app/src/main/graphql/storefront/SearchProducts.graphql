@@ -8,6 +8,7 @@ query SearchProducts($query: String!, $first: Int!, $after: String) {
                     id
                     title
                     vendor
+                    productType
                     availableForSale
                     priceRange {
                         minVariantPrice { amount currencyCode }
