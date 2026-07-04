@@ -52,7 +52,11 @@ fun CheckoutAddressScreen(
             cart?.let { safeCart ->
                 addressViewModel.submitAddress(safeCart.id) { updatedCart, selectedAddress ->
                     sharedViewModel.updateCartState(updatedCart)
+
                     sharedViewModel.setShippingAddress(selectedAddress)
+
+                    uiState.appUser?.let { sharedViewModel.setCustomerProfile(it) }
+
                     onNavigateToSummary()
                 }
             }

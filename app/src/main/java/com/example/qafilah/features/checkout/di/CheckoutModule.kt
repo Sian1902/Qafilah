@@ -6,6 +6,7 @@ import com.example.qafilah.features.checkout.data.datasource.CheckoutRemoteDataS
 import com.example.qafilah.features.checkout.data.datasource.CheckoutRemoteDataSourceImpl
 import com.example.qafilah.features.checkout.data.repo.CheckoutRepositoryImpl
 import com.example.qafilah.features.checkout.domain.repo.CheckoutRepository
+import com.example.qafilah.features.checkout.domain.usecase.CompleteOrderUseCase
 import com.example.qafilah.features.checkout.domain.usecase.UpdateBuyerIdentityUseCase
 import com.example.qafilah.features.checkout.domain.usecase.UpdateDeliveryOptionUseCase
 import com.example.qafilah.features.checkout.presentation.address.CheckoutAddressViewModel
@@ -18,16 +19,20 @@ import org.koin.dsl.module
 
 val checkoutModule = module {
     single<CheckoutRemoteDataSource> {
-        CheckoutRemoteDataSourceImpl(get(named(ShopifyClient.QUALIFIER_STOREFRONT)))
+        CheckoutRemoteDataSourceImpl(
+            get(named(ShopifyClient.QUALIFIER_STOREFRONT)),
+                get(named(ShopifyClient.QUALIFIER_ADMIN))
+        )
     }
 
     single<CheckoutRepository> { CheckoutRepositoryImpl(get()) }
 
     factory<UpdateBuyerIdentityUseCase> { UpdateBuyerIdentityUseCase(get()) }
     factory<UpdateDeliveryOptionUseCase> { UpdateDeliveryOptionUseCase(get()) }
+    factory<CompleteOrderUseCase> { CompleteOrderUseCase(get()) }
 
     viewModel { CheckoutSharedViewModel(get(), get<ConvertPriceUseCase>()) }
     viewModel { CheckoutSummaryViewModel(get()) }
-    viewModel { CheckoutAddressViewModel(get(), get(), get()) }
-    viewModel { CheckoutPaymentViewModel() }
+    viewModel { CheckoutAddressViewModel(get(), get(), get(), get()) }
+    viewModel { CheckoutPaymentViewModel(get()) }
 }

@@ -5,11 +5,16 @@ import com.apollographql.apollo.network.okHttpClient
 import com.example.qafilah.BuildConfig
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
+import okhttp3.logging.HttpLoggingInterceptor
 
 object ShopifyClient {
 
     const val QUALIFIER_STOREFRONT = "storefront_client"
     const val QUALIFIER_ADMIN = "admin_client"
+
+    private val loggingInterceptor = HttpLoggingInterceptor().apply {
+        level = HttpLoggingInterceptor.Level.BODY
+    }
 
     private val storefrontOkHttp = OkHttpClient.Builder()
         .addInterceptor { chain ->
@@ -18,6 +23,7 @@ object ShopifyClient {
                 .build()
             chain.proceed(request)
         }
+        .addInterceptor(loggingInterceptor)
         .build()
 
     val storefront: ApolloClient = ApolloClient.Builder()
@@ -32,6 +38,7 @@ object ShopifyClient {
                 .build()
             chain.proceed(request)
         }
+        .addInterceptor(loggingInterceptor)
         .build()
 
     val admin: ApolloClient = ApolloClient.Builder()

@@ -18,6 +18,7 @@ private fun CheckoutCartDetails.Node1.toDomain(): CheckoutLineItem {
 
     return CheckoutLineItem(
         id = id,
+        variantId = variant.id,
         productTitle = variant.product.title,
         variantTitle = variant.title,
         quantity = quantity,
@@ -62,6 +63,7 @@ fun StoreCart.toCheckoutCart(): CheckoutCart {
         lines = this.lines.map { line ->
             CheckoutLineItem(
                 id = line.id,
+                variantId = line.merchandise.id,
                 productTitle = line.merchandise.product.title,
                 variantTitle = line.merchandise.title,
                 quantity = line.quantity,

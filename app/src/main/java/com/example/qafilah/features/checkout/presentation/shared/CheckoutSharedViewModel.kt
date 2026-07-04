@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.qafilah.core.currency.ConvertPriceUseCase
 import com.example.qafilah.features.address.domain.model.ShippingAddress
+import com.example.qafilah.features.auth.domain.model.AppUser
 import com.example.qafilah.features.cart.domain.usecase.ObserveCartStateUseCase
 import com.example.qafilah.features.checkout.data.mapper.toCheckoutCart
 import com.example.qafilah.features.checkout.domain.model.CheckoutCart
@@ -24,6 +25,15 @@ class CheckoutSharedViewModel(
     private val _displayCartState = MutableStateFlow<CheckoutDisplayCart?>(null)
     val displayCartState = _displayCartState.asStateFlow()
 
+    private val _selectedAddress = MutableStateFlow<ShippingAddress?>(null)
+    val selectedAddress = _selectedAddress.asStateFlow()
+
+    private val _appUser = MutableStateFlow<AppUser?>(null)
+    val appUser = _appUser.asStateFlow()
+
+    private val _selectedDeliveryHandle = MutableStateFlow<String?>(null)
+    val selectedDeliveryHandle = _selectedDeliveryHandle.asStateFlow()
+
     init {
         viewModelScope.launch {
             observeCartStateUseCase().collect { storeCart ->
@@ -41,12 +51,19 @@ class CheckoutSharedViewModel(
 
     fun updateCartStateWithSelectedShipping(newCart: CheckoutCart, selectedDeliveryHandle: String?) {
         _cartState.value = newCart
+        _selectedDeliveryHandle.value = selectedDeliveryHandle
+
         viewModelScope.launch {
             _displayCartState.value = newCart.toDisplayCart(selectedDeliveryHandle)
         }
     }
 
-    fun setShippingAddress(@Suppress("unused") address: ShippingAddress) {
+    fun setShippingAddress(address: ShippingAddress) {
+        _selectedAddress.value = address
+    }
+
+    fun setCustomerProfile(user: AppUser) {
+        _appUser.value = user
     }
 
     private suspend fun emitCart(storeCart: StoreCart?) {
