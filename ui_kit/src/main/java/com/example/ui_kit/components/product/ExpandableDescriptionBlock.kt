@@ -27,6 +27,9 @@ import androidx.core.text.HtmlCompat
 @Composable
 fun ExpandableDescriptionBlock(
     descriptionHtml: String,
+    title: String,
+    readMoreLabel: String,
+    readLessLabel: String,
     modifier: Modifier = Modifier
 ) {
     if (descriptionHtml.isBlank()) return
@@ -45,7 +48,7 @@ fun ExpandableDescriptionBlock(
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         Text(
-            text = "Product Description",
+            text = title,
             style = MaterialTheme.typography.labelSmall.copy(
                 fontSize = 14.sp,
                 color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.8f)
@@ -71,7 +74,7 @@ fun ExpandableDescriptionBlock(
         )
 
         Text(
-            text = if (isExpanded) "Read Less" else "Read More",
+            text = if (isExpanded) readLessLabel else readMoreLabel,
             style = MaterialTheme.typography.bodyMedium.copy(
                 fontSize = 13.sp,
                 color = MaterialTheme.colorScheme.primary

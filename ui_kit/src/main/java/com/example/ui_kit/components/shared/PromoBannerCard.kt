@@ -28,6 +28,8 @@ import com.example.ui_kit.components.shared.PillButton
 fun PromoBannerCard(
     imageUrl: String,
     title: String,
+    tagLabel: String,
+    imageContentDescription: String,
     ctaText: String,
     onCtaClick: () -> Unit,
     modifier: Modifier = Modifier
@@ -40,7 +42,7 @@ fun PromoBannerCard(
     ) {
         AsyncImage(
             model = imageUrl,
-            contentDescription = title,
+            contentDescription = imageContentDescription,
             contentScale = ContentScale.Crop,
             modifier = Modifier.fillMaxSize()
         )
@@ -61,7 +63,7 @@ fun PromoBannerCard(
                 .padding(24.dp)
         ) {
             Text(
-                text = "EXCLUSIVE REWARD",
+                text = tagLabel,
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.primary,
                 fontWeight = FontWeight.Bold,

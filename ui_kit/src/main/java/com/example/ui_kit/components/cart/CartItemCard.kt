@@ -3,15 +3,14 @@ package com.example.ui_kit.components.cart
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
@@ -26,7 +25,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
-import com.example.ui_kit.components.shared.QafilahConfirmationDialog
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
@@ -34,6 +32,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
+import com.example.ui_kit.components.shared.QafilahConfirmationDialog
 import com.example.ui_kit.theme.QafilahTheme
 
 @Composable
@@ -42,9 +41,15 @@ fun CartItemCard(
     imageUrl: String,
     title: String,
     price: String,
-    currencyCode: String = "",
     quantity: Int,
     quantityAvailable: Int?,
+    removeConfirmationTitle: String,
+    removeConfirmationMessage: String,
+    removeConfirmLabel: String,
+    removeCancelLabel: String,
+    increaseQuantityContentDescription: String,
+    decreaseQuantityContentDescription: String,
+    removeItemContentDescription: String,
     onIncreaseQuantity: () -> Unit,
     onDecreaseQuantity: () -> Unit,
     onRemoveItem: () -> Unit
@@ -55,8 +60,8 @@ fun CartItemCard(
     val showConfirmDialog = remember { mutableStateOf(false) }
 
     QafilahConfirmationDialog(
-        message = "Are you sure you want to remove this item from your cart?",
-        title = "Remove Item",
+        message = removeConfirmationMessage,
+        title = removeConfirmationTitle,
         onYes = {
             showConfirmDialog.value = false
             onRemoveItem()
@@ -65,8 +70,8 @@ fun CartItemCard(
             showConfirmDialog.value = false
         },
         isVisible = showConfirmDialog.value,
-        yesButtonText = "Remove",
-        noButtonText = "Cancel"
+        yesButtonText = removeConfirmLabel,
+        noButtonText = removeCancelLabel
     )
 
     Row(
@@ -127,14 +132,8 @@ fun CartItemCard(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            val displayedPrice = if (currencyCode.isNotBlank() && !price.trim().startsWith(currencyCode)) {
-                "${currencyCode.trim()} ${price.trim()}"
-            } else {
-                price
-            }
-
             Text(
-                text = displayedPrice,
+                text = price,
                 style = MaterialTheme.typography.titleMedium,
                 color = colorScheme.primary,
                 maxLines = 1,
@@ -157,7 +156,7 @@ fun CartItemCard(
                 ) {
                     Icon(
                         imageVector = Icons.Outlined.Remove,
-                        contentDescription = "Decrease quantity",
+                        contentDescription = decreaseQuantityContentDescription,
                         tint = colorScheme.onSurfaceVariant
                     )
                 }
@@ -178,7 +177,7 @@ fun CartItemCard(
                 ) {
                     Icon(
                         imageVector = Icons.Outlined.Add,
-                        contentDescription = "Increase quantity",
+                        contentDescription = increaseQuantityContentDescription,
                         tint = colorScheme.onSurfaceVariant
                     )
                 }
@@ -188,7 +187,7 @@ fun CartItemCard(
         IconButton(onClick = { showConfirmDialog.value = true }) {
             Icon(
                 imageVector = Icons.Outlined.Delete,
-                contentDescription = "Remove item",
+                contentDescription = removeItemContentDescription,
                 tint = colorScheme.error
             )
         }
@@ -200,16 +199,7 @@ fun CartItemCard(
 private fun CartItemCardPreview() {
     QafilahTheme(darkTheme = true) {
         Surface(color = MaterialTheme.colorScheme.background) {
-            CartItemCard(
-                imageUrl = "https://example.com/oud-burner.jpg",
-                title = "Oud Burner",
-                price = "$120.00",
-                quantity = 1,
-                quantityAvailable = 5,
-                onIncreaseQuantity = {},
-                onDecreaseQuantity = {},
-                onRemoveItem = {}
-            )
+
         }
     }
 }

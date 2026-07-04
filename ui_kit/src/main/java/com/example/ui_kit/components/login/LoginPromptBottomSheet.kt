@@ -21,40 +21,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 
-/**
- * Bottom sheet shown when a guest taps Cart or Wishlist.
- *
- * Purely presentational — no ViewModel or business logic inside.
- * The parent ViewModel drives [showLoginPrompt] via MVI state and
- * passes navigation callbacks down through the Screen composable.
- *
- * ### Wiring example (inside CartScreen / WishlistScreen)
- * ```kotlin
- * val state by viewModel.state.collectAsStateWithLifecycle()
- *
- * if (state.showLoginPrompt) {
- *     LoginPromptBottomSheet(
- *         featureName        = "your cart",
- *         onDismiss          = { viewModel.onIntent(CartIntent.DismissLoginPrompt) },
- *         onNavigateToLogin  = { viewModel.onIntent(CartIntent.NavigateToLogin) },
- *         onNavigateToSignUp = { viewModel.onIntent(CartIntent.NavigateToSignUp) }
- *     )
- * }
- * ```
- *
- * @param featureName        Used in the subtitle — e.g. "your cart", "your wishlist".
- * @param onDismiss          Fires when the user swipes away or taps the scrim.
- * @param onNavigateToLogin  Fires when the user taps **Login**.
- * @param onNavigateToSignUp Fires when the user taps **Create an account**.
- */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginPromptBottomSheet(
     onDismiss: () -> Unit,
     onNavigateToLogin: () -> Unit,
     onNavigateToSignUp: () -> Unit,
+    title: String,
+    subtitle: String,
+    loginButtonLabel: String,
+    signUpButtonLabel: String,
     modifier: Modifier = Modifier,
-    featureName: String = "this feature",
     sheetState: SheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 ) {
     ModalBottomSheet(
@@ -71,7 +48,7 @@ fun LoginPromptBottomSheet(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = "Sign in to continue",
+                text = title,
                 style = MaterialTheme.typography.headlineSmall,
                 textAlign = TextAlign.Center
             )
@@ -79,7 +56,7 @@ fun LoginPromptBottomSheet(
             Spacer(Modifier.height(8.dp))
 
             Text(
-                text = "You need an account to access $featureName.",
+                text = subtitle,
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center
@@ -91,7 +68,7 @@ fun LoginPromptBottomSheet(
                 onClick = { onDismiss(); onNavigateToLogin() },
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Login")
+                Text(loginButtonLabel)
             }
 
             Spacer(Modifier.height(12.dp))
@@ -100,7 +77,7 @@ fun LoginPromptBottomSheet(
                 onClick = { onDismiss(); onNavigateToSignUp() },
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Create an account")
+                Text(signUpButtonLabel)
             }
 
             Spacer(Modifier.height(8.dp))

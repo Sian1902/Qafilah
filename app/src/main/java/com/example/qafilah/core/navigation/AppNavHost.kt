@@ -10,26 +10,29 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import com.example.qafilah.MainViewModel
+import com.example.qafilah.R
+import com.example.qafilah.features.address.presentation.AddressViewModel
+import com.example.qafilah.features.address.presentation.ShippingAddressesScreen
 import com.example.qafilah.features.auth.domain.model.AppUser
 import com.example.qafilah.features.auth.presentation.screens.LoginScreen
 import com.example.qafilah.features.auth.presentation.screens.SignUpScreen
 import com.example.qafilah.features.cart.presentation.ui.CartScreen
-import com.example.qafilah.features.home.presentation.ui.HomeScreen
 import com.example.qafilah.features.catalog.presentation.CatalogProductsScreen
 import com.example.qafilah.features.catalog.presentation.CatalogScreen
 import com.example.qafilah.features.checkout.presentation.shared.CheckoutScreen
+import com.example.qafilah.features.home.presentation.ui.HomeScreen
 import com.example.qafilah.features.onboarding.OnboardingScreen
 import com.example.qafilah.features.product_detail.presentation.ProductDetailScreen
-import com.example.qafilah.features.address.presentation.AddressViewModel
-import com.example.qafilah.features.address.presentation.ShippingAddressesScreen
-import com.example.qafilah.features.profile.presentation.ProfileScreen
 import com.example.qafilah.features.profile.presentation.editprofile.EditProfileScreen
 import com.example.qafilah.features.profile.presentation.persondetails.PersonalDetailsScreen
+import com.example.qafilah.features.profile.presentation.profile.ProfileScreen
 import com.example.qafilah.features.profile.presentation.profile.ProfileViewModel
 import com.example.qafilah.features.search.SearchScreen
 import com.example.qafilah.features.search.presentation.SearchViewModel
@@ -40,7 +43,9 @@ import org.koin.androidx.compose.koinViewModel
 @Composable
 fun AppNavHost(
     navController: NavHostController,
-    modifier: Modifier = Modifier
+    startDestination: String = Screen.Splash.route,
+    modifier: Modifier = Modifier,
+    mainViewModel: MainViewModel = koinViewModel()
 ) {
     NavHost(
         navController = navController,
@@ -51,7 +56,7 @@ fun AppNavHost(
         composable(Screen.Splash.route) {
             SplashScreen(
                 onSplashFinished = {
-                    navController.navigate(Screen.Onboarding.route) {
+                    navController.navigate(startDestination) {
                         popUpTo(Screen.Splash.route) { inclusive = true }
                     }
                 }
@@ -61,6 +66,7 @@ fun AppNavHost(
         composable(Screen.Onboarding.route) {
             OnboardingScreen(
                 onFinish = {
+                    mainViewModel.setOnboardingCompleted()
                     navController.navigate(Screen.Login.route) {
                         popUpTo(0) { inclusive = true }
                     }
@@ -118,6 +124,7 @@ fun AppNavHost(
 
         composable(Screen.Checkout.route) {
             Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                Text(stringResource(R.string.checkout))
                 CheckoutScreen()
             }
         }
@@ -129,7 +136,7 @@ fun AppNavHost(
             val orderId = backStackEntry.arguments?.getString("orderId")
                 ?: return@composable
             Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text("Order: $orderId")
+                Text(stringResource(R.string.order_confirmation, orderId))
             }
         }
 
@@ -140,7 +147,10 @@ fun AppNavHost(
                 onBrandClick = { },
                 onCategoryClick = { categoryUiModel ->
                     navController.navigate(
-                        Screen.CatalogProducts.createRoute(categoryUiModel.id, categoryUiModel.label)
+                        Screen.CatalogProducts.createRoute(
+                            categoryUiModel.id,
+                            categoryUiModel.label
+                        )
                     )
                 },
                 onViewAllCategoriesClick = {
@@ -338,7 +348,7 @@ fun AppNavHost(
 
         composable(Screen.AddAddress.route) {
             Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text("Add Address (Work in Progress)")
+                Text(stringResource(R.string.add_address_wip))
             }
         }
 
@@ -350,7 +360,7 @@ fun AppNavHost(
         ) { backStackEntry ->
             val addressId = backStackEntry.arguments?.getString("addressId") ?: return@composable
             Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text("Edit Address: $addressId (Work in Progress)")
+                Text(stringResource(R.string.edit_address_wip, addressId))
             }
         }
 

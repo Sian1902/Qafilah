@@ -18,6 +18,7 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun SplashLogo(
     logo: Painter,
+    contentDescription: String,
     modifier: Modifier = Modifier
 ) {
     val glowColor = MaterialTheme.colorScheme.primary
@@ -50,7 +51,7 @@ fun SplashLogo(
     ) {
         Image(
             painter = logo,
-            contentDescription = "App Logo",
+            contentDescription = contentDescription,
             modifier = Modifier.size(80.dp)
         )
     }

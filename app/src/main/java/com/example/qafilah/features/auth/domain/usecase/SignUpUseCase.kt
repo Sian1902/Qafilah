@@ -8,10 +8,11 @@ class SignUpUseCase(private val repository: AuthRepository) {
     suspend operator fun invoke(
         fullName: String,
         email: String,
-        password: String
+        password: String,
+        fieldsEmptyError: String
     ): Result<AppUser> {
         if (email.isBlank() || password.isBlank() || fullName.isBlank()) {
-            return Result.failure(IllegalArgumentException("Fields cannot be empty"))
+            return Result.failure(IllegalArgumentException(fieldsEmptyError))
         }
 
         return try {

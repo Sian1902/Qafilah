@@ -23,6 +23,10 @@ import androidx.compose.ui.unit.dp
 fun AddDiscountDialog(
     inputValue: String,
     onInputValueChange: (String) -> Unit,
+    title: String,
+    label: String,
+    applyButtonLabel: String,
+    cancelButtonLabel: String,
     isApplying: Boolean,
     errorMessage: String?,
     onApply: () -> Unit,
@@ -39,7 +43,7 @@ fun AddDiscountDialog(
         textContentColor = colorScheme.onBackground,
         title = {
             Text(
-                text = "Add Promo Code",
+                text = title,
                 style = MaterialTheme.typography.headlineMedium
             )
         },
@@ -50,7 +54,7 @@ fun AddDiscountDialog(
                     onValueChange = onInputValueChange,
                     label = {
                         Text(
-                            text = "Code",
+                            text = label,
                             style = MaterialTheme.typography.bodyMedium
                         )
                     },
@@ -91,7 +95,7 @@ fun AddDiscountDialog(
                     )
                 } else {
                     Text(
-                        text = "Apply",
+                        text = applyButtonLabel,
                         color = colorScheme.onPrimary,
                         fontWeight = FontWeight.SemiBold
                     )
@@ -104,7 +108,7 @@ fun AddDiscountDialog(
                 enabled = !isApplying
             ) {
                 Text(
-                    text = "Cancel",
+                    text = cancelButtonLabel,
                     color = colorScheme.onBackground
                 )
             }

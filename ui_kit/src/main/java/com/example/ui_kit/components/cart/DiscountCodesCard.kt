@@ -35,10 +35,17 @@ import com.example.ui_kit.components.shared.QafilahConfirmationDialog
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun DiscountCodesCard(
-    modifier: Modifier = Modifier,
     appliedCodes: List<String>,
+    title: String,
+    addCodeLabel: String,
+    removeDialogTitle: String,
+    removeDialogMessageTemplate: String,
+    removeDialogConfirmLabel: String,
+    removeDialogCancelLabel: String,
+    removeIconContentDescriptionTemplate: String,
     onAddClick: () -> Unit,
-    onRemoveDiscount: (String) -> Unit
+    onRemoveDiscount: (String) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     val colorScheme = MaterialTheme.colorScheme
     val cardShape = RoundedCornerShape(28.dp)
@@ -47,10 +54,10 @@ fun DiscountCodesCard(
 
     QafilahConfirmationDialog(
         isVisible = codeToRemove != null,
-        title = "Remove Promo Code",
-        message = "Are you sure you want to remove the code '${codeToRemove}'? Your cart totals will be recalculated.",
-        yesButtonText = "Remove",
-        noButtonText = "Cancel",
+        title = removeDialogTitle,
+        message = String.format(removeDialogMessageTemplate, codeToRemove ?: ""),
+        yesButtonText = removeDialogConfirmLabel,
+        noButtonText = removeDialogCancelLabel,
         onYes = {
             codeToRemove?.let { onRemoveDiscount(it) }
             codeToRemove = null
@@ -74,14 +81,14 @@ fun DiscountCodesCard(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "Promo Codes",
+                text = title,
                 style = MaterialTheme.typography.titleMedium,
                 color = colorScheme.onSurface
             )
 
             TextButton(onClick = onAddClick) {
                 Text(
-                    text = "+ Add Code",
+                    text = addCodeLabel,
                     color = colorScheme.primary,
                     fontWeight = FontWeight.SemiBold
                 )
@@ -117,7 +124,7 @@ fun DiscountCodesCard(
 
                         Icon(
                             imageVector = Icons.Default.Close,
-                            contentDescription = "Remove $code",
+                            contentDescription = String.format(removeIconContentDescriptionTemplate, code),
                             tint = colorScheme.onSurfaceVariant,
                             modifier = Modifier.size(16.dp)
                         )

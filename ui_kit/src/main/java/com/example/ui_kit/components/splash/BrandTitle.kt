@@ -15,9 +15,9 @@ import androidx.compose.ui.unit.sp
 
 @Composable
 fun BrandTitle(
-    modifier: Modifier = Modifier,
-    appName: String = "QAFILAH",
-    arabicName: String = "قافلة"
+    appName: String,
+    arabicName: String,
+    modifier: Modifier = Modifier
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,

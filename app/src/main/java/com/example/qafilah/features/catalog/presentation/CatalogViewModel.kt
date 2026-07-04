@@ -42,6 +42,7 @@ class CatalogViewModel(
                 val result = getCollectionsUseCase(limit = 20, after = null)
                 _collections.value = result
             } catch (e: Exception) {
+                android.util.Log.e("CatalogViewModel", "Error loading categories: ${e.message}", e)
             }
         }
     }
@@ -57,6 +58,7 @@ class CatalogViewModel(
 
                 result.products.forEach { product -> observeWishlistState(product.id) }
             } catch (e: Exception) {
+                android.util.Log.e("CatalogViewModel", "Error loading products for category $categoryId: ${e.message}", e)
             } finally {
                 _isLoading.value = false
             }

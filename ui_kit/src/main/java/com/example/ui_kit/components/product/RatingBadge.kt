@@ -18,6 +18,8 @@ import androidx.compose.ui.unit.sp
 fun RatingBadge(
     rating: Double?,
     reviewCount: Int?,
+    starContentDescription: String,
+    ratingLabel: String,
     modifier: Modifier = Modifier
 ) {
     if (rating == null || reviewCount == null) return
@@ -29,12 +31,12 @@ fun RatingBadge(
     ) {
         Icon(
             imageVector = Icons.Default.Star,
-            contentDescription = "Rating Star",
+            contentDescription = starContentDescription,
             tint = MaterialTheme.colorScheme.primary,
             modifier = Modifier.size(18.dp)
         )
         Text(
-            text = "$rating ($reviewCount Reviews)",
+            text = ratingLabel,
             style = MaterialTheme.typography.bodyMedium.copy(
                 fontSize = 14.sp,
                 color = MaterialTheme.colorScheme.primary

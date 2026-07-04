@@ -1,8 +1,8 @@
 package com.example.qafilah.features.cart.presentation.viewmodel
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.qafilah.core.currency.ConvertPriceUseCase
 import com.example.qafilah.features.auth.domain.util.RequireAuth
 import com.example.qafilah.features.cart.domain.model.CartItemCommand
 import com.example.qafilah.features.cart.domain.model.StoreCart
@@ -13,7 +13,9 @@ import com.example.qafilah.features.cart.domain.usecase.ObserveCartStateUseCase
 import com.example.qafilah.features.cart.domain.usecase.RemoveDiscountUseCase
 import com.example.qafilah.features.cart.presentation.contract.CartEvent
 import com.example.qafilah.features.cart.presentation.contract.CartIntent
+import com.example.qafilah.features.cart.presentation.contract.CartLineUiModel
 import com.example.qafilah.features.cart.presentation.contract.CartUIState
+import com.example.qafilah.features.cart.presentation.contract.CartUiModel
 import com.example.qafilah.features.catalog.domain.usecases.ClearPendingAdCouponUseCase
 import com.example.qafilah.features.catalog.domain.usecases.GetPendingAdCouponUseCase
 import kotlinx.coroutines.Job
@@ -28,12 +30,6 @@ import kotlinx.coroutines.launch
 import kotlin.coroutines.cancellation.CancellationException
 import kotlin.time.Duration.Companion.milliseconds
 
-
-private data class SyncPayload(
-    val command: CartItemCommand,
-    val fallbackCart: StoreCart
-)
-
 class CartViewModel(
     private val requireAuth: RequireAuth,
     private val observeCartStateUseCase: ObserveCartStateUseCase,
@@ -43,6 +39,7 @@ class CartViewModel(
     private val removeDiscountUseCase: RemoveDiscountUseCase,
     private val getPendingAdCouponUseCase: GetPendingAdCouponUseCase,
     private val clearPendingAdCouponUseCase: ClearPendingAdCouponUseCase,
+    private val convertPriceUseCase: ConvertPriceUseCase
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(CartUIState())
@@ -53,18 +50,47 @@ class CartViewModel(
 
     private val syncJobs = mutableMapOf<String, Job>()
     private val fallbackStates = mutableMapOf<String, StoreCart>()
+    private var rawCart: StoreCart? = null
 
     init {
         viewModelScope.launch {
             observeCartStateUseCase().collect { storeCart ->
-                _state.update { it.copy(cart = storeCart) }
+                rawCart = storeCart
+                if (storeCart != null) {
+                    val uiModel = storeCart.toUiModel()
+                    _state.update { it.copy(cart = uiModel) }
+                } else {
+                    _state.update { it.copy(cart = null) }
+                }
             }
         }
     }
 
+    private suspend fun StoreCart.toUiModel(): CartUiModel {
+        return CartUiModel(
+            totalQuantity = totalQuantity,
+            displaySubtotal = convertPriceUseCase(cost.subtotalAmount.amount.toDouble()),
+            displayTotal = convertPriceUseCase(cost.totalAmount.amount.toDouble()),
+            checkoutUrl = checkoutUrl,
+            lines = lines.map { line ->
+                CartLineUiModel(
+                    id = line.id,
+                    title = line.merchandise.product.title,
+                    vendor = line.merchandise.product.vendor,
+                    quantity = line.quantity,
+                    displayPrice = convertPriceUseCase(line.cost.amountPerQuantity.amount.toDouble()),
+                    displayTotal = convertPriceUseCase(line.cost.totalAmount.amount.toDouble()),
+                    imageUrl = line.merchandise.image?.url,
+                    variantTitle = line.merchandise.title
+                )
+            },
+            discountCodes = appliedDiscounts.map { it.code }
+        )
+    }
+
     fun onIntent(intent: CartIntent) {
         when (intent) {
-            is CartIntent.EnterScreen -> checkAuthAndLoad()
+            is CartIntent.EnterScreen -> checkAuthAndLoad(intent.fallbackErrorMessage)
             is CartIntent.NavigateToLogin -> {
                 _state.update { it.copy(showLoginPrompt = false) }
                 _events.trySend(CartEvent.NavigateToLogin)
@@ -90,14 +116,14 @@ class CartViewModel(
         }
     }
 
-    private fun checkAuthAndLoad() {
+    private fun checkAuthAndLoad(fallbackErrorMessage: String) {
         requireAuth.invoke(
-            onAuthenticated = { loadCart() },
+            onAuthenticated = { loadCart(fallbackErrorMessage) },
             onGuest = { _state.update { it.copy(showLoginPrompt = true) } }
         )
     }
 
-    private fun loadCart() {
+    private fun loadCart(fallbackErrorMessage: String) {
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true, errorMessage = null) }
 
@@ -107,7 +133,7 @@ class CartViewModel(
             } catch (e: Exception) {
                 _state.update {
                     it.copy(
-                        errorMessage = e.message ?: "Failed to load cart"
+                        errorMessage = e.message ?: fallbackErrorMessage
                     )
                 }
             } finally {
@@ -117,7 +143,7 @@ class CartViewModel(
     }
 
     private fun handleIncreaseQuantity(lineId: String) {
-        val currentCart = _state.value.cart ?: return
+        val currentCart = rawCart ?: return
         val currentQuantity = currentLineQuantity(lineId) ?: return
         val newQuantity = currentQuantity + 1
 
@@ -125,7 +151,7 @@ class CartViewModel(
     }
 
     private fun handleDecreaseQuantity(lineId: String) {
-        val currentCart = _state.value.cart ?: return
+        val currentCart = rawCart ?: return
         val currentQuantity = currentLineQuantity(lineId) ?: return
 
         if (currentQuantity <= 1) {
@@ -138,7 +164,7 @@ class CartViewModel(
     }
 
     private fun handleRemoveItem(lineId: String) {
-        val currentCart = _state.value.cart ?: return
+        val currentCart = rawCart ?: return
 
         if (!fallbackStates.containsKey(lineId)) {
             fallbackStates[lineId] = currentCart
@@ -200,7 +226,7 @@ class CartViewModel(
     }
 
     private fun currentLineQuantity(lineId: String): Int? {
-        return _state.value.cart?.lines?.firstOrNull { it.id == lineId }?.quantity
+        return rawCart?.lines?.firstOrNull { it.id == lineId }?.quantity
     }
 
     private fun handleApplyDiscount() {

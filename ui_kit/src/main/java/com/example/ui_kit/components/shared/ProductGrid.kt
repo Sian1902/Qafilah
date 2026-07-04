@@ -37,11 +37,13 @@ fun ProductGrid(
     products: List<ProductUiModel>,
     onProductClick: (ProductUiModel) -> Unit,
     onFavoriteClick: (ProductUiModel) -> Unit,
+    emptyMessage: String,
+    retryButtonLabel: String,
+    toggleWishlistContentDescription: String,
     modifier: Modifier = Modifier,
     isLoading: Boolean = false,
     isLoadingMore: Boolean = false,
     error: String? = null,
-    emptyMessage: String = "No products found.",
     onRetry: (() -> Unit)? = null,
     onLoadMore: (() -> Unit)? = null,
     loadMoreThreshold: Int = 4,
@@ -82,7 +84,7 @@ fun ProductGrid(
                     )
                     if (onRetry != null) {
                         Spacer(Modifier.height(16.dp))
-                        Button(onClick = onRetry) { Text("Retry") }
+                        Button(onClick = onRetry) { Text(retryButtonLabel) }
                     }
                 }
             }
@@ -124,6 +126,7 @@ fun ProductGrid(
                         product = product,
                         onClick = onProductClick,
                         onFavoriteClick = onFavoriteClick,
+                        toggleWishlistContentDescription = toggleWishlistContentDescription,
                         modifier = Modifier.weight(1f)
                     )
                 }

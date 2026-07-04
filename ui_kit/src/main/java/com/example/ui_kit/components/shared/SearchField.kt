@@ -23,9 +23,10 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun SearchField(
+    placeholderText: String,
+    searchIconContentDescription: String?,
     value: String = "",
     onValueChange: (String) -> Unit = {},
-    placeholder: String = "Search Qafilah...",
     onClick: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
@@ -41,7 +42,7 @@ fun SearchField(
     ) {
         Icon(
             imageVector = Icons.Filled.Search,
-            contentDescription = null,
+            contentDescription = searchIconContentDescription,
             tint = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f)
         )
 
@@ -49,7 +50,7 @@ fun SearchField(
 
         if (onClick != null) {
             Text(
-                text = placeholder,
+                text = placeholderText,
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f)
             )
@@ -64,7 +65,7 @@ fun SearchField(
                 decorationBox = { innerField ->
                     if (value.isEmpty()) {
                         Text(
-                            text = placeholder,
+                            text = placeholderText,
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f)
                         )

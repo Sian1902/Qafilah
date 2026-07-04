@@ -16,6 +16,9 @@ if (localPropertiesFile.exists()) {
 }
 
 val shopifyApiKey = localProperties.getProperty("SHOPIFY_API_KEY") ?: ""
+
+val exchangeRateApiKey = localProperties.getProperty("EXCHANGE_RATE_API_KEY") ?: ""
+
 val adminApiKey = localProperties.getProperty("ADMIN_API_KEY") ?: ""
 val storefrontEndpoint = localProperties.getProperty("STOREFRONT_ENDPOINT") ?: ""
 val adminEndpoint = localProperties.getProperty("ADMIN_ENDPOINT") ?: ""
@@ -36,6 +39,7 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         buildConfigField("String", "SHOPIFY_API_KEY", "\"$shopifyApiKey\"")
+        buildConfigField("String", "EXCHANGE_RATE_API_KEY", "\"$exchangeRateApiKey\"")
         buildConfigField("String", "ADMIN_API_KEY", "\"$adminApiKey\"")
         buildConfigField("String", "STOREFRONT_ENDPOINT", "\"$storefrontEndpoint\"")
         buildConfigField("String", "ADMIN_ENDPOINT", "\"$adminEndpoint\"")
@@ -124,6 +128,10 @@ dependencies {
     implementation("androidx.credentials:credentials:1.2.2")
     implementation("androidx.credentials:credentials-play-services-auth:1.2.2")
     implementation("com.google.android.libraries.identity.googleid:googleid:1.1.1")
+
+    // Retrofit
+    implementation(libs.retrofit)
+    implementation(libs.retrofit.gson)
 
 }
 

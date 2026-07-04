@@ -10,7 +10,9 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.example.qafilah.R
 import com.example.qafilah.features.home.presentation.viewmodel.PromoUiModel
 import com.example.ui_kit.components.shared.PromoBannerCard
 import kotlinx.coroutines.delay
@@ -58,6 +60,8 @@ fun PromosPager(
         PromoBannerCard(
             imageUrl = promo.imageUrl,
             title = promo.title,
+            tagLabel = stringResource(R.string.promo_tag_label),
+            imageContentDescription = promo.title,
             ctaText = promo.ctaText,
             onCtaClick = { onClaimPromo(promo.code) }
         )

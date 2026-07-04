@@ -24,7 +24,7 @@ import androidx.compose.ui.unit.sp
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun SelectablePillGroup(
-    title: String,
+    selectionLabel: String,
     options: List<String>,
     selectedOption: String?,
     onOptionSelected: (String) -> Unit,
@@ -35,7 +35,7 @@ fun SelectablePillGroup(
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         Text(
-            text = "Select $title",
+            text = selectionLabel,
             style = MaterialTheme.typography.labelSmall.copy(
                 fontSize = 14.sp,
                 color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.8f)

@@ -6,9 +6,15 @@ import com.example.qafilah.features.auth.domain.repository.AuthRepository
 
 class SignInUseCase(private val repository: AuthRepository) {
 
-    suspend operator fun invoke(email: String, password: String): Result<AppUser> {
+    suspend operator fun invoke(
+        email: String,
+        password: String,
+        credentialsEmptyError: String,
+        defaultFirstName: String,
+        defaultLastName: String
+    ): Result<AppUser> {
         if (email.isBlank() || password.isBlank()) {
-            return Result.failure(IllegalArgumentException("Credentials cannot be empty"))
+            return Result.failure(IllegalArgumentException(credentialsEmptyError))
         }
 
         return try {
@@ -20,8 +26,8 @@ class SignInUseCase(private val repository: AuthRepository) {
                 repository.registerStorefront(
                     email = email,
                     password = password,
-                    firstName = user.firstName ?: "Valued",
-                    lastName = user.lastName ?: "Customer"
+                    firstName = user.firstName ?: defaultFirstName,
+                    lastName = user.lastName ?: defaultLastName
                 ).getOrThrow()
 
                 storefrontTokenResult = repository.authenticateStorefront(email, password)

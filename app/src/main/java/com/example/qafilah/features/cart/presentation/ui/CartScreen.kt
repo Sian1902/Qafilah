@@ -1,11 +1,12 @@
 package com.example.qafilah.features.cart.presentation.ui
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -16,29 +17,35 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.example.qafilah.features.cart.domain.model.StoreCart
+import com.example.qafilah.R
 import com.example.qafilah.features.cart.presentation.contract.CartEvent
 import com.example.qafilah.features.cart.presentation.contract.CartIntent
+import com.example.qafilah.features.cart.presentation.contract.CartUiModel
 import com.example.qafilah.features.cart.presentation.viewmodel.CartViewModel
 import com.example.ui_kit.components.cart.CartEmptyView
 import com.example.ui_kit.components.cart.CartItemCard
 import com.example.ui_kit.components.cart.CartSummaryCard
 import com.example.ui_kit.components.cart.DiscountCodesCard
+import com.example.ui_kit.components.login.LoginPromptBottomSheet
 import org.koin.androidx.compose.koinViewModel
-import java.math.RoundingMode
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CartScreen(
     onNavigateToLogin: () -> Unit,
@@ -49,10 +56,13 @@ fun CartScreen(
     viewModel: CartViewModel = koinViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-    var showDiscountDialog by rememberSaveable { mutableStateOf(false) }
+    val context = LocalContext.current
+    val errorFailedToLoadCart = stringResource(R.string.error_failed_to_load_cart)
+
+    var showDiscountDialog by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
-        viewModel.onIntent(CartIntent.EnterScreen)
+        viewModel.onIntent(CartIntent.EnterScreen(fallbackErrorMessage = errorFailedToLoadCart))
         viewModel.events.collect { event ->
             when (event) {
                 CartEvent.NavigateToLogin -> onNavigateToLogin()
@@ -62,33 +72,48 @@ fun CartScreen(
         }
     }
 
-    Box(
-        modifier = modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background),
-        contentAlignment = Alignment.Center
-    ) {
-        state.cart?.let { cart ->
-            CartContent(
-                storeCart = cart,
-                onIncreaseQuantity = { viewModel.onIntent(CartIntent.IncreaseQuantity(it)) },
-                onDecreaseQuantity = { viewModel.onIntent(CartIntent.DecreaseQuantity(it)) },
-                onRemoveItem = { viewModel.onIntent(CartIntent.RemoveItem(it)) },
-                onAddDiscountClick = {
-                    viewModel.onIntent(CartIntent.DismissError)
-                    showDiscountDialog = true
-                },
-                onRemoveDiscount = { viewModel.onIntent(CartIntent.RemoveDiscountCode(it)) },
-                onCheckout = onNavigateToCheckout
-            )
+    LaunchedEffect(state.errorMessage) {
+        state.errorMessage?.let {
+            Toast.makeText(context, it, Toast.LENGTH_LONG).show()
+            viewModel.onIntent(CartIntent.DismissError)
         }
+    }
 
-        if (state.isLoading && state.cart == null) {
-            CircularProgressIndicator(
-                color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(64.dp),
-                strokeWidth = 6.dp
-            )
+    Scaffold(
+        containerColor = MaterialTheme.colorScheme.background
+    ) { innerPadding ->
+        Box(
+            modifier = modifier
+                .fillMaxSize()
+                .padding(innerPadding),
+            contentAlignment = Alignment.Center
+        ) {
+            state.cart?.let { cart ->
+                CartContent(
+                    modifier = Modifier.fillMaxSize(),
+                    cart = cart,
+                    onIncreaseQuantity = { lineId ->
+                        viewModel.onIntent(CartIntent.IncreaseQuantity(lineId))
+                    },
+                    onDecreaseQuantity = { lineId ->
+                        viewModel.onIntent(CartIntent.DecreaseQuantity(lineId))
+                    },
+                    onRemoveItem = { lineId ->
+                        viewModel.onIntent(CartIntent.RemoveItem(lineId))
+                    },
+                    onAddDiscountClick = { showDiscountDialog = true },
+                    onRemoveDiscount = { code -> viewModel.onIntent(CartIntent.RemoveDiscountCode(code)) },
+                    onCheckout = onNavigateToCheckout
+                )
+            }
+
+            if (state.isLoading && state.cart == null) {
+                CircularProgressIndicator(
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(64.dp),
+                    strokeWidth = 6.dp
+                )
+            }
         }
     }
 
@@ -100,11 +125,10 @@ fun CartScreen(
     )
 }
 
-
 @Composable
 private fun CartContent(
     modifier: Modifier = Modifier,
-    storeCart: StoreCart,
+    cart: CartUiModel,
     onIncreaseQuantity: (String) -> Unit,
     onDecreaseQuantity: (String) -> Unit,
     onRemoveItem: (String) -> Unit,
@@ -112,68 +136,71 @@ private fun CartContent(
     onRemoveDiscount: (String) -> Unit,
     onCheckout: () -> Unit
 ) {
-    if (storeCart.lines.isEmpty()) {
-        CartEmptyView(modifier = modifier.fillMaxSize().padding(16.dp))
-        return
-    }
-
-    Box(modifier = modifier.fillMaxSize()) {
-
-        LazyColumn(
-            modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(
-                start = 16.dp,
-                end = 16.dp,
-                top = 16.dp,
-                bottom = 100.dp
-            ),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+    if (cart.lines.isEmpty()) {
+        CartEmptyView(
+            modifier = modifier.padding(16.dp),
+            emptyCartMessage = stringResource(R.string.empty_cart_message),
+            emptyCartContentDescription = stringResource(R.string.empty_cart_content_description),
+            exploreMessage = stringResource(R.string.explore_message)
+        )
+    } else {
+        Column(
+            modifier = modifier.padding(16.dp)
         ) {
+            LazyColumn(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                items(cart.lines, key = { it.id }) { line ->
+                    CartItemCard(
+                        imageUrl = line.imageUrl.orEmpty(),
+                        title = line.title,
+                        price = line.displayTotal,
+                        quantity = line.quantity,
+                        quantityAvailable = 100,
+                        removeConfirmationTitle = stringResource(R.string.cart_remove_item_title),
+                        removeConfirmationMessage = stringResource(R.string.cart_remove_item_message),
+                        removeConfirmLabel = stringResource(R.string.cart_remove_confirm),
+                        removeCancelLabel = stringResource(R.string.cart_remove_cancel),
+                        increaseQuantityContentDescription = stringResource(R.string.cart_increase_quantity_cd),
+                        decreaseQuantityContentDescription = stringResource(R.string.cart_decrease_quantity_cd),
+                        removeItemContentDescription = stringResource(R.string.cart_remove_item_cd),
+                        onIncreaseQuantity = { onIncreaseQuantity(line.id) },
+                        onDecreaseQuantity = { onDecreaseQuantity(line.id) },
+                        onRemoveItem = { onRemoveItem(line.id) }
+                    )
+                }
 
-            items(storeCart.lines, key = { it.id }) { line ->
-                CartItemCard(
-                    imageUrl = line.merchandise.image?.url.orEmpty(),
-                    title = line.merchandise.product.title,
-                    price = line.cost.totalAmount.amount.setScale(2, RoundingMode.HALF_UP).toPlainString(),
-                    currencyCode = line.cost.totalAmount.currencyCode,
-                    quantity = line.quantity,
-                    quantityAvailable = line.merchandise.quantityAvailable,
-                    onIncreaseQuantity = { onIncreaseQuantity(line.id) },
-                    onDecreaseQuantity = { onDecreaseQuantity(line.id) },
-                    onRemoveItem = { onRemoveItem(line.id) }
-                )
+                item {
+                    DiscountCodesCard(
+                        appliedCodes = cart.discountCodes,
+                        title = stringResource(R.string.cart_promo_codes_title),
+                        addCodeLabel = stringResource(R.string.cart_add_code_label),
+                        removeDialogTitle = stringResource(R.string.cart_remove_promo_title),
+                        removeDialogMessageTemplate = stringResource(R.string.cart_remove_promo_message),
+                        removeDialogConfirmLabel = stringResource(R.string.dialog_confirm_remove),
+                        removeDialogCancelLabel = stringResource(R.string.dialog_dismiss_cancel),
+                        removeIconContentDescriptionTemplate = stringResource(R.string.cart_remove_code_cd),
+                        onAddClick = onAddDiscountClick,
+                        onRemoveDiscount = onRemoveDiscount
+                    )
+                }
+
+                item {
+                    CartSummaryCard(
+                        subTotalAmount = cart.displaySubtotal,
+                        totalAmount = cart.displayTotal,
+                        totalTaxAmount = null,
+                        checkoutChargeAmount = cart.displayTotal,
+                        subtotalLabel = stringResource(R.string.cart_subtotal),
+                        taxLabel = stringResource(R.string.cart_tax),
+                        checkoutChargeLabel = stringResource(R.string.cart_checkout_charge),
+                        totalLabel = stringResource(R.string.cart_total)
+                    )
+                }
             }
 
-            item {
-                DiscountCodesCard(
-                    appliedCodes = storeCart.appliedDiscounts.map { it.code },
-                    onAddClick = onAddDiscountClick,
-                    onRemoveDiscount = onRemoveDiscount
-                )
-            }
-
-            item {
-                CartSummaryCard(
-                    subTotalAmount = storeCart.cost.subtotalAmount.amount.setScale(2, RoundingMode.HALF_UP).toPlainString(),
-                    totalAmount = storeCart.cost.totalAmount.amount.setScale(2, RoundingMode.HALF_UP).toPlainString(),
-                    totalTaxAmount = storeCart.cost.totalTaxAmount?.amount?.setScale(2, RoundingMode.HALF_UP)?.toPlainString(),
-                    checkoutChargeAmount = storeCart.cost.checkoutChargeAmount.amount.setScale(2, RoundingMode.HALF_UP).toPlainString(),
-                    currencyCode = storeCart.cost.totalAmount.currencyCode
-                )
-            }
-        }
-
-        val colorScheme = MaterialTheme.colorScheme
-
-
-        Box(
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .fillMaxWidth()
-                .background(colorScheme.background.copy(alpha = 0.95f))
-                .padding(16.dp)
-        ) {
-            val formattedTotal = "${storeCart.cost.totalAmount.currencyCode} ${storeCart.cost.totalAmount.amount.setScale(2, RoundingMode.HALF_UP).toPlainString()}"
+            Spacer(modifier = Modifier.height(16.dp))
 
             Button(
                 onClick = onCheckout,
@@ -182,20 +209,10 @@ private fun CartContent(
                     .height(56.dp),
                 shape = RoundedCornerShape(28.dp)
             ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = "Checkout",
-                        style = MaterialTheme.typography.titleMedium
-                    )
-                    Text(
-                        text = formattedTotal,
-                        style = MaterialTheme.typography.titleMedium
-                    )
-                }
+                Text(
+                    text = stringResource(R.string.proceed_to_checkout),
+                    style = MaterialTheme.typography.titleMedium
+                )
             }
         }
     }

@@ -22,11 +22,14 @@ fun NameInputField(
     value: String,
     onValueChange: (String) -> Unit,
     isError: Boolean,
+    nameLabel: String,
+    namePlaceholder: String,
+    nameErrorMessage: String,
     modifier: Modifier = Modifier
 ) {
     Column(modifier = modifier.fillMaxWidth()) {
         Text(
-            text = "Full Name",
+            text = nameLabel,
             style = MaterialTheme.typography.labelSmall,
             color = if (isError) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
         )
@@ -35,7 +38,7 @@ fun NameInputField(
             value = value,
             onValueChange = onValueChange,
             isError = isError,
-            placeholder = { Text("Layla Al-Farsi", color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)) },
+            placeholder = { Text(namePlaceholder, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)) },
             leadingIcon = { Icon(Icons.Default.Person, contentDescription = null, tint = MaterialTheme.colorScheme.primary) },
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(12.dp),
@@ -51,7 +54,7 @@ fun NameInputField(
             singleLine = true,
             supportingText = {
                 if (isError) {
-                    Text("Please enter your full name", color = MaterialTheme.colorScheme.error)
+                    Text(nameErrorMessage, color = MaterialTheme.colorScheme.error)
                 }
             }
         )

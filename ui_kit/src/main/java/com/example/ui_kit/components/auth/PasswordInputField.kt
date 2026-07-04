@@ -21,6 +21,12 @@ fun PasswordInputField(
     onValueChange: (String) -> Unit,
     isError: Boolean,
     onForgotPasswordClick: () -> Unit,
+    passwordLabel: String,
+    passwordPlaceholder: String,
+    passwordErrorMessage: String,
+    togglePasswordVisibilityContentDescription: String,
+    forgotPasswordLabel: String? = null,
+    showForgotPassword: Boolean = true,
     modifier: Modifier = Modifier,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
     keyboardActions: KeyboardActions = KeyboardActions.Default
@@ -31,9 +37,9 @@ fun PasswordInputField(
         value = value,
         onValueChange = onValueChange,
         isError = isError,
-        label = "PASSWORD",
-        placeholder = "••••••••",
-        errorMessage = "Password cannot be empty",
+        label = passwordLabel,
+        placeholder = passwordPlaceholder,
+        errorMessage = passwordErrorMessage,
         modifier = modifier,
         keyboardOptions = keyboardOptions,
         keyboardActions = keyboardActions,
@@ -49,18 +55,20 @@ fun PasswordInputField(
             IconButton(onClick = { passwordVisible = !passwordVisible }) {
                 Icon(
                     imageVector = if (passwordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
-                    contentDescription = "Toggle Password",
+                    contentDescription = togglePasswordVisibilityContentDescription,
                     tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                 )
             }
         },
         topRightContent = {
-            TextButton(onClick = onForgotPasswordClick, contentPadding = PaddingValues(0.dp)) {
-                Text(
-                    text = "Forgot Password?",
-                    color = MaterialTheme.colorScheme.primary,
-                    style = MaterialTheme.typography.labelSmall
-                )
+            if (showForgotPassword && forgotPasswordLabel != null) {
+                TextButton(onClick = onForgotPasswordClick, contentPadding = PaddingValues(0.dp)) {
+                    Text(
+                        text = forgotPasswordLabel,
+                        color = MaterialTheme.colorScheme.primary,
+                        style = MaterialTheme.typography.labelSmall
+                    )
+                }
             }
         }
     )

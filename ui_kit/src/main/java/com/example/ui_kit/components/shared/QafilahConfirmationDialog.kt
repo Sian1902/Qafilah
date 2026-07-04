@@ -15,12 +15,12 @@ import androidx.compose.ui.text.font.FontWeight
 fun QafilahConfirmationDialog(
     modifier: Modifier = Modifier,
     message: String,
-    title: String = "Confirm",
+    title: String,
     onYes: () -> Unit,
     onNo: () -> Unit = {},
     isVisible: Boolean = true,
-    yesButtonText: String = "Yes",
-    noButtonText: String = "No"
+    yesButtonText: String,
+    noButtonText: String
 ) {
     if (!isVisible) return
 

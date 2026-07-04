@@ -1,7 +1,7 @@
 package com.example.qafilah.features.cart.presentation.contract
 
 sealed interface CartIntent {
-    object EnterScreen : CartIntent
+    data class EnterScreen(val fallbackErrorMessage: String) : CartIntent
     object NavigateToLogin : CartIntent
     object NavigateToSignUp : CartIntent
     object DismissLoginPrompt : CartIntent

@@ -22,8 +22,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.example.qafilah.R
 import com.example.qafilah.features.address.domain.model.ShippingAddress
 import com.example.qafilah.features.address.domain.model.ShippingAddressesUiState
 import com.example.qafilah.features.address.domain.model.toUiModel
@@ -49,11 +51,9 @@ fun ShippingAddressesScreen(
     var showBottomSheet by remember { mutableStateOf(false) }
     var editingAddress by remember { mutableStateOf<ShippingAddress?>(null) }
     var addressToDeleteId by remember { mutableStateOf<String?>(null) }
-    // Track whether we're waiting for an operation to complete to close the sheet
     var waitingForSheetClose by remember { mutableStateOf(false) }
     val snackbarHostState = remember { SnackbarHostState() }
 
-    // Close the bottom sheet when an operation succeeds
     LaunchedEffect(uiState.operationSuccess) {
         if (uiState.operationSuccess == true && waitingForSheetClose) {
             scope.launch { sheetState.hide() }.invokeOnCompletion {
@@ -65,12 +65,10 @@ fun ShippingAddressesScreen(
             waitingForSheetClose = false
             onConsumeOperationResult()
         } else if (uiState.operationSuccess == true) {
-            // Operation succeeded but no sheet to close (e.g. set default from card)
             onConsumeOperationResult()
         }
     }
 
-    // Show snackbar for errors
     LaunchedEffect(uiState.error) {
         val errorMsg = uiState.error
         if (errorMsg != null) {
@@ -90,7 +88,7 @@ fun ShippingAddressesScreen(
             CenterAlignedTopAppBar(
                 title = {
                     Text(
-                        text = "Shipping Addresses",
+                        text = stringResource(R.string.address_shipping_addresses_title),
                         style = MaterialTheme.typography.headlineMedium,
                         color = MaterialTheme.colorScheme.primary
                     )
@@ -99,7 +97,7 @@ fun ShippingAddressesScreen(
                     IconButton(onClick = onBackClick) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back",
+                            contentDescription = stringResource(R.string.back),
                             tint = MaterialTheme.colorScheme.primary
                         )
                     }
@@ -117,7 +115,6 @@ fun ShippingAddressesScreen(
                 .padding(paddingValues)
         ) {
             if (uiState.isLoading && uiState.addresses.isEmpty()) {
-                // Initial loading state
                 Box(
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
@@ -134,6 +131,9 @@ fun ShippingAddressesScreen(
                     items(uiState.addresses, key = { it.id }) { address ->
                         GlassAddressCard(
                             address = address.toUiModel(),
+                            defaultLabel = stringResource(R.string.address_default_label),
+                            editContentDescription = stringResource(R.string.edit_cd),
+                            deleteContentDescription = stringResource(R.string.address_delete_cd),
                             onClick = {
                                 if (!address.isDefault && !uiState.isOperationInProgress) {
                                     onSetDefaultAddress(address.id)
@@ -144,6 +144,12 @@ fun ShippingAddressesScreen(
                                     editingAddress = address
                                     showBottomSheet = true
                                 }
+                            },
+                            onDeleteClick = {
+                                addressToDeleteId = it
+                            },
+                            onSetDefaultClick = {
+                                onSetDefaultAddress(it)
                             }
                         )
                     }
@@ -151,7 +157,7 @@ fun ShippingAddressesScreen(
                     item {
                         Spacer(modifier = Modifier.height(16.dp))
                         DashedAddButton(
-                            text = "Add New Address",
+                            text = stringResource(R.string.address_add_new_button),
                             icon = {
                                 Icon(
                                     Icons.Default.AddCircle,
@@ -171,7 +177,6 @@ fun ShippingAddressesScreen(
                 }
             }
 
-            // Loading overlay for operations (set default, delete from list, etc.)
             AnimatedVisibility(
                 visible = uiState.isOperationInProgress && !showBottomSheet,
                 enter = fadeIn(),
@@ -201,7 +206,7 @@ fun ShippingAddressesScreen(
                                 color = MaterialTheme.colorScheme.primary
                             )
                             Text(
-                                text = "Updating…",
+                                text = stringResource(R.string.address_updating_label),
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onSurface
                             )
@@ -244,9 +249,10 @@ fun ShippingAddressesScreen(
 
         QafilahConfirmationDialog(
             isVisible = addressToDeleteId != null,
-            title = "Delete address",
-            message = "Are you sure you want to delete this address?",
-            yesButtonText = "Delete",
+            title = stringResource(R.string.address_delete_button),
+            message = stringResource(R.string.address_delete_confirm_message),
+            yesButtonText = stringResource(R.string.dialog_confirm_remove),
+            noButtonText = stringResource(R.string.dialog_dismiss_cancel),
             onYes = {
                 addressToDeleteId?.let { id ->
                     waitingForSheetClose = true
@@ -290,22 +296,22 @@ fun AddAddressSheetContent(
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         Text(
-            text = if (initialAddress == null) "New Address" else "Edit Address",
+            text = if (initialAddress == null) stringResource(R.string.address_new_address_title) else stringResource(R.string.address_edit_address_title),
             style = MaterialTheme.typography.headlineMedium,
             color = MaterialTheme.colorScheme.primary,
             modifier = Modifier.padding(bottom = 8.dp)
         )
 
-        QafilahTextField(label = "Street Address", value = street, onValueChange = { street = it }, placeholder = "e.g. 123 Tahrir St")
+        QafilahTextField(label = stringResource(R.string.address_street_label), value = street, onValueChange = { street = it }, placeholder = "e.g. 123 Tahrir St")
 
         Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-            QafilahTextField(label = "City", value = city, onValueChange = { city = it }, placeholder = "Cairo", modifier = Modifier.weight(1f))
-            QafilahTextField(label = "Province", value = province, onValueChange = { province = it }, placeholder = "Cairo", modifier = Modifier.weight(1f))
+            QafilahTextField(label = stringResource(R.string.address_city_label), value = city, onValueChange = { city = it }, placeholder = "Cairo", modifier = Modifier.weight(1f))
+            QafilahTextField(label = stringResource(R.string.address_province_label), value = province, onValueChange = { province = it }, placeholder = "Cairo", modifier = Modifier.weight(1f))
         }
 
         Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-            QafilahTextField(label = "Country", value = country, onValueChange = { country = it }, placeholder = "Egypt", modifier = Modifier.weight(1f))
-            QafilahTextField(label = "Zip Code", value = zipCode, onValueChange = { zipCode = it }, placeholder = "11511", modifier = Modifier.weight(1f))
+            QafilahTextField(label = stringResource(R.string.address_country_label), value = country, onValueChange = { country = it }, placeholder = "Egypt", modifier = Modifier.weight(1f))
+            QafilahTextField(label = stringResource(R.string.address_zip_label), value = zipCode, onValueChange = { zipCode = it }, placeholder = "11511", modifier = Modifier.weight(1f))
         }
 
         Row(
@@ -333,7 +339,7 @@ fun AddAddressSheetContent(
             }
             Spacer(modifier = Modifier.width(12.dp))
             Text(
-                text = "Set as default shipping address",
+                text = stringResource(R.string.address_set_default_label),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
             )
@@ -368,7 +374,7 @@ fun AddAddressSheetContent(
                 )
             } else {
                 Text(
-                    text = if (initialAddress == null) "Save Address" else "Update Address",
+                    text = if (initialAddress == null) stringResource(R.string.address_save_button) else stringResource(R.string.address_update_button),
                     color = MaterialTheme.colorScheme.background,
                     fontWeight = FontWeight.Bold,
                     style = MaterialTheme.typography.bodyLarge
@@ -386,7 +392,7 @@ fun AddAddressSheetContent(
                 shape = RoundedCornerShape(50),
                 colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error)
             ) {
-                Text("Delete Address")
+                Text(stringResource(R.string.address_delete_button))
             }
         }
     }

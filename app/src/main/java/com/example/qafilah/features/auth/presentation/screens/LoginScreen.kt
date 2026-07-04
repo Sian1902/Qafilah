@@ -1,11 +1,11 @@
 package com.example.qafilah.features.auth.presentation.screens
 
-import android.util.Log
+import android.app.Activity
+import android.content.ContextWrapper
 import androidx.credentials.exceptions.GetCredentialCancellationException
 import androidx.credentials.exceptions.NoCredentialException
 import androidx.credentials.CredentialManager
 import androidx.credentials.GetCredentialRequest
-import androidx.credentials.exceptions.GetCredentialException
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -33,6 +33,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.credentials.CustomCredential
@@ -57,18 +58,31 @@ fun LoginScreen(
     onNavigateToHome: (user: AppUser) -> Unit,
     onContinueAsGuest: () -> Unit
 ) {
+
     val viewModel: AuthViewModel = koinViewModel()
     val state = viewModel.authState.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
 
+    val errorHostActivityUnavailable = stringResource(R.string.error_host_activity_unavailable)
+    val errorUnexpectedCredentialType = stringResource(R.string.error_unexpected_credential_type)
+    val errorNoGoogleAccounts = stringResource(R.string.error_no_google_accounts)
+    val errorGoogleSignInFailed = stringResource(R.string.error_google_sign_in_failed)
+
+    val errorLoginFailed = stringResource(R.string.error_login_failed)
+    val errorGoogleAuthFailed = stringResource(R.string.error_google_auth_failed)
+    val errorCredentialsEmpty = stringResource(R.string.error_credentials_empty)
+    val errorNoEmail = stringResource(R.string.no_email)
+    val defaultFirstName = stringResource(R.string.valued_customer_first_name)
+    val defaultLastName = stringResource(R.string.valued_customer_last_name)
+
     val activity = remember(context) {
         var currentContext = context
-        while (currentContext is android.content.ContextWrapper) {
-            if (currentContext is android.app.Activity) break
+        while (currentContext is ContextWrapper) {
+            if (currentContext is Activity) break
             currentContext = currentContext.baseContext
         }
-        currentContext as? android.app.Activity
+        currentContext as? Activity
     }
 
     LaunchedEffect(state.value) {
@@ -81,23 +95,26 @@ fun LoginScreen(
         modifier = modifier,
         state = state.value,
         onLogin = { email, password ->
-            viewModel.signIn(email, password)
+            viewModel.signIn(
+                email,
+                password,
+                errorLoginFailed,
+                errorCredentialsEmpty,
+                defaultFirstName,
+                defaultLastName
+            )
         },
         onLoginWithGoogle = {
-            Log.d("LoginScreen", "onLoginWithGoogle clicked")
             coroutineScope.launch {
                 try {
                     if (activity == null) {
-                        Log.e("LoginScreen", "Activity context is null")
-                        viewModel.setAuthError("Failed to initiate login: host activity is not available.")
+                        viewModel.setAuthError(errorHostActivityUnavailable)
                         return@launch
                     }
-                    Log.d("LoginScreen", "Initializing CredentialManager")
                     val credentialManager = CredentialManager.create(activity)
 
                     val webClientId = "50329480866-0ismrbov61kq0tj3c4g1282foev660r6.apps.googleusercontent.com"
 
-                    Log.d("LoginScreen", "Building GetGoogleIdOption")
                     val googleIdOption = GetGoogleIdOption.Builder()
                         .setFilterByAuthorizedAccounts(false)
                         .setServerClientId(webClientId)
@@ -108,35 +125,34 @@ fun LoginScreen(
                         .addCredentialOption(googleIdOption)
                         .build()
 
-                    Log.d("LoginScreen", "Requesting credential from CredentialManager")
                     val result = credentialManager.getCredential(activity, request)
                     val credential = result.credential
 
-                    Log.d("LoginScreen", "Credential retrieved. Type: ${credential.type}")
                     if (credential is CustomCredential && credential.type == GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL) {
                         val googleIdTokenCredential = GoogleIdTokenCredential.createFrom(credential.data)
                         val idToken = googleIdTokenCredential.idToken
-                        Log.d("LoginScreen", "Obtained Google ID Token successfully")
 
-                        viewModel.signInWithGoogle(idToken)
+                        viewModel.signInWithGoogle(
+                            idToken,
+                            errorGoogleAuthFailed,
+                            errorNoEmail,
+                            defaultFirstName,
+                            defaultLastName
+                        )
                     } else {
-                        Log.w("LoginScreen", "Unexpected credential type received")
-                        viewModel.setAuthError("Sign-in failed: unexpected credential type.")
+                        viewModel.setAuthError(errorUnexpectedCredentialType)
                     }
                 } catch (e: GetCredentialCancellationException) {
-                    Log.d("LoginScreen", "User cancelled Google Sign-In")
                     viewModel.setIdleState()
                 } catch (e: NoCredentialException) {
-                    Log.w("LoginScreen", "No credentials/accounts found: ${e.message}")
-                    viewModel.setAuthError("No Google accounts found. Please add a Google account in your device settings.")
+                    viewModel.setAuthError(errorNoGoogleAccounts)
                 } catch (e: Throwable) {
-                    Log.e("LoginScreen", "Error during Google Sign-In", e)
-                    viewModel.setAuthError(e.message ?: "Google sign-in failed. Please try again.")
+                    viewModel.setAuthError(e.message ?: errorGoogleSignInFailed)
                 }
             }
         },
         onLoginAsGuest = {
-            onNavigateToHome(AppUser(id = "Guest", email = "alooo@alooo.com"))
+            onContinueAsGuest()
         },
         onNavigateToSignUp = {
             onNavigateToSignUp()
@@ -157,46 +173,66 @@ private fun LoginContent(
     val focusManager = LocalFocusManager.current 
     Box(
         modifier = modifier
-            .fillMaxSize() 
-    .background(MaterialTheme.colorScheme.background) 
-    .pointerInput(Unit) { 
-        detectTapGestures(onTap = { 
-            focusManager.clearFocus() 
+            .fillMaxSize()
+    .background(MaterialTheme.colorScheme.background)
+    .pointerInput(Unit) {
+        detectTapGestures(onTap = {
+            focusManager.clearFocus()
         })
     }
     ) {
         Column(
             modifier = Modifier
-                .fillMaxSize() 
-        .verticalScroll(rememberScrollState()), 
+                .fillMaxSize()
+        .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally, 
         verticalArrangement = Arrangement.SpaceBetween 
         ) {
         Spacer(modifier = Modifier.height(48.dp))
         LoginTitle(
-            logoPainter = painterResource(id = R.drawable.ic_logo), 
+            logoPainter = painterResource(id = R.drawable.ic_logo),
+            logoContentDescription = stringResource(R.string.app_logo_content_description),
+            titleText = stringResource(R.string.login_welcome_back_title),
+            subtitleText = stringResource(R.string.login_welcome_back_subtitle)
         )
 
         LoginCard(
-            onLogin = onLogin, 
-        authErrorMessage = errorMessage, 
-        googleIcon = painterResource(id = R.drawable.ic_google), 
-        onLoginWithGoogle = onLoginWithGoogle )
+            onLogin = onLogin,
+            authErrorMessage = errorMessage,
+            googleIcon = painterResource(id = R.drawable.ic_google),
+            onLoginWithGoogle = onLoginWithGoogle,
+            emailLabel = stringResource(R.string.email_address),
+            emailPlaceholder = stringResource(R.string.login_email_placeholder),
+            emailErrorMessage = stringResource(R.string.login_email_error_message),
+            passwordLabel = stringResource(R.string.password),
+            passwordPlaceholder = stringResource(R.string.login_password_placeholder),
+            passwordErrorMessage = stringResource(R.string.login_password_error_message),
+            forgotPasswordLabel = stringResource(R.string.login_forgot_password_label),
+            loginButtonLabel = stringResource(R.string.login_button_label),
+            orLabel = stringResource(R.string.ui_common_or),
+            togglePasswordVisibilityContentDescription = stringResource(R.string.login_toggle_password_visibility_cd)
+        )
 
         AuthFooter(
-            isInLogin = true, 
-        onLoginAsGuest = onLoginAsGuest, 
-        onNavigate = onNavigateToSignUp 
+            isInLogin = true,
+            onLoginAsGuest = onLoginAsGuest,
+            onNavigate = onNavigateToSignUp,
+            loginPrompt = stringResource(R.string.login_prompt),
+            loginActionLabel = stringResource(R.string.login_action_label),
+            signupPrompt = stringResource(R.string.signup_prompt),
+            signupActionLabel = stringResource(R.string.signup_action_label),
+            guestButtonLabel = stringResource(R.string.guest_button_label),
+            guestButtonContentDescription = stringResource(R.string.guest_button_content_description)
         )
     }
         if (state is AuthState.Loading) {
             Box(
                 modifier = Modifier
-                    .fillMaxSize() 
-                    .background(Color.Black.copy(alpha = 0.5f)) 
-                    .clickable( 
-                        interactionSource = remember { MutableInteractionSource() }, 
-                        indication = null 
+                    .fillMaxSize()
+                    .background(Color.Black.copy(alpha = 0.5f))
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null
                     ) {}, 
                 contentAlignment = Alignment.Center 
             ) {
@@ -217,26 +253,10 @@ fun LoginScreenPreview() {
         Surface { 
             LoginContent(
                 state = AuthState.Idle, 
-            onLogin = { _, _ -> }, 
-            onLoginWithGoogle = {}, 
-            onLoginAsGuest = {}, 
-            onNavigateToSignUp = {} 
-            )
-        }
-    }
-}
-
-@Preview(showSystemUi = true)
-@Composable
-fun LoginScreenPreviewLight() {
-    QafilahTheme(darkTheme = false) { 
-        Surface { 
-            LoginContent(
-                state = AuthState.Idle, 
-            onLogin = { _, _ -> }, 
-            onLoginWithGoogle = {}, 
-            onLoginAsGuest = {},
-            onNavigateToSignUp = {}
+                onLogin = { _, _ -> }, 
+                onLoginWithGoogle = {}, 
+                onLoginAsGuest = {}, 
+                onNavigateToSignUp = {} 
             )
         }
     }

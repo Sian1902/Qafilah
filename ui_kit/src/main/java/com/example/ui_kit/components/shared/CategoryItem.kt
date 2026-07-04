@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyRow
@@ -31,6 +32,7 @@ import coil.compose.AsyncImage
 data class CategoryUiModel(
     val id: String,
     val label: String,
+    @DrawableRes val icon: Int,
     val imageUrl: String? = null
 )
 
@@ -38,6 +40,7 @@ data class CategoryUiModel(
 fun CategoryItem(
     category: CategoryUiModel,
     onClick: (CategoryUiModel) -> Unit,
+    imageContentDescription: String,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -55,13 +58,21 @@ fun CategoryItem(
                 .clip(CircleShape)
                 .background(MaterialTheme.colorScheme.surface)
         ) {
-            AsyncImage(
-                model = category.imageUrl,
-                contentDescription = "Optional description for accessibility",
-                modifier = Modifier.size(24.dp),
-                contentScale = ContentScale.Crop
-            )
-
+            if (category.imageUrl != null) {
+                AsyncImage(
+                    model = category.imageUrl,
+                    contentDescription = imageContentDescription,
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop
+                )
+            } else {
+                Icon(
+                    painter = painterResource(id = category.icon),
+                    contentDescription = imageContentDescription,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(24.dp)
+                )
+            }
         }
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -78,6 +89,7 @@ fun CategoryItem(
 fun CategoryRow(
     categories: List<CategoryUiModel>,
     onCategoryClick: (CategoryUiModel) -> Unit,
+    imageContentDescription: String,
     modifier: Modifier = Modifier
 ) {
     LazyRow(
@@ -86,7 +98,11 @@ fun CategoryRow(
         modifier = modifier
     ) {
         items(categories, key = { it.id }) { category ->
-            CategoryItem(category = category, onClick = onCategoryClick)
+            CategoryItem(
+                category = category,
+                onClick = onCategoryClick,
+                imageContentDescription = imageContentDescription
+            )
         }
     }
 }

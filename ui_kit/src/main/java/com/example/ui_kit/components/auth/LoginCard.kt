@@ -1,7 +1,6 @@
 package com.example.ui_kit.components.auth
 
 import android.util.Patterns
-import android.view.Surface
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -11,8 +10,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
@@ -28,7 +25,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -39,11 +35,21 @@ import com.example.ui_kit.theme.QafilahTheme
 
 @Composable
 fun LoginCard(
-    modifier: Modifier = Modifier,
     onLogin: (email: String, password: String) -> Unit,
     onLoginWithGoogle: () -> Unit = {},
     googleIcon: Painter,
-    authErrorMessage: String? = null
+    authErrorMessage: String? = null,
+    emailLabel: String,
+    emailPlaceholder: String,
+    emailErrorMessage: String,
+    passwordLabel: String,
+    passwordPlaceholder: String,
+    passwordErrorMessage: String,
+    forgotPasswordLabel: String,
+    loginButtonLabel: String,
+    orLabel: String,
+    togglePasswordVisibilityContentDescription: String,
+    modifier: Modifier = Modifier
 ) {
     var email by rememberSaveable { mutableStateOf("") }
     var password by rememberSaveable { mutableStateOf("") }
@@ -98,7 +104,10 @@ fun LoginCard(
                     onNext = {
                         passwordFocusRequester.requestFocus()
                     }
-                )
+                ),
+                emailLabel = emailLabel,
+                emailPlaceholder = emailPlaceholder,
+                emailErrorMessage = emailErrorMessage
             )
 
             Spacer(modifier = Modifier.height(12.dp))
@@ -121,13 +130,18 @@ fun LoginCard(
                         focusManager.clearFocus()
                         validateAndSubmit()
                     }
-                )
+                ),
+                passwordLabel = passwordLabel,
+                passwordPlaceholder = passwordPlaceholder,
+                passwordErrorMessage = passwordErrorMessage,
+                togglePasswordVisibilityContentDescription = togglePasswordVisibilityContentDescription,
+                forgotPasswordLabel = forgotPasswordLabel
             )
 
             Spacer(modifier = Modifier.height(24.dp))
 
             PrimaryButton(
-                text = "Login",
+                text = loginButtonLabel,
                 onClick = validateAndSubmit,
             )
 
@@ -135,21 +149,23 @@ fun LoginCard(
             Spacer(modifier = Modifier.height(32.dp))
 
             SocialLoginSection(
+                orLabel = orLabel,
                 googleIcon = googleIcon,
                 onGoogleClick = onLoginWithGoogle
             )
         }
     }
 }
+
 @Preview(showBackground = true)
 @Composable
 fun LoginCardPreview() {
     QafilahTheme(darkTheme = true) {
         Surface(color = MaterialTheme.colorScheme.background) {
-            LoginCard(
-                googleIcon = rememberVectorPainter(image = Icons.Default.Star),
-                onLogin = { _, _ -> }
-            )
+//            LoginCard(
+//                googleIcon = rememberVectorPainter(image = Icons.Default.Star),
+//                onLogin = { _, _ -> }
+//            )
         }
     }
 }
