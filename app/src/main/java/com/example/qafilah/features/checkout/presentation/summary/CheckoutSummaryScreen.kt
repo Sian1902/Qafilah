@@ -38,9 +38,9 @@ fun CheckoutSummaryScreen(
         modifier = modifier,
         uiState = finalUiState,
         onShippingOptionSelected = { handle ->
-            val groupId = cart.deliveryGroups.firstOrNull()?.id ?: return@CheckoutSummaryContent
+            val groupId = cart!!.deliveryGroups.firstOrNull()?.id ?: return@CheckoutSummaryContent
 
-            summaryViewModel.selectShippingOption(cart.id, groupId, handle) { updatedCart ->
+            summaryViewModel.selectShippingOption(cart!!.id, groupId, handle) { updatedCart ->
                 sharedViewModel.updateCartState(updatedCart)
             }
         },
@@ -60,8 +60,6 @@ fun CheckoutSummaryContent(
     val uiKitDeliveryOptions = cart.deliveryGroups.firstOrNull()?.deliveryOptions?.map { option ->
         Triple(option.handle, option.title, "$${option.estimatedCost.amount}")
     } ?: emptyList()
-
-    val discountString = "10.00"
 
     Column(
         modifier = modifier

@@ -1,5 +1,6 @@
 package com.example.qafilah.features.checkout.data.mapper
 
+import com.example.qafilah.features.cart.domain.model.StoreCart
 import com.example.qafilah.features.checkout.domain.model.*
 import com.example.qafilah.graphql.storefront.fragment.CheckoutCartDetails
 import com.example.qafilah.graphql.storefront.fragment.MoneyFields
@@ -46,3 +47,27 @@ private fun MoneyFields.toMoney(): CheckoutMoney = CheckoutMoney.from(
     amount = amount as String,
     currencyCode = currencyCode.rawValue
 )
+
+fun StoreCart.toCheckoutCart(): CheckoutCart {
+    return CheckoutCart(
+        id = this.id,
+        cost = CheckoutCost(
+            subtotalAmount = CheckoutMoney(this.cost.subtotalAmount.amount, this.cost.subtotalAmount.currencyCode),
+            totalAmount = CheckoutMoney(this.cost.totalAmount.amount, this.cost.totalAmount.currencyCode),
+            totalTaxAmount = this.cost.totalTaxAmount?.let {
+                CheckoutMoney(it.amount, it.currencyCode)
+            }
+        ),
+        deliveryGroups = emptyList(),
+        lines = this.lines.map { line ->
+            CheckoutLineItem(
+                id = line.id,
+                productTitle = line.merchandise.product.title,
+                variantTitle = line.merchandise.title,
+                quantity = line.quantity,
+                price = CheckoutMoney(line.merchandise.price.amount, line.merchandise.price.currencyCode),
+                imageUrl = line.merchandise.image?.url
+            )
+        }
+    )
+}

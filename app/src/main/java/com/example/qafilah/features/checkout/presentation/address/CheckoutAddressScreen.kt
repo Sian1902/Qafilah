@@ -47,15 +47,19 @@ fun CheckoutAddressScreen(
     CheckoutAddressContent(
         uiState,
         onNavigateToAddEditAddress,
-        {
-            addressViewModel.submitAddress(cart.id) { updatedCart ->
-                sharedViewModel.updateCartState(updatedCart)
-                onNavigateToSummary()
+        onContinueToSummary = {
+            cart?.let { safeCart ->
+                addressViewModel.submitAddress(safeCart.id) { updatedCart, selectedAddress ->
+                    sharedViewModel.updateCartState(updatedCart)
+                    sharedViewModel.setShippingAddress(selectedAddress) // Assuming you added this!
+                    onNavigateToSummary()
+                }
             }
         },
         {
             addressViewModel.selectAddress(it.id)
-        }
+        },
+        isCartLoaded = cart != null
     )
 }
 
@@ -65,6 +69,7 @@ private fun CheckoutAddressContent(
     onNavigateToAddEditAddress: () -> Unit,
     onContinueToSummary: () -> Unit,
     onSelectAddress: (ShippingAddress) -> Unit,
+    isCartLoaded: Boolean
 ) {
     Column(
         Modifier
@@ -114,7 +119,7 @@ private fun CheckoutAddressContent(
             onClick = {
                 onContinueToSummary()
             },
-            enabled = !uiState.isSubmitting && uiState.selectedAddressId != null,
+            enabled = !uiState.isSubmitting && uiState.selectedAddressId != null && isCartLoaded,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 16.dp)

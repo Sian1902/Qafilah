@@ -1,8 +1,10 @@
 package com.example.qafilah.features.checkout.presentation.address
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.qafilah.core.token.TokenProvider
+import com.example.qafilah.features.address.domain.model.ShippingAddress
 import com.example.qafilah.features.address.domain.usecase.GetAddressesUseCase
 import com.example.qafilah.features.checkout.domain.model.CheckoutCart
 import com.example.qafilah.features.checkout.domain.usecase.UpdateBuyerIdentityUseCase
@@ -20,15 +22,18 @@ class CheckoutAddressViewModel(
     private val _uiState = MutableStateFlow(CheckoutAddressUIState())
     val uiState = _uiState.asStateFlow()
 
-    init {
-        loadAddresses()
-    }
 
     fun loadAddresses() {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoadingAddresses = true, error = null) }
 
-            val result = getAddressesUseCase(tokenProvider.getToken()!!)
+            val token = tokenProvider.getToken()
+            if (token == null) {
+                _uiState.update { it.copy(isLoadingAddresses = false, error = "Authentication error. Please log in again.") }
+                return@launch
+            }
+
+            val result = getAddressesUseCase(token)
 
             result.onSuccess { addressList ->
                 val currentState = _uiState.value
@@ -60,21 +65,28 @@ class CheckoutAddressViewModel(
         _uiState.update { it.copy(selectedAddressId = addressId) }
     }
 
-    fun submitAddress(cartId: String, onSuccess: (CheckoutCart) -> Unit) {
+
+    fun submitAddress(cartId: String, onSuccess: (CheckoutCart, ShippingAddress) -> Unit) {
         val currentState = _uiState.value
         val selectedAddress = currentState.addresses.find { it.id == currentState.selectedAddressId }
 
-        if (selectedAddress == null) return
+        if (selectedAddress == null) {
+            return
+        }
 
         viewModelScope.launch {
-            _uiState.update { it.copy(isSubmitting = true) }
+            _uiState.update { it.copy(isSubmitting = true, error = null) }
 
             val result = updateBuyerIdentityUseCase(cartId, selectedAddress)
 
             _uiState.update { it.copy(isSubmitting = false) }
 
             result.onSuccess { updatedCart ->
-                onSuccess(updatedCart)
+                onSuccess(updatedCart, selectedAddress)
+            }.onFailure { error ->
+                _uiState.update {
+                    it.copy(error = error.message)
+                }
             }
         }
     }

@@ -18,7 +18,7 @@ fun CheckoutPaymentScreen(
 
     Column(Modifier.fillMaxSize().padding(16.dp)) {
         Text("Step 3: Payment", style = MaterialTheme.typography.headlineMedium)
-        Text("Amount to charge: $${cart.cost.totalAmount.amount}", style = MaterialTheme.typography.titleLarge)
+        Text("Amount to charge: $${cart!!.cost.totalAmount.amount}", style = MaterialTheme.typography.titleLarge)
 
         Spacer(modifier = Modifier.weight(1f))
 
