@@ -9,6 +9,7 @@ import com.example.qafilah.features.profile.data.datasource.ProfileRemoteDataSou
 import com.example.qafilah.features.profile.data.datasource.ProfileRemoteDataSourceImpl
 import com.example.qafilah.features.profile.data.repo.ProfileRepositoryImpl
 import com.example.qafilah.features.profile.domain.repository.ProfileRepository
+import com.example.qafilah.features.auth.domain.usecase.SignOutUseCase
 import com.example.qafilah.features.profile.domain.usecase.GetCustomerProfileUseCase
 import com.example.qafilah.features.profile.domain.usecase.GetPersonalDetailsUseCase
 import com.example.qafilah.features.profile.domain.usecase.UpdateProfileUseCase
@@ -43,6 +44,7 @@ val profileModule = module {
     viewModel {
         ProfileViewModel(
             getCustomerProfile = get(),
+            signOutUseCase = get(),
             tokenProvider = get(),
             currencyRepository = get()
         )

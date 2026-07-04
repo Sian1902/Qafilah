@@ -66,7 +66,7 @@ class MainActivity : ComponentActivity() {
                                     currentRoute = currentRoute,
                                     onItemClick = { item ->
                                         navController.navigate(item.route) {
-                                            popUpTo(navController.graph.startDestinationId) {
+                                            popUpTo(NavItem.Home.route) {
                                                 saveState = true
                                             }
                                             launchSingleTop = true

@@ -75,11 +75,11 @@ class HomeViewModel(
                             CategoryUiModel(
                                 id = collection.id,
                                 label = collection.title.uppercase(),
-                                icon = R.drawable.ic_logo, // Default icon
+                                icon = R.drawable.ic_logo,
                                 imageUrl = collection.imageUrl
                             )
                         },
-                        brands = collections.map { it.toBrandLabel() },
+                        brands = productTypes.map { it.uppercase() },
                         products = uiProducts
                     )
                 }
@@ -112,8 +112,14 @@ class HomeViewModel(
     fun toggleFavorite(
         productId: String,
         addedToWishlistTemplate: String,
-        fallbackErrorMessage: String
+        fallbackErrorMessage: String,
+        notLoggedInMessage: String
     ) {
+        if (com.google.firebase.auth.FirebaseAuth.getInstance().currentUser == null) {
+            _events.trySend(HomeEvent.ShowSnackbar(notLoggedInMessage))
+            return
+        }
+
         val uiProduct = _uiState.value.products.find { it.id == productId } ?: return
         val domainProduct = domainProductsCache.find { it.id == productId } ?: return
         val wasFavorite = uiProduct.isFavorite
