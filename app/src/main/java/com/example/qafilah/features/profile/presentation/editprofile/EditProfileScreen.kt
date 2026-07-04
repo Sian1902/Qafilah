@@ -32,7 +32,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -56,14 +58,33 @@ fun EditProfileScreen(
 ) {
     val state by viewModel.state.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
+    val context = LocalContext.current
+
+    val sessionExpired = stringResource(R.string.error_session_expired)
+    val updateFailed = stringResource(R.string.error_update_failed)
+    val phoneFormat = stringResource(R.string.error_phone_format_full)
+    val firstNameEmpty = stringResource(R.string.error_first_name_empty)
+    val invalidEmail = stringResource(R.string.login_email_error_message)
+    val phoneEmpty = stringResource(R.string.error_phone_empty)
+
+    LaunchedEffect(Unit) {
+        viewModel.setLocalizedStrings(
+            sessionExpired,
+            updateFailed,
+            phoneFormat,
+            firstNameEmpty,
+            invalidEmail,
+            phoneEmpty
+        )
+    }
 
     LaunchedEffect(state.saveSuccess) {
         if (state.saveSuccess) {
             if (state.emailChanged) {
                 snackbarHostState.showSnackbar(
-                    message = "Please check your inbox to confirm your new email",
+                    message = context.getString(R.string.edit_profile_email_confirm_message),
                     duration = SnackbarDuration.Indefinite,
-                    actionLabel = "Dismiss"
+                    actionLabel = context.getString(R.string.dialog_dismiss_cancel)
                 )
             } else {
                 onBackClick()
@@ -80,9 +101,11 @@ fun EditProfileScreen(
                 .systemBarsPadding()
         ) {
             DetailTopBar(
-                title = "Edit Profile",
+                title = stringResource(R.string.profile_edit_profile),
+                backContentDescription = stringResource(R.string.back),
                 onBackClick = onBackClick,
                 trailingIcon = Icons.Filled.Settings,
+                trailingContentDescription = stringResource(R.string.settings_cd),
                 onTrailingClick = onSettingsClick
             )
 
@@ -136,6 +159,7 @@ private fun EditProfileForm(
             .padding(horizontal = 20.dp)
     ) {
         ChangePhotoAvatar(
+            changePhotoLabel = stringResource(R.string.profile_change_photo),
             onChangePhotoClick = onChangePhotoClick,
             avatarContent = {
                 Image(
@@ -160,18 +184,18 @@ private fun EditProfileForm(
 
         Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
             EditableTextField(
-                label = "First Name",
+                label = stringResource(R.string.first_name),
                 value = state.firstName,
                 onValueChange = onFirstNameChange,
                 error = state.firstNameError
             )
             EditableTextField(
-                label = "Last Name",
+                label = stringResource(R.string.last_name),
                 value = state.lastName,
                 onValueChange = onLastNameChange
             )
             EditableTextField(
-                label = "Email Address",
+                label = stringResource(R.string.email_address),
                 value = state.email,
                 onValueChange = onEmailChange,
                 leadingIcon = Icons.Filled.Email,
@@ -179,7 +203,7 @@ private fun EditProfileForm(
                 error = state.emailError
             )
             EditableTextField(
-                label = "Phone Number",
+                label = stringResource(R.string.phone_number),
                 value = state.phone,
                 onValueChange = onPhoneChange,
                 leadingIcon = Icons.Filled.Phone,
@@ -187,14 +211,14 @@ private fun EditProfileForm(
                 error = state.phoneError ?: if (state.phone.isNotEmpty() && !state.phone.startsWith(
                         "+"
                     )
-                ) "Start with + and country code" else null
+                ) stringResource(R.string.error_phone_format_hint) else null
             )
         }
 
         Spacer(Modifier.height(28.dp))
 
         PrimaryButton(
-            text = if (state.isSaving) "Saving..." else "Save Changes",
+            text = if (state.isSaving) stringResource(R.string.saving_label) else stringResource(R.string.save_changes_label),
             onClick = onSaveClick,
             enabled = !state.isSaving
         )
@@ -202,7 +226,7 @@ private fun EditProfileForm(
         Spacer(Modifier.height(8.dp))
 
         TextLinkButton(
-            text = "Cancel",
+            text = stringResource(R.string.dialog_dismiss_cancel),
             onClick = onCancelClick,
             modifier = Modifier.align(Alignment.CenterHorizontally)
         )

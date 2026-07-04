@@ -18,6 +18,12 @@ import com.example.ui_kit.theme.QafilahTheme
 fun AuthFooter(
     modifier: Modifier = Modifier,
     isInLogin: Boolean = true,
+    loginPrompt: String,
+    loginActionLabel: String,
+    signupPrompt: String,
+    signupActionLabel: String,
+    guestButtonLabel: String,
+    guestButtonContentDescription: String,
     onLoginAsGuest: () -> Unit,
     onNavigate: () -> Unit
 ) {
@@ -29,7 +35,7 @@ fun AuthFooter(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = if (isInLogin) "New to Qafilah? " else "Already have an account? ",
+                text = if (isInLogin) loginPrompt else signupPrompt,
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
             )
@@ -38,7 +44,7 @@ fun AuthFooter(
                 contentPadding = PaddingValues(5.dp)
             ) {
                 Text(
-                    text = if (isInLogin) "Create Account" else "Sign In",
+                    text = if (isInLogin) loginActionLabel else signupActionLabel,
                     style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
                     color = MaterialTheme.colorScheme.primary
                 )
@@ -58,13 +64,13 @@ fun AuthFooter(
         ) {
             Icon(
                 imageVector = Icons.Default.Face,
-                contentDescription = "Continue as guest",
+                contentDescription = guestButtonContentDescription,
                 tint = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.size(20.dp)
             )
             Spacer(modifier = Modifier.width(8.dp))
             Text(
-                text = "Continue as guest",
+                text = guestButtonLabel,
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onBackground
             )
@@ -79,10 +85,10 @@ fun AuthFooter(
 fun AuthFooterPreview() {
     QafilahTheme(darkTheme = true) {
         Surface(color = MaterialTheme.colorScheme.background) {
-            AuthFooter(
-                onLoginAsGuest = {},
-                onNavigate = {}
-            )
+ //            AuthFooter(
+//                onLoginAsGuest = {},
+//                onNavigate = {}
+//            )
         }
     }
 }

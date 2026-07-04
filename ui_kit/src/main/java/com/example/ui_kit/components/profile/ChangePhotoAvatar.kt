@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun ChangePhotoAvatar(
+    changePhotoLabel: String,
     onChangePhotoClick: () -> Unit,
     modifier: Modifier = Modifier,
     avatarContent: @Composable () -> Unit
@@ -55,7 +56,7 @@ fun ChangePhotoAvatar(
             ) {
                 Icon(
                     imageVector = Icons.Filled.PhotoCamera,
-                    contentDescription = "Change Photo",
+                    contentDescription = changePhotoLabel,
                     tint = Color.White,
                     modifier = Modifier.size(16.dp)
                 )
@@ -65,7 +66,7 @@ fun ChangePhotoAvatar(
         Spacer(Modifier.height(8.dp))
 
         Text(
-            text = "Change Photo",
+            text = changePhotoLabel,
             style = MaterialTheme.typography.labelSmall,
             color = MaterialTheme.colorScheme.primary,
             modifier = Modifier.clickable(onClick = onChangePhotoClick)

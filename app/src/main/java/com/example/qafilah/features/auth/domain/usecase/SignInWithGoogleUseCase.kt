@@ -7,10 +7,15 @@ import com.example.qafilah.features.auth.domain.repository.AuthRepository
 
 class SignInWithGoogleUseCase(private val repository: AuthRepository) {
 
-    suspend operator fun invoke(idToken: String): Result<AppUser> {
+    suspend operator fun invoke(
+        idToken: String,
+        noEmailError: String,
+        defaultFirstName: String,
+        defaultLastName: String
+    ): Result<AppUser> {
         return try {
             val user = repository.authenticateWithGoogle(idToken).getOrThrow()
-            val email = user.email ?: return Result.failure(Exception("Google account lacks an email address."))
+            val email = user.email ?: return Result.failure(Exception(noEmailError))
 
             val secureFederatedPassword = "GoogleOAuth_${user.id}"
             var storefrontTokenResult = repository.authenticateStorefront(email, secureFederatedPassword)
@@ -19,8 +24,8 @@ class SignInWithGoogleUseCase(private val repository: AuthRepository) {
                 repository.registerStorefront(
                     email = email,
                     password = secureFederatedPassword,
-                    firstName = user.firstName ?: "Valued",
-                    lastName = user.lastName ?: "Customer"
+                    firstName = user.firstName ?: defaultFirstName,
+                    lastName = user.lastName ?: defaultLastName
                 ).getOrThrow()
 
                 storefrontTokenResult = repository.authenticateStorefront(email, secureFederatedPassword)

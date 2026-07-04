@@ -36,7 +36,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.example.qafilah.R
 import com.example.qafilah.features.search.domain.model.ChipState
 import com.example.ui_kit.components.home.ProductCard
 import com.example.ui_kit.components.home.ProductUiModel
@@ -45,6 +47,18 @@ import com.example.ui_kit.components.search.TrendingPillCard
 import com.example.ui_kit.components.shared.RemovableChip
 import com.example.ui_kit.components.shared.SearchField
 import kotlinx.coroutines.launch
+
+@Composable
+private fun categoryDisplayName(categoryId: String): String {
+    return when (categoryId) {
+        "jewelry" -> stringResource(R.string.category_jewelry)
+        "attire" -> stringResource(R.string.category_attire)
+        "scent" -> stringResource(R.string.category_scent)
+        "home" -> stringResource(R.string.category_home)
+        "gear" -> stringResource(R.string.category_gear)
+        else -> categoryId
+    }
+}
 
 @OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class)
 @Composable
@@ -69,6 +83,18 @@ fun SearchScreen(
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
 
+    val filtersText = stringResource(R.string.filters)
+    val resetAllText = stringResource(R.string.reset_all)
+    val categoriesText = stringResource(R.string.categories)
+    val brandsText = stringResource(R.string.brands)
+    val applyFiltersText = stringResource(R.string.apply_filters)
+    val goBackDescription = stringResource(R.string.go_back)
+    val recentSearchesText = stringResource(R.string.recent_searches)
+    val clearAllText = stringResource(R.string.clear_all)
+    val trendingNowText = stringResource(R.string.trending_now)
+    val resultsText = stringResource(R.string.search_results)
+    val trendingIconDesc = stringResource(R.string.trending_icon_cd)
+
     val hasActiveFilter = availableCategories.any { it.isSelected } || availableBrands.any { it.isSelected }
     val showResults = searchQuery.isNotEmpty() || hasActiveFilter
 
@@ -91,14 +117,14 @@ fun SearchScreen(
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text("Filters", style = MaterialTheme.typography.headlineMedium)
+                        Text(filtersText, style = MaterialTheme.typography.headlineMedium)
                         TextButton(onClick = onResetFilters) {
-                            Text("Reset All")
+                            Text(resetAllText)
                         }
                     }
 
                     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Text("Categories", style = MaterialTheme.typography.titleMedium)
+                        Text(categoriesText, style = MaterialTheme.typography.titleMedium)
                         FlowRow(
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
                             verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -107,14 +133,14 @@ fun SearchScreen(
                                 FilterChip(
                                     selected = category.isSelected,
                                     onClick = { onCategoryFilterSelect(category.id) },
-                                    label = { Text(category.name) }
+                                    label = { Text(categoryDisplayName(category.id)) }
                                 )
                             }
                         }
                     }
 
                     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Text("Brands", style = MaterialTheme.typography.titleMedium)
+                        Text(brandsText, style = MaterialTheme.typography.titleMedium)
                         FlowRow(
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
                             verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -131,9 +157,11 @@ fun SearchScreen(
 
                     Button(
                         onClick = { scope.launch { drawerState.close() } },
-                        modifier = Modifier.fillMaxWidth().padding(top = 16.dp)
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 16.dp)
                     ) {
-                        Text("Apply Filters")
+                        Text(applyFiltersText)
                     }
                 }
             }
@@ -151,12 +179,14 @@ fun SearchScreen(
                     IconButton(onClick = onBackClick) {
                         Icon(
                             imageVector = Icons.Default.ArrowBack,
-                            contentDescription = "Go Back",
+                            contentDescription = goBackDescription,
                             tint = MaterialTheme.colorScheme.primary
                         )
                     }
 
                     SearchField(
+                        placeholderText = stringResource(R.string.search_placeholder),
+                        searchIconContentDescription = stringResource(R.string.search_icon_cd),
                         value = searchQuery,
                         onValueChange = onSearchQueryChange,
                         modifier = Modifier.weight(1f)
@@ -165,7 +195,7 @@ fun SearchScreen(
                     IconButton(onClick = { scope.launch { drawerState.open() } }) {
                         Icon(
                             imageVector = Icons.Default.Tune,
-                            contentDescription = "Filters",
+                            contentDescription = filtersText,
                             tint = if (hasActiveFilter) MaterialTheme.colorScheme.primary
                             else MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -203,13 +233,13 @@ fun SearchScreen(
                                         verticalAlignment = Alignment.CenterVertically
                                     ) {
                                         Text(
-                                            text = "Recent Searches",
+                                            text = recentSearchesText,
                                             style = MaterialTheme.typography.headlineMedium,
                                             color = MaterialTheme.colorScheme.primary
                                         )
                                         TextButton(onClick = onClearAllRecentSearches) {
                                             Text(
-                                                text = "CLEAR ALL",
+                                                text = clearAllText,
                                                 style = MaterialTheme.typography.labelSmall,
                                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                                             )
@@ -224,6 +254,7 @@ fun SearchScreen(
                                         recentSearches.forEach { chip ->
                                             RemovableChip(
                                                 label = chip.name,
+                                                removeContentDescription = stringResource(R.string.search_remove_chip_cd),
                                                 onRemoveClick = { onRemoveRecentSearch(chip.name) }
                                             )
                                         }
@@ -234,7 +265,7 @@ fun SearchScreen(
 
                         item(span = { GridItemSpan(maxLineSpan) }) {
                             Text(
-                                text = "Trending Now",
+                                text = trendingNowText,
                                 style = MaterialTheme.typography.headlineMedium,
                                 color = MaterialTheme.colorScheme.primary,
                                 modifier = Modifier.padding(top = 8.dp)
@@ -244,13 +275,14 @@ fun SearchScreen(
                         items(trendingSearches) { searchItem ->
                             TrendingPillCard(
                                 label = searchItem,
+                                iconContentDescription = trendingIconDesc,
                                 onClick = { onSearchQueryChange(searchItem) }
                             )
                         }
                     } else {
                         item(span = { GridItemSpan(maxLineSpan) }) {
                             Text(
-                                text = "Results",
+                                text = resultsText,
                                 style = MaterialTheme.typography.headlineMedium,
                                 color = MaterialTheme.colorScheme.primary,
                                 modifier = Modifier.padding(bottom = 8.dp)
@@ -259,14 +291,19 @@ fun SearchScreen(
 
                         if (searchResults.isEmpty()) {
                             item(span = { GridItemSpan(maxLineSpan) }) {
-                                SearchEmptyState()
+                                SearchEmptyState(
+                                    title = stringResource(R.string.search_empty_title),
+                                    description = stringResource(R.string.search_empty_description),
+                                    iconContentDescription = stringResource(R.string.search_icon_cd)
+                                )
                             }
                         } else {
                             items(searchResults) { product ->
                                 ProductCard(
                                     product = product,
                                     onClick = onProductClick,
-                                    onFavoriteClick = onFavoriteClick
+                                    onFavoriteClick = onFavoriteClick,
+                                    toggleWishlistContentDescription = stringResource(R.string.product_card_toggle_wishlist_cd)
                                 )
                             }
                         }

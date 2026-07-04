@@ -8,5 +8,5 @@ data class AppUser(
     val phone: String? = null
 ) {
     val fullName: String
-        get() = listOfNotNull(firstName, lastName).joinToString(" ").ifBlank { email ?: "Guest" }
+        get() = listOfNotNull(firstName, lastName).filter { it.isNotBlank() }.joinToString(" ")
 }

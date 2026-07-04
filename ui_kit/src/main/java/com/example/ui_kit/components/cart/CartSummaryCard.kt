@@ -20,23 +20,26 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import com.example.ui_kit.theme.QafilahTheme
 
 
 @Composable
 fun CartSummaryCard(
-    modifier: Modifier = Modifier,
     subTotalAmount: String,
     totalAmount: String,
     totalTaxAmount: String?,
     checkoutChargeAmount: String,
-    currencyCode: String
+    subtotalLabel: String,
+    taxLabel: String,
+    checkoutChargeLabel: String,
+    totalLabel: String,
+    modifier: Modifier = Modifier
 ) {
     val colorScheme = MaterialTheme.colorScheme
     val cardShape = RoundedCornerShape(28.dp)
-    val extraLabel = if (totalTaxAmount != null) "Tax" else "Checkout Charge"
+    val extraLabel = if (totalTaxAmount != null) taxLabel else checkoutChargeLabel
     val extraAmount = totalTaxAmount ?: checkoutChargeAmount
 
     Column(
@@ -48,8 +51,8 @@ fun CartSummaryCard(
             .padding(horizontal = 24.dp, vertical = 22.dp)
     ) {
         SummaryRow(
-            label = "Subtotal",
-            value = formatAmount(subTotalAmount, currencyCode),
+            label = subtotalLabel,
+            value = subTotalAmount,
             labelColor = colorScheme.onSurfaceVariant,
             valueColor = colorScheme.onSurface,
             valueStyle = MaterialTheme.typography.bodyLarge
@@ -59,7 +62,7 @@ fun CartSummaryCard(
 
         SummaryRow(
             label = extraLabel,
-            value = formatAmount(extraAmount, currencyCode),
+            value = extraAmount,
             labelColor = colorScheme.primary,
             valueColor = colorScheme.primary,
             valueStyle = MaterialTheme.typography.bodyLarge
@@ -72,8 +75,8 @@ fun CartSummaryCard(
         Spacer(modifier = Modifier.height(18.dp))
 
         SummaryRow(
-            label = "Total",
-            value = formatAmount(totalAmount, currencyCode),
+            label = totalLabel,
+            value = totalAmount,
             labelColor = colorScheme.onSurface,
             valueColor = colorScheme.primary,
             valueStyle = MaterialTheme.typography.titleMedium
@@ -110,23 +113,13 @@ private fun SummaryRow(
     }
 }
 
-private fun formatAmount(amount: String, currencyCode: String): String {
-    val cleanedAmount = amount.trim()
-    return if (currencyCode.isBlank()) cleanedAmount else "$currencyCode $cleanedAmount"
-}
-
 @Preview(showBackground = true)
 @Composable
 private fun CartSummaryCardPreview() {
     QafilahTheme(darkTheme = true) {
         Surface(color = MaterialTheme.colorScheme.background) {
-            CartSummaryCard(
-                subTotalAmount = "355.00",
-                totalAmount = "319.50",
-                totalTaxAmount = "35.50",
-                checkoutChargeAmount = "0.00",
-                currencyCode = "$"
-            )
+
+
         }
     }
 }

@@ -4,6 +4,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.res.stringResource
+import com.example.qafilah.R
 import org.koin.androidx.compose.koinViewModel
 import com.example.ui_kit.components.shared.ProductGrid
 import com.example.ui_kit.components.home.ProductUiModel
@@ -32,7 +34,6 @@ fun CatalogProductsScreen(
                 category = product.vendor,
                 name = product.title,
                 price = "${product.currencyCode} ${product.priceAmount}",
-                // You can attach real wishlist state observation here if available in Product
                 isFavorite = false
             )
         }
@@ -44,7 +45,7 @@ fun CatalogProductsScreen(
                 title = { Text(categoryTitle) },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.Default.ArrowBack, contentDescription = stringResource(R.string.back))
                     }
                 }
             )
@@ -60,7 +61,11 @@ fun CatalogProductsScreen(
                 if (domainProduct != null) {
                     vm.toggleFavorite(domainProduct, uiProduct.isFavorite)
                 }
-            }
+            },
+            emptyMessage = stringResource(R.string.product_grid_empty_message),
+            retryButtonLabel = stringResource(R.string.retry),
+            toggleWishlistContentDescription = stringResource(R.string.product_card_toggle_wishlist_cd),
+            error = if (uiProducts.isEmpty() && !isLoading) stringResource(R.string.error_something_went_wrong) else null
         )
     }
 }

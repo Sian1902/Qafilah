@@ -32,6 +32,8 @@ fun ProfileHeaderCard(
     name: String,
     email: String,
     onEditProfileClick: () -> Unit,
+    verifiedContentDescription: String,
+    editProfileLabel: String,
     modifier: Modifier = Modifier,
     avatarContent: @Composable () -> Unit
 ) {
@@ -60,7 +62,7 @@ fun ProfileHeaderCard(
             ) {
                 Icon(
                     imageVector = Icons.Filled.Check,
-                    contentDescription = "Verified",
+                    contentDescription = verifiedContentDescription,
                     tint = Color.White,
                     modifier = Modifier.size(14.dp)
                 )
@@ -93,7 +95,7 @@ fun ProfileHeaderCard(
                 contentColor = MaterialTheme.colorScheme.primary
             )
         ) {
-            Text(text = "Edit Profile", style = MaterialTheme.typography.labelSmall)
+            Text(text = editProfileLabel, style = MaterialTheme.typography.labelSmall)
         }
     }
 }

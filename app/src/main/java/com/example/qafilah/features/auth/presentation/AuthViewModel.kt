@@ -19,47 +19,76 @@ class AuthViewModel(
     private val _authState = MutableStateFlow<AuthState>(AuthState.Idle)
     val authState: StateFlow<AuthState> = _authState
 
-    fun signIn(email: String, password: String) {
+    fun signIn(
+        email: String,
+        password: String,
+        fallbackErrorMessage: String,
+        credentialsEmptyError: String,
+        defaultFirstName: String,
+        defaultLastName: String
+    ) {
         viewModelScope.launch {
             _authState.value = AuthState.Loading
 
-            signInUseCase(email, password).fold(
+            signInUseCase(
+                email,
+                password,
+                credentialsEmptyError,
+                defaultFirstName,
+                defaultLastName
+            ).fold(
                 onSuccess = { user ->
                     _authState.value = AuthState.Success(user)
                 },
                 onFailure = { error ->
-                    _authState.value = AuthState.Error(error.message ?: "Login failed")
+                    _authState.value = AuthState.Error(error.message ?: fallbackErrorMessage)
                 }
             )
         }
     }
 
-    fun signUp(name: String, email: String, password: String) {
+    fun signUp(
+        name: String,
+        email: String,
+        password: String,
+        fallbackErrorMessage: String,
+        fieldsEmptyError: String
+    ) {
         viewModelScope.launch {
             _authState.value = AuthState.Loading
 
-            signUpUseCase(name, email, password).fold(
+            signUpUseCase(name, email, password, fieldsEmptyError).fold(
                 onSuccess = { user ->
                     _authState.value = AuthState.Success(user)
                 },
                 onFailure = { error ->
-                    _authState.value = AuthState.Error(error.message ?: "Registration failed")
+                    _authState.value = AuthState.Error(error.message ?: fallbackErrorMessage)
                 }
             )
         }
     }
 
-
-    fun signInWithGoogle(idToken: String) {
+    fun signInWithGoogle(
+        idToken: String,
+        fallbackErrorMessage: String,
+        noEmailError: String,
+        defaultFirstName: String,
+        defaultLastName: String
+    ) {
         viewModelScope.launch {
             _authState.value = AuthState.Loading
 
-            signInWithGoogleUseCase(idToken).fold(
+            signInWithGoogleUseCase(
+                idToken,
+                noEmailError,
+                defaultFirstName,
+                defaultLastName
+            ).fold(
                 onSuccess = { user ->
                     _authState.value = AuthState.Success(user)
                 },
                 onFailure = { error ->
-                    _authState.value = AuthState.Error(error.message ?: "Google authentication failed")
+                    _authState.value = AuthState.Error(error.message ?: fallbackErrorMessage)
                 }
             )
         }
@@ -80,3 +109,4 @@ sealed class AuthState {
     data class Success(val user: AppUser) : AuthState()
     data class Error(val message: String) : AuthState()
 }
+

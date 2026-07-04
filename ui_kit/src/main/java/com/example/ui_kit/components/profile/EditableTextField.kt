@@ -33,7 +33,9 @@ fun EditableTextField(
         Text(
             text = label,
             style = MaterialTheme.typography.labelSmall,
-            color = if (error != null) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
+            color = if (error != null) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onBackground.copy(
+                alpha = 0.7f
+            )
         )
 
         Spacer(Modifier.height(6.dp))

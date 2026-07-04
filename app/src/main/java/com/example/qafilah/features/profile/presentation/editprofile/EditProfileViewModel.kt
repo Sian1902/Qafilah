@@ -38,6 +38,29 @@ class EditProfileViewModel(
 
     private var originalUser: AppUser? = null
 
+    private var sessionExpiredMessage: String = ""
+    private var updateFailedMessage: String = ""
+    private var phoneFormatHint: String = ""
+    private var firstNameEmptyMessage: String = ""
+    private var invalidEmailMessage: String = ""
+    private var phoneEmptyMessage: String = ""
+
+    fun setLocalizedStrings(
+        sessionExpired: String,
+        updateFailed: String,
+        phoneFormat: String,
+        firstNameEmpty: String,
+        invalidEmail: String,
+        phoneEmpty: String
+    ) {
+        sessionExpiredMessage = sessionExpired
+        updateFailedMessage = updateFailed
+        phoneFormatHint = phoneFormat
+        firstNameEmptyMessage = firstNameEmpty
+        invalidEmailMessage = invalidEmail
+        phoneEmptyMessage = phoneEmpty
+    }
+
     init {
         loadUserProfile()
     }
@@ -47,7 +70,7 @@ class EditProfileViewModel(
             _state.update { it.copy(isLoading = true) }
             val token = tokenProvider.getToken()
             if (token == null) {
-                _state.update { it.copy(isLoading = false, generalError = "Session expired") }
+                _state.update { it.copy(isLoading = false, generalError = sessionExpiredMessage) }
                 return@launch
             }
 
@@ -93,7 +116,7 @@ class EditProfileViewModel(
             _state.update { it.copy(isSaving = true, generalError = null) }
             val token = tokenProvider.getToken()
             if (token == null) {
-                _state.update { it.copy(isSaving = false, generalError = "Session expired") }
+                _state.update { it.copy(isSaving = false, generalError = sessionExpiredMessage) }
                 return@launch
             }
 
@@ -127,21 +150,25 @@ class EditProfileViewModel(
     }
 
     private fun handleUpdateError(error: Throwable) {
-        val message = error.message ?: "Update failed"
         _state.update { it.copy(isSaving = false) }
 
-        when {
-            message.contains("email", ignoreCase = true) ->
-                _state.update { it.copy(emailError = message) }
+        when (error) {
+            is com.example.qafilah.features.profile.domain.usecase.UpdateProfileError.FirstNameEmpty ->
+                _state.update { it.copy(firstNameError = firstNameEmptyMessage) }
 
-            message.contains("first name", ignoreCase = true) ->
-                _state.update { it.copy(firstNameError = message) }
+            is com.example.qafilah.features.profile.domain.usecase.UpdateProfileError.InvalidEmail ->
+                _state.update { it.copy(emailError = invalidEmailMessage) }
 
-            message.contains("phone", ignoreCase = true) ->
-                _state.update { it.copy(phoneError = message) }
+            is com.example.qafilah.features.profile.domain.usecase.UpdateProfileError.PhoneEmpty ->
+                _state.update { it.copy(phoneError = phoneEmptyMessage) }
 
-            else ->
+            is com.example.qafilah.features.profile.domain.usecase.UpdateProfileError.InvalidPhoneFormat ->
+                _state.update { it.copy(phoneError = phoneFormatHint) }
+
+            else -> {
+                val message = error.message ?: updateFailedMessage
                 _state.update { it.copy(generalError = message) }
+            }
         }
     }
 

@@ -3,18 +3,11 @@ package com.example.ui_kit.components.address
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Edit
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -23,94 +16,115 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+
 
 @Composable
 fun GlassAddressCard(
     address: AddressUiModel,
+    defaultLabel: String,
+    editContentDescription: String,
+    deleteContentDescription: String,
+    onEditClick: (String) -> Unit,
+    onDeleteClick: (String) -> Unit,
+    onSetDefaultClick: (String) -> Unit,
     onClick: () -> Unit,
-    onEditClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val glassBackground = Color.White.copy(alpha = 0.08f)
-    val glassBorder = Color.White.copy(alpha = 0.12f)
+    val glassBrush = Brush.verticalGradient(
+        colors = listOf(
+            Color.White.copy(alpha = 0.12f),
+            Color.White.copy(alpha = 0.04f)
+        )
+    )
 
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(16.dp))
-            .background(glassBackground)
-            .border(1.dp, glassBorder, RoundedCornerShape(16.dp))
+            .clip(RoundedCornerShape(24.dp))
+            .background(glassBrush)
+            .border(1.dp, Color.White.copy(alpha = 0.12f), RoundedCornerShape(24.dp))
             .clickable { onClick() }
-            .padding(24.dp)
+            .padding(20.dp)
     ) {
-        Column {
-            Box(modifier = Modifier.fillMaxWidth()) {
-                if (address.isDefault) {
-                    Box(
-                        modifier = Modifier
-                            .align(Alignment.TopStart)
-                            .padding(top = 2.dp)
-                            .size(width = 84.dp, height = 30.dp)
-                            .clip(RoundedCornerShape(4.dp))
-                            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.08f))
-                            .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.28f), RoundedCornerShape(4.dp)),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .matchParentSize()
-                                .padding(4.dp)
-                                .background(Color.Transparent)
-                        ) {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(1.dp)
-                                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.35f))
-                                    .align(Alignment.BottomCenter)
-                            )
-                        }
-                        Text(
-                            text = "DEFAULT",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.primary,
-                            fontWeight = FontWeight.Medium
-                        )
-                    }
-                }
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.End,
-                    verticalAlignment = Alignment.Top
-                ) {
-                    IconButton(
-                        onClick = onEditClick,
-                        modifier = Modifier.size(24.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Outlined.Edit,
-                            contentDescription = "Edit",
-                            tint = MaterialTheme.colorScheme.primary
-                        )
-                    }
-                }
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(48.dp)
+                    .clip(RoundedCornerShape(14.dp))
+                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = address.icon,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(24.dp)
+                )
             }
 
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = address.street,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-            Text(
-                text = address.locationDetails,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-            )
+            Column(modifier = Modifier.weight(1f)) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = address.label,
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.onBackground
+                    )
+                    if (address.isDefault) {
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(4.dp))
+                                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f))
+                                .padding(horizontal = 6.dp, vertical = 2.dp)
+                        ) {
+                            Text(
+                                text = defaultLabel,
+                                style = MaterialTheme.typography.labelSmall.copy(
+                                    fontSize = 10.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.primary
+                                )
+                            )
+                        }
+                    }
+                }
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = address.street,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.8f)
+                )
+                Text(
+                    text = address.locationDetails,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f)
+                )
+            }
+
+            Row {
+                IconButton(onClick = { onEditClick(address.id) }) {
+                    Icon(
+                        imageVector = Icons.Default.Edit,
+                        contentDescription = editContentDescription,
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                }
+                IconButton(onClick = { onDeleteClick(address.id) }) {
+                    Icon(
+                        imageVector = Icons.Default.Delete,
+                        contentDescription = deleteContentDescription,
+                        tint = MaterialTheme.colorScheme.error.copy(alpha = 0.7f)
+                    )
+                }
+            }
         }
     }
 }

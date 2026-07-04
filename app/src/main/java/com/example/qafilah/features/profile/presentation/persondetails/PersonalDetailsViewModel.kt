@@ -24,6 +24,14 @@ class PersonalDetailsViewModel(
     private val _uiState = MutableStateFlow<PersonalDetailsUiState>(PersonalDetailsUiState.Loading)
     val uiState: StateFlow<PersonalDetailsUiState> = _uiState.asStateFlow()
 
+    private var sessionExpiredMessage: String = ""
+    private var unknownErrorMessage: String = ""
+
+    fun setLocalizedStrings(sessionExpired: String, unknownError: String) {
+        sessionExpiredMessage = sessionExpired
+        unknownErrorMessage = unknownError
+    }
+
     init {
         loadPersonalDetails()
     }
@@ -34,7 +42,7 @@ class PersonalDetailsViewModel(
             val token = tokenProvider.getToken()
             if (token == null) {
                 _uiState.value =
-                    PersonalDetailsUiState.Error("Session expired. Please login again.")
+                    PersonalDetailsUiState.Error(sessionExpiredMessage)
                 return@launch
             }
 
@@ -43,7 +51,7 @@ class PersonalDetailsViewModel(
                     _uiState.value = PersonalDetailsUiState.Success(user)
                 },
                 onFailure = { error ->
-                    _uiState.value = PersonalDetailsUiState.Error(error.message ?: "Unknown error")
+                    _uiState.value = PersonalDetailsUiState.Error(error.message ?: unknownErrorMessage)
                 }
             )
         }

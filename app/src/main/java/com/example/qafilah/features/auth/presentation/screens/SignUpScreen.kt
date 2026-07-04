@@ -1,16 +1,11 @@
 package com.example.qafilah.features.auth.presentation.screens
 
-import android.util.Log
-import androidx.credentials.exceptions.GetCredentialCancellationException
-import androidx.credentials.exceptions.NoCredentialException
 import android.app.Activity
 import android.content.ContextWrapper
+import androidx.credentials.exceptions.GetCredentialCancellationException
+import androidx.credentials.exceptions.NoCredentialException
 import androidx.credentials.CredentialManager
 import androidx.credentials.GetCredentialRequest
-import androidx.credentials.exceptions.GetCredentialException
-import androidx.credentials.CustomCredential
-import com.google.android.libraries.identity.googleid.GetGoogleIdOption
-import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -21,6 +16,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -37,8 +33,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.credentials.CustomCredential
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.qafilah.R
 import com.example.qafilah.features.auth.domain.model.AppUser
@@ -46,10 +43,11 @@ import com.example.qafilah.features.auth.presentation.AuthState
 import com.example.qafilah.features.auth.presentation.AuthViewModel
 import com.example.ui_kit.components.auth.AuthFooter
 import com.example.ui_kit.components.auth.SignUpCard
-import com.example.ui_kit.theme.QafilahTheme
-import org.koin.androidx.compose.koinViewModel
 import com.example.ui_kit.components.auth.SocialLoginSection
+import com.google.android.libraries.identity.googleid.GetGoogleIdOption
+import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import kotlinx.coroutines.launch
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun SignUpScreen(
@@ -61,6 +59,18 @@ fun SignUpScreen(
     val state = viewModel.authState.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
+
+    val errorHostActivityUnavailable = stringResource(R.string.error_host_activity_unavailable)
+    val errorUnexpectedCredentialType = stringResource(R.string.error_unexpected_credential_type)
+    val errorNoGoogleAccounts = stringResource(R.string.error_no_google_accounts)
+    val errorGoogleSignInFailed = stringResource(R.string.error_google_sign_in_failed)
+
+    val errorRegistrationFailed = stringResource(R.string.error_registration_failed)
+    val errorGoogleAuthFailed = stringResource(R.string.error_google_auth_failed)
+    val errorFieldsEmpty = stringResource(R.string.error_fields_empty)
+    val errorNoEmail = stringResource(R.string.no_email)
+    val defaultFirstName = stringResource(R.string.valued_customer_first_name)
+    val defaultLastName = stringResource(R.string.valued_customer_last_name)
 
     val activity = remember(context) {
         var currentContext = context
@@ -81,54 +91,49 @@ fun SignUpScreen(
         modifier = modifier,
         state = state.value,
         onSignUp = { name, email, password ->
-            viewModel.signUp(name, email, password)
+            viewModel.signUp(name, email, password, errorRegistrationFailed, errorFieldsEmpty)
         },
         onLoginWithGoogle = {
-            Log.d("SignUpScreen", "onLoginWithGoogle clicked")
             coroutineScope.launch {
                 try {
                     if (activity == null) {
-                        Log.e("SignUpScreen", "Activity context is null")
-                        viewModel.setAuthError("Failed to initiate login: host activity is not available.")
+                        viewModel.setAuthError(errorHostActivityUnavailable)
                         return@launch
                     }
-                    Log.d("SignUpScreen", "Initializing CredentialManager")
                     val credentialManager = CredentialManager.create(activity)
                     val webClientId = "50329480866-0ismrbov61kq0tj3c4g1282foev660r6.apps.googleusercontent.com"
 
-                    Log.d("SignUpScreen", "Building GetGoogleIdOption")
                     val googleIdOption = GetGoogleIdOption.Builder()
                         .setFilterByAuthorizedAccounts(false)
                         .setServerClientId(webClientId)
-                        .setAutoSelectEnabled(false) // Set to false to always show the bottom sheet chooser
+                        .setAutoSelectEnabled(false)
                         .build()
 
                     val request = GetCredentialRequest.Builder()
                         .addCredentialOption(googleIdOption)
                         .build()
 
-                    Log.d("SignUpScreen", "Requesting credential from CredentialManager")
                     val result = credentialManager.getCredential(activity, request)
                     val credential = result.credential
 
-                    Log.d("SignUpScreen", "Credential retrieved. Type: ${credential.type}")
                     if (credential is CustomCredential && credential.type == GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL) {
                         val googleIdTokenCredential = GoogleIdTokenCredential.createFrom(credential.data)
-                        Log.d("SignUpScreen", "Obtained Google ID Token successfully")
-                        viewModel.signInWithGoogle(googleIdTokenCredential.idToken)
+                        viewModel.signInWithGoogle(
+                            googleIdTokenCredential.idToken,
+                            errorGoogleAuthFailed,
+                            errorNoEmail,
+                            defaultFirstName,
+                            defaultLastName
+                        )
                     } else {
-                        Log.w("SignUpScreen", "Unexpected credential type received")
-                        viewModel.setAuthError("Sign-in failed: unexpected credential type.")
+                        viewModel.setAuthError(errorUnexpectedCredentialType)
                     }
                 } catch (e: GetCredentialCancellationException) {
-                    Log.d("SignUpScreen", "User cancelled Google Sign-In")
                     viewModel.setIdleState()
                 } catch (e: NoCredentialException) {
-                    Log.w("SignUpScreen", "No credentials/accounts found: ${e.message}")
-                    viewModel.setAuthError("No Google accounts found. Please add a Google account in your device settings.")
+                    viewModel.setAuthError(errorNoGoogleAccounts)
                 } catch (e: Throwable) {
-                    Log.e("SignUpScreen", "Error during Google Sign-In", e)
-                    viewModel.setAuthError(e.message ?: "Google sign-in failed. Please try again.")
+                    viewModel.setAuthError(e.message ?: errorGoogleSignInFailed)
                 }
             }
         },
@@ -136,7 +141,7 @@ fun SignUpScreen(
             onNavigateToHome(
                 AppUser(
                     id = "Guest",
-                    email = "alooo@alooo.com",
+                    email = null,
                 )
             )
         },
@@ -177,18 +182,18 @@ private fun SignUpContent(
             ) {
                 Image(
                     painter = painterResource(id = R.drawable.ic_logo),
-                    contentDescription = "App Logo",
+                    contentDescription = stringResource(R.string.app_logo_content_description),
                     modifier = Modifier.size(150.dp)
                 )
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
-                    text = "Qafilah",
+                    text = stringResource(R.string.app_name),
                     style = MaterialTheme.typography.displayMedium,
                     color = MaterialTheme.colorScheme.onBackground
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = "Your journey to discovery begins here",
+                    text = stringResource(R.string.signup_tagline),
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
                 )
@@ -196,18 +201,37 @@ private fun SignUpContent(
 
             SignUpCard(
                 onSignUp = onSignUp,
-                authErrorMessage = errorMessage
+                authErrorMessage = errorMessage,
+                nameLabel = stringResource(R.string.first_name),
+                namePlaceholder = stringResource(R.string.signup_name_placeholder),
+                nameErrorMessage = stringResource(R.string.signup_name_error_message),
+                emailLabel = stringResource(R.string.email_address),
+                emailPlaceholder = stringResource(R.string.signup_email_placeholder),
+                emailErrorMessage = stringResource(R.string.signup_email_error_message),
+                passwordLabel = stringResource(R.string.password),
+                passwordPlaceholder = stringResource(R.string.signup_password_placeholder),
+                passwordErrorMessage = stringResource(R.string.signup_password_error_message),
+                confirmPasswordLabel = stringResource(R.string.confirm_password),
+                confirmPasswordPlaceholder = stringResource(R.string.signup_confirm_password_placeholder),
+                confirmPasswordErrorMessage = stringResource(R.string.signup_confirm_password_error_message),
+                submitButtonLabel = stringResource(R.string.signup_action_label),
+                togglePasswordVisibilityContentDescription = stringResource(R.string.login_toggle_password_visibility_cd)
             )
 
             SocialLoginSection(
+                orLabel = stringResource(R.string.ui_common_or),
                 googleIcon = painterResource(id = R.drawable.ic_google),
-                onGoogleClick = onLoginWithGoogle,
-                onAppleClick = {},
-                onEmailClick = {}
+                onGoogleClick = onLoginWithGoogle
             )
 
             AuthFooter(
                 isInLogin = false,
+                loginPrompt = stringResource(R.string.login_prompt),
+                loginActionLabel = stringResource(R.string.login_action_label),
+                signupPrompt = stringResource(R.string.signup_prompt),
+                signupActionLabel = stringResource(R.string.signup_action_label),
+                guestButtonLabel = stringResource(R.string.guest_button_label),
+                guestButtonContentDescription = stringResource(R.string.guest_button_content_description),
                 onLoginAsGuest = onLoginAsGuest,
                 onNavigate = onNavigateToLogin
             )
