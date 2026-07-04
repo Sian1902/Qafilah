@@ -10,7 +10,11 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.example.qafilah.R
+import com.example.qafilah.features.checkout.presentation.shared.CheckoutDisplayCart
 import com.example.qafilah.features.checkout.presentation.shared.CheckoutSharedViewModel
 import com.example.ui_kit.components.checkout.CheckoutProductCard
 import com.example.ui_kit.components.checkout.CheckoutSummaryCard
@@ -25,6 +29,7 @@ fun CheckoutSummaryScreen(
     onNavigateToPayment: () -> Unit
 ) {
     val cart by sharedViewModel.cartState.collectAsState()
+    val displayCart by sharedViewModel.displayCartState.collectAsState()
 
     val localUiState by summaryViewModel.uiState.collectAsState()
 
@@ -37,11 +42,12 @@ fun CheckoutSummaryScreen(
     CheckoutSummaryContent(
         modifier = modifier,
         uiState = finalUiState,
+        displayCart = displayCart,
         onShippingOptionSelected = { handle ->
             val groupId = cart!!.deliveryGroups.firstOrNull()?.id ?: return@CheckoutSummaryContent
 
             summaryViewModel.selectShippingOption(cart!!.id, groupId, handle) { updatedCart ->
-                sharedViewModel.updateCartState(updatedCart)
+                sharedViewModel.updateCartStateWithSelectedShipping(updatedCart, handle)
             }
         },
         onProceedToPayment = onNavigateToPayment
@@ -52,14 +58,16 @@ fun CheckoutSummaryScreen(
 fun CheckoutSummaryContent(
     modifier: Modifier = Modifier,
     uiState: CheckoutSummaryUIState,
+    displayCart: CheckoutDisplayCart?,
     onShippingOptionSelected: (String) -> Unit,
     onProceedToPayment: () -> Unit
 ) {
     val cart = uiState.cart ?: return
+    val displayedCart = displayCart ?: return
 
-    val uiKitDeliveryOptions = cart.deliveryGroups.firstOrNull()?.deliveryOptions?.map { option ->
-        Triple(option.handle, option.title, "$${option.estimatedCost.amount}")
-    } ?: emptyList()
+    val uiKitDeliveryOptions = displayedCart.deliveryOptions.map { option ->
+        Triple(option.handle, option.title, option.displayCost)
+    }
 
     Column(
         modifier = modifier
@@ -73,7 +81,7 @@ fun CheckoutSummaryContent(
         ) {
             item {
                 Text(
-                    text = "Order Summary",
+                    text = stringResource(R.string.checkout_order_summary_title),
                     style = MaterialTheme.typography.displayMedium,
                     color = MaterialTheme.colorScheme.onBackground,
                     modifier = Modifier.padding(bottom = 8.dp)
@@ -81,12 +89,13 @@ fun CheckoutSummaryContent(
             }
 
             items(cart.lines) { lineItem ->
+                val displayLine = displayedCart.lines.firstOrNull { it.id == lineItem.id } ?: return@items
                 CheckoutProductCard(
                     imageUrl = lineItem.imageUrl ?: "",
-                    title = lineItem.productTitle,
-                    variantTitle = lineItem.variantTitle,
-                    price = "$${lineItem.price.amount}",
-                    quantity = lineItem.quantity
+                    title = displayLine.title,
+                    variantTitle = displayLine.variantTitle,
+                    price = displayLine.displayPrice,
+                    quantityLabel = stringResource(R.string.checkout_quantity_label, lineItem.quantity)
                 )
             }
 
@@ -101,6 +110,7 @@ fun CheckoutSummaryContent(
             if (uiKitDeliveryOptions.isNotEmpty()) {
                 item {
                     DeliveryOptionsRadioGroup(
+                        title = stringResource(R.string.checkout_shipping_method_title),
                         options = uiKitDeliveryOptions,
                         selectedOptionHandle = uiState.selectedDeliveryHandle,
                         onOptionSelected = onShippingOptionSelected
@@ -118,11 +128,16 @@ fun CheckoutSummaryContent(
 
             item {
                 CheckoutSummaryCard(
-                    subtotal = uiState.displaySubtotal,
-                    discountAmount = uiState.displayDiscount,
-                    tax = uiState.displayTax,
-                    shippingAmount = uiState.displayShipping,
-                    total = uiState.displayTotal,
+                    subtotalLabel = stringResource(R.string.checkout_subtotal_label),
+                    subtotal = displayedCart.displaySubtotal,
+                    discountLabel = stringResource(R.string.checkout_discount_label),
+                    discountAmount = displayedCart.displayDiscount,
+                    shippingLabel = stringResource(R.string.checkout_shipping_label),
+                    taxLabel = stringResource(R.string.checkout_tax_label),
+                    totalLabel = stringResource(R.string.checkout_total_label),
+                    tax = displayedCart.displayTax,
+                    shippingAmount = displayedCart.displayShipping,
+                    total = displayedCart.displayTotal,
                     isCalculating = uiState.isRecalculating
                 )
             }
@@ -148,7 +163,7 @@ fun CheckoutSummaryContent(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "Proceed to Payment",
+                    text = stringResource(R.string.checkout_proceed_to_payment),
                     style = MaterialTheme.typography.bodyLarge
                 )
 
@@ -160,11 +175,14 @@ fun CheckoutSummaryContent(
                     )
                 } else {
                     Text(
-                        text = "$${cart.cost.totalAmount.amount}",
-                        style = MaterialTheme.typography.headlineMedium
+                        text = displayedCart.displayTotal,
+                        style = MaterialTheme.typography.bodyMedium,
+                        textAlign = TextAlign.End
                     )
                 }
             }
         }
     }
 }
+
+

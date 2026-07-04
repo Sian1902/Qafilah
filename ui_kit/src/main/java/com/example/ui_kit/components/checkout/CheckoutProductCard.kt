@@ -21,7 +21,7 @@ fun CheckoutProductCard(
     title: String,
     variantTitle: String,
     price: String,
-    quantity: Int
+    quantityLabel: String
 ) {
     val colorScheme = MaterialTheme.colorScheme
     val cardShape = RoundedCornerShape(28.dp)
@@ -101,7 +101,7 @@ fun CheckoutProductCard(
             contentAlignment = Alignment.Center
         ) {
             Text(
-                text = "Qty: $quantity",
+                text = quantityLabel,
                 style = MaterialTheme.typography.bodyMedium,
                 color = colorScheme.onSurface
             )

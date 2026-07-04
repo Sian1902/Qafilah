@@ -19,6 +19,7 @@ import com.example.ui_kit.components.address.AddressUiModel
 fun CheckoutAddressCard(
     address: AddressUiModel,
     isSelected: Boolean,
+    defaultBadgeText: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -64,7 +65,7 @@ fun CheckoutAddressCard(
                     )
 
                     if (address.isDefault) {
-                        ContainerBadge(text = "DEFAULT", colorScheme = colorScheme)
+                        ContainerBadge(text = defaultBadgeText, colorScheme = colorScheme)
                     }
                 }
 

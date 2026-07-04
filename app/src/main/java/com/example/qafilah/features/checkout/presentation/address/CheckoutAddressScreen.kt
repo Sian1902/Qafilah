@@ -8,13 +8,14 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import com.example.qafilah.R
 import com.example.qafilah.features.address.domain.model.ShippingAddress
 import com.example.qafilah.features.address.domain.model.toUiModel
-import com.example.qafilah.features.checkout.domain.model.CheckoutCart
 import com.example.qafilah.features.checkout.presentation.shared.CheckoutSharedViewModel
 import com.example.ui_kit.components.checkout.CheckoutAddressCard
 import org.koin.androidx.compose.koinViewModel
@@ -51,7 +52,7 @@ fun CheckoutAddressScreen(
             cart?.let { safeCart ->
                 addressViewModel.submitAddress(safeCart.id) { updatedCart, selectedAddress ->
                     sharedViewModel.updateCartState(updatedCart)
-                    sharedViewModel.setShippingAddress(selectedAddress) // Assuming you added this!
+                    sharedViewModel.setShippingAddress(selectedAddress)
                     onNavigateToSummary()
                 }
             }
@@ -77,7 +78,7 @@ private fun CheckoutAddressContent(
             .padding(16.dp)
     ) {
         Text(
-            text = "Shipping Address",
+            text = stringResource(R.string.checkout_shipping_address_title),
             style = MaterialTheme.typography.displayMedium,
             color = MaterialTheme.colorScheme.onBackground,
             modifier = Modifier.padding(bottom = 16.dp)
@@ -96,6 +97,7 @@ private fun CheckoutAddressContent(
                     CheckoutAddressCard(
                         address = domainAddress.toUiModel(),
                         isSelected = domainAddress.id == uiState.selectedAddressId,
+                        defaultBadgeText = stringResource(R.string.address_default_label),
                         onClick = { onSelectAddress(domainAddress) }
                     )
                 }
@@ -109,7 +111,10 @@ private fun CheckoutAddressContent(
                             .height(56.dp),
                         shape = RoundedCornerShape(16.dp)
                     ) {
-                        Text("Add or Edit Addresses", style = MaterialTheme.typography.bodyLarge)
+                                Text(
+                                    text = stringResource(R.string.checkout_manage_addresses),
+                                    style = MaterialTheme.typography.bodyLarge
+                                )
                     }
                 }
             }
@@ -137,7 +142,10 @@ private fun CheckoutAddressContent(
                     strokeWidth = 2.dp
                 )
             } else {
-                Text("Continue to Summary", style = MaterialTheme.typography.bodyLarge)
+                Text(
+                    text = stringResource(R.string.checkout_continue_to_summary),
+                    style = MaterialTheme.typography.bodyLarge
+                )
             }
         }
     }
