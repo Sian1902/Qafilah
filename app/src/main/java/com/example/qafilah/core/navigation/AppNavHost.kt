@@ -31,6 +31,8 @@ import com.example.qafilah.features.home.presentation.ui.HomeScreen
 import com.example.qafilah.features.onboarding.OnboardingScreen
 import com.example.qafilah.features.product_detail.presentation.ProductDetailScreen
 import com.example.qafilah.features.profile.presentation.editprofile.EditProfileScreen
+import com.example.qafilah.features.orders.presentation.OrdersScreen
+import com.example.qafilah.features.orders.presentation.OrdersViewModel
 import com.example.qafilah.features.profile.presentation.persondetails.PersonalDetailsScreen
 import com.example.qafilah.features.profile.presentation.profile.ProfileScreen
 import com.example.qafilah.features.profile.presentation.profile.ProfileViewModel
@@ -284,6 +286,9 @@ fun AppNavHost(
                 onPersonalDetailsClick = {
                     navController.navigate(Screen.PersonalDetails.route)
                 },
+                onOrdersClick = {
+                    navController.navigate(Screen.Orders.route)
+                },
                 onSavedPaymentsClick = {
                 },
                 onShippingAddressesClick = {
@@ -306,6 +311,20 @@ fun AppNavHost(
             PersonalDetailsScreen(
                 onBackClick = { navController.popBackStack() },
                 onEditClick = { navController.navigate(Screen.EditProfile.route) }
+            )
+        }
+
+        composable(Screen.Orders.route) {
+            val ordersViewModel: OrdersViewModel = koinViewModel()
+            LaunchedEffect(Unit) {
+                ordersViewModel.loadOrders()
+            }
+            OrdersScreen(
+                viewModel = ordersViewModel,
+                onBackClick = { navController.popBackStack() },
+                onOrderClick = { orderId ->
+                    navController.navigate(Screen.OrderConfirmation.createRoute(orderId))
+                }
             )
         }
 

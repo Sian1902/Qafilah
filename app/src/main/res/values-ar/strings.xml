@@ -246,4 +246,19 @@
     <string name="signup_password_error_message">كلمة المرور قصيرة جداً</string>
     <string name="signup_confirm_password_placeholder">••••••••</string>
     <string name="signup_confirm_password_error_message">كلمتا المرور غير متطابقتين</string>
+    <string name="my_orders">طلباتي</string>
+    <string name="orders_count">%d طلب</string>
+    <string name="orders_icon_cd">سجل الطلبات</string>
+    <string name="order_history_title">سجل الطلبات</string>
+    <string name="orders_empty_title">لا توجد طلبات بعد</string>
+    <string name="orders_empty_subtitle">لم تبدأ رحلاتك بعد. ابدأ الاستكشاف الآن.</string>
+    <string name="order_number_label">طلب رقم %s</string>
+    <string name="order_date_label">تم الطلب في %s</string>
+    <string name="order_total_items">%d عناصر</string>
+    <string name="order_status_paid">مدفوع</string>
+    <string name="order_status_fulfilled">تم التوصيل</string>
+    <string name="order_status_processing">قيد المعالجة</string>
+    <string name="order_view_details">عرض التفاصيل</string>
+    <string name="order_details_title">تفاصيل الطلب</string>
+
 </resources>

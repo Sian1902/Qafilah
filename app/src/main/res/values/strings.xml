@@ -246,4 +246,19 @@
     <string name="signup_confirm_password_error_message">Passwords do not match</string>
 
 
+    <string name="my_orders">My Orders</string>
+    <string name="orders_count">%d orders</string>
+    <string name="orders_icon_cd">Order history</string>
+    <string name="order_history_title">Order History</string>
+    <string name="orders_empty_title">No orders yet</string>
+    <string name="orders_empty_subtitle">You haven\'t made any journeys yet. Start exploring now.</string>
+    <string name="order_number_label">Order #%s</string>
+    <string name="order_date_label">Placed on %s</string>
+    <string name="order_total_items">%d items</string>
+    <string name="order_status_paid">Paid</string>
+    <string name="order_status_fulfilled">Fulfilled</string>
+    <string name="order_status_processing">Processing</string>
+    <string name="order_view_details">View Details</string>
+    <string name="order_details_title">Order Details</string>
+
 </resources>
