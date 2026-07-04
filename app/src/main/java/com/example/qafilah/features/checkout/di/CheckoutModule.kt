@@ -27,6 +27,6 @@ val checkoutModule = module {
 
     viewModel { CheckoutSharedViewModel() }
     viewModel { CheckoutSummaryViewModel(get()) }
-    viewModel { CheckoutAddressViewModel(get()) }
+    viewModel { CheckoutAddressViewModel(get(), get(), get()) }
     viewModel { CheckoutPaymentViewModel() }
 }
