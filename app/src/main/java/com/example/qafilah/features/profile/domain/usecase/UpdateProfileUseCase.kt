@@ -3,6 +3,13 @@ package com.example.qafilah.features.profile.domain.usecase
 import com.example.qafilah.features.auth.domain.model.AppUser
 import com.example.qafilah.features.profile.domain.repository.ProfileRepository
 
+sealed class UpdateProfileError : Throwable() {
+    object FirstNameEmpty : UpdateProfileError()
+    object InvalidEmail : UpdateProfileError()
+    object PhoneEmpty : UpdateProfileError()
+    object InvalidPhoneFormat : UpdateProfileError()
+}
+
 class UpdateProfileUseCase(
     private val repository: ProfileRepository
 ) {
@@ -15,16 +22,16 @@ class UpdateProfileUseCase(
         originalEmail: String?
     ): Result<Pair<AppUser, Boolean>> {
         if (firstName.isBlank()) {
-            return Result.failure(Exception("First name cannot be blank"))
+            return Result.failure(UpdateProfileError.FirstNameEmpty)
         }
         if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-            return Result.failure(Exception("Invalid email format"))
+            return Result.failure(UpdateProfileError.InvalidEmail)
         }
         if (phone.isBlank()) {
-            return Result.failure(Exception("Phone number cannot be blank"))
+            return Result.failure(UpdateProfileError.PhoneEmpty)
         }
         if (!phone.startsWith("+")) {
-            return Result.failure(Exception("Include '+' and country code (e.g. +2010...)"))
+            return Result.failure(UpdateProfileError.InvalidPhoneFormat)
         }
 
         return repository.updateProfile(accessToken, firstName, lastName, email, phone)

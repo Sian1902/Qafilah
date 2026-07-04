@@ -6,6 +6,12 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 
+sealed class NetworkError(message: String) : Exception(message) {
+    class GraphQLError(graphqlMessage: String) : NetworkError(graphqlMessage)
+    class DataIsNull : NetworkError("Data is null")
+    class Unknown : NetworkError("Unknown network error")
+}
+
 suspend fun <D : Operation.Data> safeApiCall(
     apiCall: suspend () -> ApolloResponse<D>
 ): D {
@@ -16,13 +22,14 @@ suspend fun <D : Operation.Data> safeApiCall(
             if (response.hasErrors()) {
                 val errorMessage =
                     response.errors?.firstOrNull()?.message ?: "Unknown GraphQL Error"
-                throw Exception(errorMessage)
+                throw NetworkError.GraphQLError(errorMessage)
             }
 
-            response.data ?: throw Exception("Response data is null")
+            response.data ?: throw NetworkError.DataIsNull()
 
         } catch (e: Exception) {
-            throw e
+            if (e is NetworkError) throw e
+            throw NetworkError.Unknown()
         }
     }
 }

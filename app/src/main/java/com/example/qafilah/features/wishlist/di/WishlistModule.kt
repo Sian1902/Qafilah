@@ -15,7 +15,6 @@ import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
 
 val wishlistModule = module {
-    // 1. ADD THIS: Tell Koin exactly how to build the AppDatabase
     single {
         Room.databaseBuilder(
             androidContext(),
@@ -26,7 +25,6 @@ val wishlistModule = module {
             .build()
     }
 
-    // 2. Now this will succeed because AppDatabase is defined directly above it
     single { get<AppDatabase>().wishlistDao() }
 
     single { OkHttpClient() }
@@ -38,5 +36,5 @@ val wishlistModule = module {
     factory { RemoveFromWishlistUseCase(get()) }
     factory { ClearWishlistUseCase(get()) }
 
-    viewModel { WishlistViewModel(get(), get(),get(),get()) }
+    viewModel { WishlistViewModel(get(), get(), get(), get(), get()) }
 }

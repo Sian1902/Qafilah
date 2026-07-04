@@ -24,9 +24,11 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.qafilah.R
 import com.example.ui_kit.components.home.ProductCard
 import com.example.ui_kit.components.home.ProductUiModel
 import com.example.ui_kit.components.login.LoginPromptBottomSheet
@@ -46,7 +48,23 @@ fun WishlistScreen(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
+    val loadFailedFallback = stringResource(R.string.error_failed_to_load_wishlist)
+    val removeFailedFallback = stringResource(R.string.error_failed_to_remove_item)
+    val unknownCategoryFallback = stringResource(R.string.unknown_category)
+    val wishlistEmptyTitle = stringResource(R.string.wishlist_empty_title)
+    val wishlistEmptySubtitle = stringResource(R.string.wishlist_empty_subtitle)
+    val wishlistTitle = stringResource(R.string.wishlist_title)
+    val wishlistItemCountTemplate = stringResource(R.string.wishlist_item_count)
+    val featureNameWishlist = stringResource(R.string.feature_name_wishlist)
+    val removeItemTitle = stringResource(R.string.remove_item_title)
+    val removeItemMessageTemplate = stringResource(R.string.remove_item_message)
+
     LaunchedEffect(Unit) {
+        viewModel.setLocalizedStrings(
+            loadFailedFallback,
+            removeFailedFallback,
+            unknownCategoryFallback
+        )
         viewModel.onIntent(WishlistIntent.EnterScreen)
         viewModel.events.collect { event ->
             when (event) {
@@ -76,6 +94,7 @@ fun WishlistScreen(
                         strokeWidth = 6.dp
                     )
                 }
+
                 state.items.isEmpty() -> {
                     Column(
                         modifier = Modifier
@@ -86,20 +105,20 @@ fun WishlistScreen(
                         verticalArrangement = Arrangement.Center
                     ) {
                         Text(
-                            text = "Your wishlist is waiting to be filled.",
+                            text = wishlistEmptyTitle,
                             style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
                             color = MaterialTheme.colorScheme.onBackground
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
-                            text = "Begin your caravan journey by exploring our curated collections.",
+                            text = wishlistEmptySubtitle,
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                 }
+
                 else -> {
-                    // --- WISHLIST DYNAMIC GRID LIST VIEW ---
                     LazyVerticalGrid(
                         columns = GridCells.Fixed(2),
                         modifier = Modifier.fillMaxSize(),
@@ -107,29 +126,38 @@ fun WishlistScreen(
                         horizontalArrangement = Arrangement.spacedBy(16.dp),
                         verticalArrangement = Arrangement.spacedBy(24.dp)
                     ) {
-                        // Wishlist Header Titles Block
                         item(span = { GridItemSpan(maxLineSpan) }) {
                             Column {
                                 Text(
-                                    text = "Wishlist",
+                                    text = wishlistTitle,
                                     style = MaterialTheme.typography.headlineLarge.copy(fontWeight = FontWeight.Bold),
                                     color = MaterialTheme.colorScheme.primary
                                 )
                                 Spacer(modifier = Modifier.height(4.dp))
                                 Text(
-                                    text = "${state.items.size} items curated for your journey",
+                                    text = String.format(
+                                        wishlistItemCountTemplate,
+                                        state.items.size
+                                    ),
                                     style = MaterialTheme.typography.bodyMedium,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                             }
                         }
 
-                        // Product Items Rendering Loop[cite: 14]
                         items(items = state.items, key = { it.id }) { product ->
                             ProductCard(
                                 product = product,
                                 onClick = onProductClick,
-                                onFavoriteClick = { viewModel.onIntent(WishlistIntent.PromptRemove(product = product)) })                     }
+                                toggleWishlistContentDescription = stringResource(R.string.product_card_toggle_wishlist_cd),
+                                onFavoriteClick = {
+                                    viewModel.onIntent(
+                                        WishlistIntent.PromptRemove(
+                                            product = product
+                                        )
+                                    )
+                                })
+                        }
                     }
                 }
             }
@@ -138,7 +166,10 @@ fun WishlistScreen(
 
     if (state.showLoginPrompt) {
         LoginPromptBottomSheet(
-            featureName = "your wishlist",
+            title = stringResource(R.string.login_prompt_title),
+            subtitle = stringResource(R.string.login_prompt_subtitle, featureNameWishlist),
+            loginButtonLabel = stringResource(R.string.login_button_label),
+            signUpButtonLabel = stringResource(R.string.signup_action_label),
             onDismiss = { viewModel.onIntent(WishlistIntent.DismissLoginPrompt) },
             onNavigateToLogin = { viewModel.onIntent(WishlistIntent.NavigateToLogin) },
             onNavigateToSignUp = { viewModel.onIntent(WishlistIntent.NavigateToSignUp) }
@@ -146,8 +177,10 @@ fun WishlistScreen(
     }
     state.productToConfirmRemove?.let { product ->
         QafilahConfirmDialog(
-            title = "Remove Item",
-            message = "Are you sure you want to remove ${product.name} from your wishlist?",
+            title = removeItemTitle,
+            message = String.format(removeItemMessageTemplate, product.name),
+            confirmText = stringResource(R.string.dialog_confirm_remove),
+            dismissText = stringResource(R.string.dialog_dismiss_cancel),
             onConfirm = { viewModel.onIntent(WishlistIntent.ConfirmRemoval) },
             onDismiss = { viewModel.onIntent(WishlistIntent.DismissRemoval) }
         )

@@ -16,6 +16,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.qafilah.R
@@ -51,16 +52,22 @@ fun SplashScreen(
         Spacer(modifier = Modifier.weight(1f))
 
         SplashLogo(
-            logo = painterResource(id = R.drawable.ic_logo)
+            logo = painterResource(id = R.drawable.ic_logo),
+            contentDescription = stringResource(R.string.app_logo_content_description)
         )
 
         Spacer(modifier = Modifier.height(32.dp))
 
-        BrandTitle()
+        BrandTitle(
+            appName = stringResource(R.string.app_name_brand),
+            arabicName = stringResource(R.string.app_name_arabic)
+        )
 
         Spacer(modifier = Modifier.weight(1f))
 
-        SplashTagline()
+        SplashTagline(
+            tagline = stringResource(R.string.splash_tagline)
+        )
 
         Spacer(modifier = Modifier.height(40.dp))
     }

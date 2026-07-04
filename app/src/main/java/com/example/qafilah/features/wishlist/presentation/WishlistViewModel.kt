@@ -3,6 +3,7 @@ package com.example.qafilah.features.wishlist.presentation
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.qafilah.features.auth.domain.util.RequireAuth
+import com.example.qafilah.core.currency.ConvertPriceUseCase
 import com.example.qafilah.features.wishlist.domain.model.WishlistItem
 import com.example.qafilah.features.wishlist.domain.usecase.GetWishlistUseCase
 import com.example.qafilah.features.wishlist.domain.usecase.IsProductWishlistedUseCase
@@ -45,7 +46,8 @@ class WishlistViewModel(
     private val requireAuth: RequireAuth,
     private val getWishlistUseCase: GetWishlistUseCase,
     private val isProductWishlistedUseCase: IsProductWishlistedUseCase,
-    private val removeFromWishlistUseCase: RemoveFromWishlistUseCase
+    private val removeFromWishlistUseCase: RemoveFromWishlistUseCase,
+    private val convertPriceUseCase: ConvertPriceUseCase
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(WishlistState())
@@ -54,6 +56,16 @@ class WishlistViewModel(
     private val _events = Channel<WishlistEvent>(Channel.BUFFERED)
     val events = _events.receiveAsFlow()
 
+    private var loadFailedFallback: String = ""
+    private var removeFailedFallback: String = ""
+    private var unknownCategoryFallback: String = ""
+
+    fun setLocalizedStrings(loadFailed: String, removeFailed: String, unknownCategory: String) {
+        loadFailedFallback = loadFailed
+        removeFailedFallback = removeFailed
+        unknownCategoryFallback = unknownCategory
+    }
+
     fun onIntent(intent: WishlistIntent) {
         when (intent) {
             WishlistIntent.EnterScreen -> checkAuthAndLoad()
@@ -61,22 +73,27 @@ class WishlistViewModel(
                 _state.update { it.copy(showLoginPrompt = false) }
                 _events.trySend(WishlistEvent.NavigateToLogin)
             }
+
             WishlistIntent.NavigateToSignUp -> {
                 _state.update { it.copy(showLoginPrompt = false) }
                 _events.trySend(WishlistEvent.NavigateToSignUp)
             }
+
             WishlistIntent.DismissLoginPrompt -> {
                 _state.update { it.copy(showLoginPrompt = false) }
                 _events.trySend(WishlistEvent.NavigateToHome)
             }
+
             is WishlistIntent.RemoveFromWishlist -> removeItemFromDb(intent.productId)
             is WishlistIntent.PromptRemove -> {
                 _state.update { it.copy(productToConfirmRemove = intent.product) }
             }
+
             WishlistIntent.ConfirmRemoval -> {
                 state.value.productToConfirmRemove?.let { removeItemFromDb(it.id) }
                 _state.update { it.copy(productToConfirmRemove = null) }
             }
+
             WishlistIntent.DismissRemoval -> {
                 _state.update { it.copy(productToConfirmRemove = null) }
             }
@@ -101,7 +118,7 @@ class WishlistViewModel(
                 }
             } catch (e: Exception) {
                 _state.update {
-                    it.copy(isLoading = false, errorMessage = e.message ?: "Failed to load wishlist")
+                    it.copy(isLoading = false, errorMessage = e.message ?: loadFailedFallback)
                 }
             }
         }
@@ -133,17 +150,17 @@ class WishlistViewModel(
             try {
                 removeFromWishlistUseCase(productId)
             } catch (e: Exception) {
-                _state.update { it.copy(errorMessage = e.message ?: "Failed to remove item") }
+                _state.update { it.copy(errorMessage = e.message ?: removeFailedFallback) }
             }
         }
     }
 
-    private fun WishlistItem.toUiModel(): ProductUiModel = ProductUiModel(
+    private suspend fun WishlistItem.toUiModel(): ProductUiModel = ProductUiModel(
         id = productId,
         imageUrl = remoteImageUrl ?: localImagePath ?: "",
-        category = vendor ?: "Unknown Category",
+        category = vendor ?: unknownCategoryFallback,
         name = title,
-        price = "$currencyCode $price",
+        price = convertPriceUseCase(price),
         isFavorite = true
     )
 }

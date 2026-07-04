@@ -24,7 +24,8 @@ val searchModule = module {
             getCollectionsUseCase = get(),
             isProductWishlistedUseCase = get(),
             addToWishlistUseCase = get(),
-            removeFromWishlistUseCase = get()
+            removeFromWishlistUseCase = get(),
+            convertPriceUseCase = get()
         )
     }
 }

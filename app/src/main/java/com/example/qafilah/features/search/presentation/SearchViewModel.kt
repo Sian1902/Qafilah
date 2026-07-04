@@ -6,6 +6,7 @@ import com.example.qafilah.core.model.Product
 import com.example.qafilah.features.catalog.domain.usecases.GetBestSellingUseCase
 import com.example.qafilah.features.catalog.domain.usecases.GetCollectionsUseCase
 import com.example.qafilah.features.catalog.domain.usecases.SearchProductsUseCase
+import com.example.qafilah.core.currency.ConvertPriceUseCase
 import com.example.qafilah.features.search.data.datasource.SearchLocalDataSource
 import com.example.qafilah.features.search.domain.model.ChipState
 import com.example.qafilah.features.wishlist.domain.usecase.AddToWishlistUseCase
@@ -27,7 +28,8 @@ class SearchViewModel(
     private val getCollectionsUseCase: GetCollectionsUseCase,
     private val isProductWishlistedUseCase: IsProductWishlistedUseCase,
     private val addToWishlistUseCase: AddToWishlistUseCase,
-    private val removeFromWishlistUseCase: RemoveFromWishlistUseCase
+    private val removeFromWishlistUseCase: RemoveFromWishlistUseCase,
+    private val convertPriceUseCase: ConvertPriceUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(SearchUiState())
@@ -143,18 +145,31 @@ class SearchViewModel(
     }
 
     private fun combineAndEmitResults() {
-        val categoryFilter = _uiState.value.selectedCategory
-        val brandFilter = _uiState.value.selectedBrand
+        viewModelScope.launch {
+            val categoryFilter = _uiState.value.selectedCategory
+            val brandFilter = _uiState.value.selectedBrand
 
-        val filtered = rawFetchedProducts.filter { product ->
-            val matchesCategory = categoryFilter == null || product.vendor.equals(categoryFilter, ignoreCase = true)
-            val matchesBrand = brandFilter == null || product.vendor.equals(brandFilter, ignoreCase = true)
-            matchesCategory && matchesBrand
-        }.map { it.toUiModel() }
+            val filtered = rawFetchedProducts.filter { product ->
+                val matchesCategory =
+                    categoryFilter == null || product.vendor.equals(
+                        categoryFilter,
+                        ignoreCase = true
+                    )
+                val matchesBrand =
+                    brandFilter == null || product.vendor.equals(brandFilter, ignoreCase = true)
+                matchesCategory && matchesBrand
+            }
 
-        _uiState.update { it.copy(searchResults = filtered, isLoading = false) }
+            val uiResults = filtered.map { product ->
+                val convertedPrice =
+                    convertPriceUseCase(product.priceAmount.toDoubleOrNull() ?: 0.0)
+                product.toUiModel(convertedPrice)
+            }
 
-        filtered.forEach { observeWishlistState(it.id) }
+            _uiState.update { it.copy(searchResults = uiResults, isLoading = false) }
+
+            uiResults.forEach { observeWishlistState(it.id) }
+        }
     }
 
     private fun observeWishlistState(productId: String) {
@@ -191,7 +206,8 @@ class SearchViewModel(
                         currencyCode = domainProduct.currencyCode
                     )
                 }
-            } catch (_: Exception) {}
+            } catch (_: Exception) {
+            }
         }
     }
 
@@ -205,12 +221,12 @@ class SearchViewModel(
         loadRecentSearches()
     }
 
-    private fun Product.toUiModel(): ProductUiModel = ProductUiModel(
+    private fun Product.toUiModel(displayPrice: String): ProductUiModel = ProductUiModel(
         id = id,
         imageUrl = imageUrl.orEmpty(),
         category = vendor,
         name = title,
-        price = "$currencyCode $priceAmount",
+        price = displayPrice,
         badge = null,
         isFavorite = false
     )

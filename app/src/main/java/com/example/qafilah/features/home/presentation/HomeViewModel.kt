@@ -7,6 +7,7 @@ import com.example.qafilah.core.model.Product
 import com.example.qafilah.features.catalog.domain.model.StoreCollection
 import com.example.qafilah.features.catalog.domain.usecases.GetBestSellingUseCase
 import com.example.qafilah.features.catalog.domain.usecases.GetCollectionsUseCase
+import com.example.qafilah.core.currency.ConvertPriceUseCase
 import com.example.qafilah.features.wishlist.domain.usecase.AddToWishlistUseCase
 import com.example.qafilah.features.wishlist.domain.usecase.IsProductWishlistedUseCase
 import com.example.qafilah.features.wishlist.domain.usecase.RemoveFromWishlistUseCase
@@ -32,7 +33,8 @@ class HomeViewModel(
     private val getCollectionsUseCase: GetCollectionsUseCase,
     private val isProductWishlistedUseCase: IsProductWishlistedUseCase,
     private val addToWishlistUseCase: AddToWishlistUseCase,
-    private val removeFromWishlistUseCase: RemoveFromWishlistUseCase
+    private val removeFromWishlistUseCase: RemoveFromWishlistUseCase,
+    private val convertPriceUseCase: ConvertPriceUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(HomeUiState())
@@ -43,11 +45,7 @@ class HomeViewModel(
 
     private var domainProductsCache: List<Product> = emptyList()
 
-    init {
-        loadHome()
-    }
-
-    fun loadHome() {
+    fun loadHome(fallbackErrorMessage: String) {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = null) }
             try {
@@ -55,12 +53,17 @@ class HomeViewModel(
                 val collections = getCollectionsUseCase(limit = COLLECTIONS_LIMIT, after = null)
                 domainProductsCache = products
 
+                val uiProducts = products.map { product ->
+                    val convertedPrice = convertPriceUseCase(product.priceAmount.toDoubleOrNull() ?: 0.0)
+                    product.toUiModel(convertedPrice)
+                }
+
                 _uiState.update {
                     it.copy(
                         isLoading = false,
                         categories = staticCategories,
                         brands = collections.map { it.toBrandLabel() },
-                        products = products.map { it.toUiModel() }
+                        products = uiProducts
                     )
                 }
 
@@ -68,7 +71,7 @@ class HomeViewModel(
 
             } catch (e: Exception) {
                 _uiState.update {
-                    it.copy(isLoading = false, error = e.message ?: "Something went wrong")
+                    it.copy(isLoading = false, error = e.message ?: fallbackErrorMessage)
                 }
             }
         }
@@ -89,7 +92,11 @@ class HomeViewModel(
         }
     }
 
-    fun toggleFavorite(productId: String) {
+    fun toggleFavorite(
+        productId: String,
+        addedToWishlistTemplate: String,
+        fallbackErrorMessage: String
+    ) {
         val uiProduct = _uiState.value.products.find { it.id == productId } ?: return
         val domainProduct = domainProductsCache.find { it.id == productId } ?: return
         val wasFavorite = uiProduct.isFavorite
@@ -108,23 +115,30 @@ class HomeViewModel(
                         price = domainProduct.priceAmount.toDoubleOrNull() ?: 0.0,
                         currencyCode = "USD"
                     )
-                    _events.trySend(HomeEvent.ShowSnackbar("${domainProduct.title} added to wishlist"))
+                    _events.trySend(
+                        HomeEvent.ShowSnackbar(
+                            String.format(
+                                addedToWishlistTemplate,
+                                domainProduct.title
+                            )
+                        )
+                    )
                 }
             } catch (e: Exception) {
                 _uiState.update { state ->
-                    state.copy(error = e.message ?: "Failed to update wishlist")
+                    state.copy(error = e.message ?: fallbackErrorMessage)
                 }
             }
         }
     }
 }
 
-private fun Product.toUiModel(): ProductUiModel = ProductUiModel(
+private fun Product.toUiModel(displayPrice: String): ProductUiModel = ProductUiModel(
     id = id,
     imageUrl = imageUrl.orEmpty(),
     category = vendor,
     name = title,
-    price = "$currencyCode $priceAmount",
+    price = displayPrice,
     badge = null,
     isFavorite = false
 )
@@ -132,9 +146,9 @@ private fun Product.toUiModel(): ProductUiModel = ProductUiModel(
 private fun StoreCollection.toBrandLabel(): String = title
 
 private val staticCategories = listOf(
-    CategoryUiModel("jewelry", "JEWELRY", R.drawable.onboarding_ring),
-    CategoryUiModel("attire", "ATTIRE", R.drawable.onboarding_fabric),
-    CategoryUiModel("scent", "SCENT", R.drawable.ic_logo),
-    CategoryUiModel("home", "HOME", R.drawable.home),
-    CategoryUiModel("gear", "GEAR", R.drawable.onboarding_bag)
+    CategoryUiModel("jewelry", R.string.category_jewelry, R.drawable.onboarding_ring),
+    CategoryUiModel("attire", R.string.category_attire, R.drawable.onboarding_fabric),
+    CategoryUiModel("scent", R.string.category_scent, R.drawable.ic_logo),
+    CategoryUiModel("home", R.string.category_home, R.drawable.home),
+    CategoryUiModel("gear", R.string.category_gear, R.drawable.onboarding_bag)
 )

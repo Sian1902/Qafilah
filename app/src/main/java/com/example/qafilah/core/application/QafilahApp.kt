@@ -1,6 +1,8 @@
 package com.example.qafilah.core.application
 
 import android.app.Application
+import com.example.qafilah.core.currency.currencyModule
+import com.example.qafilah.core.di.coreModule
 import com.example.qafilah.core.di.databaseModule
 import com.example.qafilah.core.di.networkModule
 import com.example.qafilah.di.searchModule
@@ -18,6 +20,7 @@ import org.koin.core.context.GlobalContext
 class QafilahApp : Application() {
 
     private val modules = listOf(
+        coreModule,
         networkModule,
         catalogModule,
         authModule,
@@ -27,7 +30,8 @@ class QafilahApp : Application() {
         wishlistModule,
         databaseModule,
         cartModule,
-        searchModule
+        searchModule,
+        currencyModule
     )
 
     override fun onCreate() {

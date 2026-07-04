@@ -3,8 +3,9 @@ package com.example.qafilah.features.product_detail.presentation
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.qafilah.features.cart.domain.usecase.AddCartItemUseCase
-import com.example.qafilah.features.catalog.domain.usecases.GetSingleProductUseCase
 import com.example.qafilah.features.catalog.domain.model.ProductVariant
+import com.example.qafilah.features.catalog.domain.usecases.GetSingleProductUseCase
+import com.example.qafilah.core.currency.ConvertPriceUseCase
 import com.example.qafilah.features.wishlist.domain.usecase.AddToWishlistUseCase
 import com.example.qafilah.features.wishlist.domain.usecase.IsProductWishlistedUseCase
 import com.example.qafilah.features.wishlist.domain.usecase.RemoveFromWishlistUseCase
@@ -18,7 +19,8 @@ class ProductDetailViewModel(
     private val isProductWishlistedUseCase: IsProductWishlistedUseCase,
     private val addToWishlistUseCase: AddToWishlistUseCase,
     private val removeFromWishlistUseCase: RemoveFromWishlistUseCase,
-    private val addCartItemUseCase: AddCartItemUseCase
+    private val addCartItemUseCase: AddCartItemUseCase,
+    private val convertPriceUseCase: ConvertPriceUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<ProductDetailUiState>(ProductDetailUiState.Loading)
@@ -26,7 +28,7 @@ class ProductDetailViewModel(
 
     private var lastLoadedId: String? = null
 
-    fun loadProduct(productId: String) {
+    fun loadProduct(productId: String, fallbackErrorMessage: String) {
         if (productId == lastLoadedId && _uiState.value is ProductDetailUiState.Success) return
 
         lastLoadedId = productId
@@ -36,6 +38,9 @@ class ProductDetailViewModel(
                 .onSuccess { product ->
                     val initialVariant = product.variants.firstOrNull()
                     val initialOptions = initialVariant?.options ?: emptyMap()
+
+                    val convertedPrice =
+                        convertPriceUseCase(initialVariant?.price?.toDoubleOrNull() ?: 0.0)
 
                     _uiState.value = ProductDetailUiState.Success(
                         product = product,
@@ -48,14 +53,15 @@ class ProductDetailViewModel(
                             options = emptyMap()
                         ),
                         selectedOptions = initialOptions,
-                        isFavorite = false
+                        isFavorite = false,
+                        displayPrice = convertedPrice
                     )
 
                     observeWishlistState(productId)
                 }
                 .onFailure { error ->
                     _uiState.value = ProductDetailUiState.Error(
-                        error.message ?: "Failed to load product details"
+                        error.message ?: fallbackErrorMessage
                     )
                 }
         }
@@ -77,10 +83,14 @@ class ProductDetailViewModel(
             variant.options.all { (optName, optValue) -> updatedOptions[optName] == optValue }
         } ?: current.selectedVariant
 
-        _uiState.value = current.copy(
-            selectedVariant = matchingVariant,
-            selectedOptions = updatedOptions
-        )
+        viewModelScope.launch {
+            val convertedPrice = convertPriceUseCase(matchingVariant.price.toDoubleOrNull() ?: 0.0)
+            _uiState.value = current.copy(
+                selectedVariant = matchingVariant,
+                selectedOptions = updatedOptions,
+                displayPrice = convertedPrice
+            )
+        }
     }
 
     fun toggleFavorite() {
@@ -103,11 +113,12 @@ class ProductDetailViewModel(
                         currencyCode = "USD"
                     )
                 }
-            } catch (_: Exception) { }
+            } catch (_: Exception) {
+            }
         }
     }
 
-    fun addToCart(variantId: String, quantity: Int = 1) {
+    fun addToCart(variantId: String, quantity: Int = 1, fallbackErrorMessage: String) {
         val currentState = _uiState.value as? ProductDetailUiState.Success ?: return
 
         viewModelScope.launch {
@@ -120,7 +131,7 @@ class ProductDetailViewModel(
             } catch (e: Exception) {
                 _uiState.value = currentState.copy(
                     isAddingToCart = false,
-                    addToCartError = e.message ?: "Failed to add item to cart"
+                    addToCartError = e.message ?: fallbackErrorMessage
                 )
             }
         }

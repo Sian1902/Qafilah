@@ -27,8 +27,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.qafilah.R
 import com.example.ui_kit.components.product.ExpandableDescriptionBlock
 import com.example.ui_kit.components.product.ProductImageHeader
 import com.example.ui_kit.components.product.RatingBadge
@@ -49,9 +51,25 @@ fun ProductDetailScreen(
     val context = LocalContext.current
     val uiState by viewModel.uiState.collectAsState()
 
+    val defaultCollectionLabel = stringResource(R.string.default_collection_label)
+    val inStockTemplate = stringResource(R.string.stock_in_stock)
+    val outOfStockText = stringResource(R.string.stock_out_of_stock)
+    val sharedProductTemplate = stringResource(R.string.share_product_message)
+    val addingToCartText = stringResource(R.string.adding_to_cart_toast)
+    val loadProductErrorFallback = stringResource(R.string.error_failed_to_load_product_details)
+    val addToCartErrorFallback = stringResource(R.string.error_failed_to_add_to_cart)
+
+    val productDescriptionLabel = stringResource(R.string.product_description)
+    val readMoreLabel = stringResource(R.string.read_more)
+    val readLessLabel = stringResource(R.string.read_less)
+    val backDesc = stringResource(R.string.back)
+    val shareDesc = stringResource(R.string.share)
+    val addToWishlistDesc = stringResource(R.string.add_to_wishlist)
+    val removeFromWishlistDesc = stringResource(R.string.remove_from_wishlist)
+
     val decodedId = android.net.Uri.decode(productId)
     LaunchedEffect(decodedId) {
-        viewModel.loadProduct(decodedId)
+        viewModel.loadProduct(decodedId, loadProductErrorFallback)
     }
 
     when (val state = uiState) {
@@ -106,7 +124,11 @@ fun ProductDetailScreen(
                 val groups = mutableMapOf<String, MutableList<String>>()
                 for (variant in product.variants) {
                     for ((name, value) in variant.options) {
-                        if (name.equals("Title", ignoreCase = true) && value.equals("Default Title", ignoreCase = true)) {
+                        if (name.equals("Title", ignoreCase = true) && value.equals(
+                                "Default Title",
+                                ignoreCase = true
+                            )
+                        ) {
                             continue
                         }
                         val list = groups.getOrPut(name) { mutableListOf() }
@@ -120,13 +142,15 @@ fun ProductDetailScreen(
 
             val specs = remember { emptyList<SpecItem>() }
 
-            val inStock = selectedVariant.inventoryQuantity != null && selectedVariant.inventoryQuantity > 0
+            val inStock =
+                selectedVariant.inventoryQuantity != null && selectedVariant.inventoryQuantity > 0
             val stockText = if (inStock) {
-                "In Stock (${selectedVariant.inventoryQuantity} available)"
+                String.format(inStockTemplate, selectedVariant.inventoryQuantity)
             } else {
-                "Out of Stock"
+                outOfStockText
             }
-            val stockColor = if (inStock) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
+            val stockColor =
+                if (inStock) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
 
             val rating = product.rating
             val reviewCount = product.ratingCount
@@ -144,7 +168,15 @@ fun ProductDetailScreen(
                     Box(modifier = Modifier.fillMaxWidth()) {
                         ProductImageHeader(
                             images = product.images,
-                            collectionName = product.tags.firstOrNull()?.uppercase() ?: "THE COLLECTION"
+                            collectionName = product.tags.firstOrNull()?.uppercase()
+                                ?: defaultCollectionLabel,
+                            imageContentDescription = { page ->
+                                stringResource(
+                                    R.string.product_image_cd,
+                                    page + 1,
+                                    product.title
+                                )
+                            }
                         )
                         TopIconBar(
                             isFavorite = isFavorite,
@@ -152,11 +184,15 @@ fun ProductDetailScreen(
                             onShareClick = {
                                 Toast.makeText(
                                     context,
-                                    "Shared product: ${product.title}",
+                                    String.format(sharedProductTemplate, product.title),
                                     Toast.LENGTH_SHORT
                                 ).show()
                             },
-                            onFavoriteToggle = { viewModel.toggleFavorite() }
+                            onFavoriteToggle = { viewModel.toggleFavorite() },
+                            backContentDescription = backDesc,
+                            shareContentDescription = shareDesc,
+                            addToWishlistContentDescription = addToWishlistDesc,
+                            removeFromWishlistContentDescription = removeFromWishlistDesc
                         )
                     }
 
@@ -196,12 +232,21 @@ fun ProductDetailScreen(
                             color = MaterialTheme.colorScheme.onBackground
                         )
 
-                        RatingBadge(rating = rating, reviewCount = reviewCount)
+                        RatingBadge(
+                            rating = rating,
+                            reviewCount = reviewCount,
+                            starContentDescription = stringResource(R.string.product_rating_star_cd),
+                            ratingLabel = stringResource(
+                                R.string.product_rating_label,
+                                rating ?: 0.0,
+                                reviewCount ?: 0
+                            )
+                        )
 
                         if (optionGroups.isNotEmpty()) {
                             optionGroups.forEach { (optionName, optionValues) ->
                                 SelectablePillGroup(
-                                    title = optionName,
+                                    selectionLabel = optionName,
                                     options = optionValues,
                                     selectedOption = selectedOptions[optionName],
                                     onOptionSelected = { selectedVal ->
@@ -211,7 +256,12 @@ fun ProductDetailScreen(
                             }
                         }
 
-                        ExpandableDescriptionBlock(descriptionHtml = product.description ?: "")
+                        ExpandableDescriptionBlock(
+                            title = productDescriptionLabel,
+                            descriptionHtml = product.description ?: "",
+                            readMoreLabel = readMoreLabel,
+                            readLessLabel = readLessLabel
+                        )
 
                         SpecTagPairs(specs = specs)
 
@@ -220,15 +270,17 @@ fun ProductDetailScreen(
                 }
 
                 StickyBottomBar(
-                    price = "$${selectedVariant.price}",
-                     isLoading = isAddingToCart,
+                    price = state.displayPrice,
+                    totalPriceLabel = stringResource(R.string.product_total_price_label),
+                    addToCartLabel = stringResource(R.string.product_add_to_cart_label),
+                    addToCartContentDescription = stringResource(R.string.product_add_to_cart_cd),
+                    isLoading = isAddingToCart,
                     onAddToCartClick = {
-                        viewModel.addToCart(variantId = selectedVariant.id)
-                        Toast.makeText(
-                            context,
-                            "Adding to cart...",
-                            Toast.LENGTH_SHORT
-                        ).show()
+                        viewModel.addToCart(
+                            variantId = selectedVariant.id,
+                            fallbackErrorMessage = addToCartErrorFallback
+                        )
+                        Toast.makeText(context, addingToCartText, Toast.LENGTH_SHORT).show()
                     }
                 )
             }

@@ -27,6 +27,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.qafilah.R
@@ -47,7 +48,11 @@ fun PersonalDetailsScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
+    val sessionExpired = stringResource(R.string.error_session_expired)
+    val unknownError = stringResource(R.string.error_unknown)
+
     LaunchedEffect(Unit) {
+        viewModel.setLocalizedStrings(sessionExpired, unknownError)
         viewModel.loadPersonalDetails()
     }
 
@@ -58,9 +63,11 @@ fun PersonalDetailsScreen(
             .systemBarsPadding()
     ) {
         DetailTopBar(
-            title = "Personal Details",
+            title = stringResource(R.string.personal_details),
+            backContentDescription = stringResource(R.string.back),
             onBackClick = onBackClick,
             trailingIcon = Icons.Filled.Edit,
+            trailingContentDescription = stringResource(R.string.edit_cd),
             onTrailingClick = onEditClick
         )
 
@@ -86,7 +93,7 @@ fun PersonalDetailsScreen(
                     )
                     Spacer(Modifier.height(16.dp))
                     Button(onClick = { viewModel.loadPersonalDetails() }) {
-                        Text("Retry")
+                        Text(stringResource(R.string.retry))
                     }
                 }
             }
@@ -100,14 +107,15 @@ fun PersonalDetailsScreen(
 
 @Composable
 private fun PersonalDetailsContent(user: AppUser) {
+    val displayName = user.fullName.ifBlank { stringResource(R.string.default_username) }
     Column(
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
     ) {
         ProfileAvatarWithLabel(
-            name = user.fullName,
-            label = "Member",
+            name = displayName,
+            label = stringResource(R.string.member_label),
             modifier = Modifier.padding(top = 12.dp),
             avatarContent = {
                 Image(
@@ -121,7 +129,7 @@ private fun PersonalDetailsContent(user: AppUser) {
 
         Spacer(Modifier.height(28.dp))
 
-        SectionLabel(text = "Account Information", modifier = Modifier.padding(horizontal = 20.dp))
+        SectionLabel(text = stringResource(R.string.account_information_label), modifier = Modifier.padding(horizontal = 20.dp))
         Spacer(Modifier.height(10.dp))
 
         Column(
@@ -130,9 +138,9 @@ private fun PersonalDetailsContent(user: AppUser) {
                 .padding(horizontal = 20.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            InfoField(label = "Full Name", value = user.fullName)
-            InfoField(label = "Email Address", value = user.email ?: "N/A")
-            InfoField(label = "Phone Number", value = user.phone ?: "N/A")
+            InfoField(label = stringResource(R.string.full_name_label), value = displayName)
+            InfoField(label = stringResource(R.string.email_address), value = user.email ?: stringResource(R.string.not_available_label))
+            InfoField(label = stringResource(R.string.phone_number), value = user.phone ?: stringResource(R.string.not_available_label))
         }
 
         Spacer(Modifier.height(20.dp))

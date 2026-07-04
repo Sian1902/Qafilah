@@ -30,6 +30,7 @@ val cartModule = module {
         get(),
         get(),
         get(),
+        get()
         )
     }
 }

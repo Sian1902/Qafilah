@@ -11,6 +11,7 @@ sealed interface ProductDetailUiState {
         val selectedVariant: ProductVariant,
         val selectedOptions: Map<String, String>,
         val isFavorite: Boolean,
+        val displayPrice: String,
         val isAddingToCart: Boolean = false,
         val addToCartError: String? = null
     ) : ProductDetailUiState

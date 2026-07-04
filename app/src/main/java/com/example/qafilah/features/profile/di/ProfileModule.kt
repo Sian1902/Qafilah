@@ -42,6 +42,7 @@ val profileModule = module {
         ProfileViewModel(
             getCustomerProfile = get(),
             tokenProvider = get(),
+            currencyRepository = get()
         )
     }
 

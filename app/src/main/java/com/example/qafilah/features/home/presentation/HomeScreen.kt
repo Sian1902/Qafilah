@@ -1,6 +1,5 @@
 package com.example.qafilah.features.home.presentation
 
-import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -23,7 +22,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.example.qafilah.R
 import com.example.ui_kit.components.home.BrandRow
 import com.example.ui_kit.components.home.CategoryRow
 import com.example.ui_kit.components.home.CategoryUiModel
@@ -50,8 +51,12 @@ fun HomeScreen(
     val uiState by viewModel.uiState.collectAsState()
 
     val snackbarHostState = remember { SnackbarHostState() }
+    val homeErrorFallback = stringResource(R.string.error_something_went_wrong)
+    val wishlistAddedTemplate = stringResource(R.string.wishlist_item_added)
+    val wishlistErrorFallback = stringResource(R.string.error_failed_to_update_wishlist)
 
     LaunchedEffect(Unit) {
+        viewModel.loadHome(homeErrorFallback)
         viewModel.events.collect { event ->
             when (event) {
                 is HomeEvent.ShowSnackbar -> {
@@ -71,11 +76,10 @@ fun HomeScreen(
                     }
                 }
 
-
                 uiState.error != null && uiState.products.isEmpty() -> {
                     Box(modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         Text(
-                            text = uiState.error ?: "Something went wrong",
+                            text = uiState.error ?: homeErrorFallback,
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.error
                         )
@@ -91,7 +95,13 @@ fun HomeScreen(
                         onViewAllCategoriesClick = onViewAllCategoriesClick,
                         onBrandClick = onBrandClick,
                         onProductClick = onProductClick,
-                        onFavoriteClick = { product -> viewModel.toggleFavorite(product.id) },
+                        onFavoriteClick = { product ->
+                            viewModel.toggleFavorite(
+                                product.id,
+                                wishlistAddedTemplate,
+                                wishlistErrorFallback
+                            )
+                        },
                         modifier = modifier
                     )
                 }
@@ -121,8 +131,11 @@ private fun HomeContent(
     {
         item {
             WelcomeHeader(
-                userName = "Traveler",
                 avatarUrl = null,
+                userAvatarContentDescription = stringResource(R.string.welcome_avatar_cd),
+                welcomeBackLabel = stringResource(R.string.welcome_back_label),
+                welcomeUserLabel = stringResource(R.string.welcome_user_greeting, stringResource(R.string.default_username)),
+                notificationsContentDescription = stringResource(R.string.welcome_notifications_cd),
                 hasNotification = true,
                 onNotificationClick = onNotificationClick,
                 modifier = Modifier.padding(horizontal = 20.dp)
@@ -131,6 +144,8 @@ private fun HomeContent(
 
         item {
             SearchField(
+                placeholderText = stringResource(R.string.search_placeholder),
+                searchIconContentDescription = stringResource(R.string.search_icon_cd),
                 onClick = onSearchClick,
                 modifier = Modifier.padding(horizontal = 20.dp)
             )
@@ -139,8 +154,8 @@ private fun HomeContent(
         item {
             PromoBannerCard(
                 imageUrl = "https://example.com/dune-collection.jpg",
-                title = "Dune Collection",
-                ctaText = "SHOP NOW",
+                title = stringResource(R.string.promo_dune_collection),
+                ctaText = stringResource(R.string.shop_now),
                 onCtaClick = { },
                 modifier = Modifier.padding(horizontal = 20.dp)
             )
@@ -148,8 +163,8 @@ private fun HomeContent(
 
         item {
             SectionHeader(
-                title = "Categories",
-                trailingText = "VIEW ALL",
+                title = stringResource(R.string.categories),
+                trailingText = stringResource(R.string.view_all),
                 onTrailingClick = onViewAllCategoriesClick,
                 modifier = Modifier.padding(horizontal = 20.dp)
             )
@@ -164,7 +179,7 @@ private fun HomeContent(
 
         item {
             SectionHeader(
-                title = "Shop by Brand",
+                title = stringResource(R.string.shop_by_brand),
                 modifier = Modifier.padding(horizontal = 20.dp)
             )
         }
@@ -178,8 +193,8 @@ private fun HomeContent(
 
         item {
             SectionHeader(
-                title = "New Arrivals",
-                trailingText = "${uiState.products.size} ITEMS",
+                title = stringResource(R.string.new_arrivals),
+                trailingText = stringResource(R.string.new_arrivals_count, uiState.products.size),
                 modifier = Modifier.padding(horizontal = 20.dp)
             )
         }
@@ -194,9 +209,9 @@ private fun HomeContent(
                         product = product,
                         onClick = onProductClick,
                         onFavoriteClick = onFavoriteClick,
+                        toggleWishlistContentDescription = stringResource(R.string.product_card_toggle_wishlist_cd),
                         modifier = Modifier.weight(1f)
                     )
-                    Log.d("id", "Product: ${product.id}")
                 }
                 if (rowProducts.size < 2) {
                     Spacer(modifier = Modifier.weight(1f))
