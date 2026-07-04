@@ -1,6 +1,7 @@
 package com.example.ui_kit.components.home
 
 import androidx.annotation.DrawableRes
+import androidx.annotation.StringRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -23,12 +24,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 
 
 data class CategoryUiModel(
     val id: String,
-    val label: String,
+    @StringRes val label: Int,
     @DrawableRes val icon: Int
 )
 
@@ -38,6 +40,7 @@ fun CategoryItem(
     onClick: (CategoryUiModel) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val categoryLabel = stringResource(id = category.label)
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = modifier.clickable(
@@ -55,7 +58,7 @@ fun CategoryItem(
         ) {
             Icon(
                 painter = painterResource(id = category.icon),
-                contentDescription = category.label,
+                contentDescription = categoryLabel,
                 tint = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.size(24.dp)
             )
@@ -64,7 +67,7 @@ fun CategoryItem(
         Spacer(modifier = Modifier.height(8.dp))
 
         Text(
-            text = category.label,
+            text = categoryLabel,
             style = MaterialTheme.typography.labelSmall,
             color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
         )

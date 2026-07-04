@@ -25,7 +25,8 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun ProfileTopBar(
-    greetingName: String,
+    greetingText: String,
+    notificationsContentDescription: String,
     onNotificationsClick: () -> Unit,
     modifier: Modifier = Modifier,
     trailingAvatar: @Composable () -> Unit
@@ -37,7 +38,7 @@ fun ProfileTopBar(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
-            text = "Ahlan, $greetingName",
+            text = greetingText,
             style = MaterialTheme.typography.headlineMedium,
             color = MaterialTheme.colorScheme.primary,
             modifier = Modifier.weight(1f)
@@ -46,7 +47,7 @@ fun ProfileTopBar(
         IconButton(onClick = onNotificationsClick) {
             Icon(
                 imageVector = Icons.Filled.Notifications,
-                contentDescription = "Notifications",
+                contentDescription = notificationsContentDescription,
                 tint = MaterialTheme.colorScheme.onBackground
             )
         }

@@ -8,8 +8,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.VerifiedUser
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
@@ -21,18 +19,30 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.example.ui_kit.R
 import com.example.ui_kit.components.shared.PrimaryButton
 import com.example.ui_kit.theme.QafilahTheme
 
 @Composable
 fun SignUpCard(
-    modifier: Modifier = Modifier,
     onSignUp: (name: String, email: String, password: String) -> Unit,
-    authErrorMessage: String? = null
+    authErrorMessage: String? = null,
+    nameLabel: String,
+    namePlaceholder: String,
+    nameErrorMessage: String,
+    emailLabel: String,
+    emailPlaceholder: String,
+    emailErrorMessage: String,
+    passwordLabel: String,
+    passwordPlaceholder: String,
+    passwordErrorMessage: String,
+    confirmPasswordLabel: String,
+    confirmPasswordPlaceholder: String,
+    confirmPasswordErrorMessage: String,
+    submitButtonLabel: String,
+    togglePasswordVisibilityContentDescription: String,
+    modifier: Modifier = Modifier
 ) {
     var name by rememberSaveable { mutableStateOf("") }
     var email by rememberSaveable { mutableStateOf("") }
@@ -81,7 +91,10 @@ fun SignUpCard(
                     name = it
                     nameHasError = false
                 },
-                isError = nameHasError
+                isError = nameHasError,
+                nameLabel = nameLabel,
+                namePlaceholder = namePlaceholder,
+                nameErrorMessage = nameErrorMessage
             )
 
             Spacer(modifier = Modifier.height(12.dp))
@@ -92,7 +105,10 @@ fun SignUpCard(
                     email = it
                     emailHasError = false
                 },
-                isError = emailHasError
+                isError = emailHasError,
+                emailLabel = emailLabel,
+                emailPlaceholder = emailPlaceholder,
+                emailErrorMessage = emailErrorMessage
             )
 
             Spacer(modifier = Modifier.height(12.dp))
@@ -104,7 +120,12 @@ fun SignUpCard(
                     passwordHasError = false
                 },
                 isError = passwordHasError,
-                {}
+                onForgotPasswordClick = {},
+                passwordLabel = passwordLabel,
+                passwordPlaceholder = passwordPlaceholder,
+                passwordErrorMessage = passwordErrorMessage,
+                togglePasswordVisibilityContentDescription = togglePasswordVisibilityContentDescription,
+                showForgotPassword = false
             )
 
             Spacer(modifier = Modifier.height(12.dp))
@@ -116,13 +137,18 @@ fun SignUpCard(
                     confirmPasswordHasError = false
                 },
                 onForgotPasswordClick = {},
-                isError = false
+                isError = confirmPasswordHasError,
+                passwordLabel = confirmPasswordLabel,
+                passwordPlaceholder = confirmPasswordPlaceholder,
+                passwordErrorMessage = confirmPasswordErrorMessage,
+                togglePasswordVisibilityContentDescription = togglePasswordVisibilityContentDescription,
+                showForgotPassword = false
             )
 
             Spacer(modifier = Modifier.height(24.dp))
 
             PrimaryButton(
-                text = "Create Account",
+                text = submitButtonLabel,
                 onClick = validateAndSubmit,
             )
 
@@ -137,9 +163,9 @@ fun SignUpCard(
 fun SignUpCardPreview() {
     QafilahTheme(darkTheme = true) {
         Surface(color = MaterialTheme.colorScheme.background) {
-            SignUpCard(
-                onSignUp = { _, _, _ -> }
-            )
+//            SignUpCard(
+//                onSignUp = { _, _, _ -> }
+//            )
         }
     }
 }

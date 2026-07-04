@@ -32,6 +32,7 @@ fun AccountMenuItem(
     modifier: Modifier = Modifier,
     subtitle: String? = null,
     trailingText: String? = null,
+    iconContentDescription: String? = null,
     onClick: () -> Unit = {}
 ) {
     Row(
@@ -52,7 +53,7 @@ fun AccountMenuItem(
         ) {
             Icon(
                 imageVector = icon,
-                contentDescription = null,
+                contentDescription = iconContentDescription,
                 tint = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.size(20.dp)
             )

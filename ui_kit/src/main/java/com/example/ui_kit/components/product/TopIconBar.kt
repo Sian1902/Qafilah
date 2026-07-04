@@ -22,6 +22,10 @@ fun TopIconBar(
     onBackClick: () -> Unit,
     onShareClick: () -> Unit,
     onFavoriteToggle: () -> Unit,
+    backContentDescription: String,
+    shareContentDescription: String,
+    addToWishlistContentDescription: String,
+    removeFromWishlistContentDescription: String,
     modifier: Modifier = Modifier
 ) {
     Row(
@@ -33,7 +37,7 @@ fun TopIconBar(
     ) {
         CircleIconButton(
             icon = Icons.AutoMirrored.Filled.ArrowBack,
-            contentDescription = "Back",
+            contentDescription = backContentDescription,
             onClick = onBackClick
         )
 
@@ -43,13 +47,13 @@ fun TopIconBar(
         ) {
             CircleIconButton(
                 icon = Icons.Default.Share,
-                contentDescription = "Share",
+                contentDescription = shareContentDescription,
                 onClick = onShareClick
             )
 
             CircleIconButton(
                 icon = if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
-                contentDescription = if (isFavorite) "Remove from wishlist" else "Add to wishlist",
+                contentDescription = if (isFavorite) removeFromWishlistContentDescription else addToWishlistContentDescription,
                 onClick = onFavoriteToggle,
                 contentColor = if (isFavorite) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
             )

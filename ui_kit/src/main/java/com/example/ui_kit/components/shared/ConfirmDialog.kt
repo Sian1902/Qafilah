@@ -10,8 +10,8 @@ import androidx.compose.runtime.Composable
 fun QafilahConfirmDialog(
     title: String,
     message: String,
-    confirmText: String = "Remove",
-    dismissText: String = "Cancel",
+    confirmText: String,
+    dismissText: String,
     onConfirm: () -> Unit,
     onDismiss: () -> Unit
 ) {

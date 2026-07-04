@@ -28,6 +28,9 @@ import androidx.compose.ui.unit.sp
 @Composable
 fun StickyBottomBar(
     price: String,
+    totalPriceLabel: String,
+    addToCartLabel: String,
+    addToCartContentDescription: String,
     isLoading: Boolean = false,
     onAddToCartClick: () -> Unit,
     modifier: Modifier = Modifier
@@ -44,7 +47,7 @@ fun StickyBottomBar(
             verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
             Text(
-                text = "Total Price",
+                text = totalPriceLabel,
                 style = MaterialTheme.typography.labelSmall.copy(
                     fontSize = 12.sp,
                     color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
@@ -81,13 +84,13 @@ fun StickyBottomBar(
             } else {
                 Icon(
                     imageVector = Icons.Default.ShoppingCart,
-                    contentDescription = "Add to cart",
+                    contentDescription = addToCartContentDescription,
                     tint = MaterialTheme.colorScheme.onPrimary,
                     modifier = Modifier.size(20.dp)
                 )
                 Spacer(modifier = Modifier.width(10.dp))
                 Text(
-                    text = "ADD TO CART",
+                    text = addToCartLabel,
                     style = MaterialTheme.typography.labelSmall.copy(
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Bold,

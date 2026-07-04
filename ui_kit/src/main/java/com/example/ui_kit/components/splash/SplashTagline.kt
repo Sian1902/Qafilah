@@ -17,8 +17,8 @@ import androidx.compose.ui.unit.sp
 
 @Composable
 fun SplashTagline(
-    modifier: Modifier = Modifier,
-    tagline: String = "CARRY THE FINEST THINGS"
+    tagline: String,
+    modifier: Modifier = Modifier
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,

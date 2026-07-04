@@ -22,6 +22,7 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun RemovableChip(
     label: String,
+    removeContentDescription: String,
     onRemoveClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -41,7 +42,7 @@ fun RemovableChip(
         )
         Icon(
             imageVector = Icons.Default.Close,
-            contentDescription = "Remove Search",
+            contentDescription = removeContentDescription,
             tint = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier
                 .size(18.dp)

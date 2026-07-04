@@ -29,6 +29,7 @@ import coil.compose.AsyncImage
 fun ProductImageHeader(
     images: List<String>,
     collectionName: String?,
+    imageContentDescription: @Composable (page: Int) -> String,
     modifier: Modifier = Modifier
 ) {
     val pagerState = rememberPagerState(pageCount = { images.size })
@@ -47,7 +48,7 @@ fun ProductImageHeader(
             ) { page ->
                 AsyncImage(
                     model = images[page],
-                    contentDescription = "Product Image $page",
+                    contentDescription = imageContentDescription(page),
                     modifier = Modifier.fillMaxSize(),
                     contentScale = ContentScale.Crop
                 )

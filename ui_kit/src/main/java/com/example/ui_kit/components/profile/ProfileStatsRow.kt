@@ -28,6 +28,9 @@ fun ProfileStatsRow(
     orders: Int,
     wishlist: Int,
     reviews: Int,
+    ordersLabel: String,
+    wishlistLabel: String,
+    reviewsLabel: String,
     modifier: Modifier = Modifier
 ) {
     Row(
@@ -39,11 +42,11 @@ fun ProfileStatsRow(
             .padding(vertical = 16.dp),
         horizontalArrangement = Arrangement.SpaceEvenly
     ) {
-        StatItem(value = orders, label = "Orders", modifier = Modifier.weight(1f))
+        StatItem(value = orders, label = ordersLabel, modifier = Modifier.weight(1f))
         StatDivider()
-        StatItem(value = wishlist, label = "Wishlist", modifier = Modifier.weight(1f))
+        StatItem(value = wishlist, label = wishlistLabel, modifier = Modifier.weight(1f))
         StatDivider()
-        StatItem(value = reviews, label = "Reviews", modifier = Modifier.weight(1f))
+        StatItem(value = reviews, label = reviewsLabel, modifier = Modifier.weight(1f))
     }
 }
 

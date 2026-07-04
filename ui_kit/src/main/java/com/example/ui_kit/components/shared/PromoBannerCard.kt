@@ -45,7 +45,6 @@ fun PromoBannerCard(
             modifier = Modifier.fillMaxSize()
         )
 
-        // Dark gradient so the title/CTA stay legible over any photo.
         Box(
             modifier = Modifier
                 .fillMaxSize()

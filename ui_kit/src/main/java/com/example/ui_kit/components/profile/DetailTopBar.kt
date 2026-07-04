@@ -22,10 +22,12 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun DetailTopBar(
     title: String,
+    backContentDescription: String,
     onBackClick: () -> Unit,
-    modifier: Modifier = Modifier,
-    trailingIcon: ImageVector? = null,
-    onTrailingClick: () -> Unit = {}
+    trailingIcon: ImageVector?,
+    trailingContentDescription: String?,
+    onTrailingClick: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     Row(
         modifier = modifier
@@ -36,7 +38,7 @@ fun DetailTopBar(
         IconButton(onClick = onBackClick) {
             Icon(
                 imageVector = Icons.Filled.ArrowBack,
-                contentDescription = "Back",
+                contentDescription = backContentDescription,
                 tint = MaterialTheme.colorScheme.primary
             )
         }
@@ -53,7 +55,7 @@ fun DetailTopBar(
             IconButton(onClick = onTrailingClick) {
                 Icon(
                     imageVector = trailingIcon,
-                    contentDescription = null,
+                    contentDescription = trailingContentDescription,
                     tint = MaterialTheme.colorScheme.primary
                 )
             }

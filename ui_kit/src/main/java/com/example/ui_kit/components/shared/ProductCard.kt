@@ -27,9 +27,7 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.example.ui_kit.components.shared.CircleIconButton
 
-/**
- * UI model for a single product card in a grid (e.g. "New Arrivals").
- */
+
 data class ProductUiModel(
     val id: String,
     val imageUrl: String,
@@ -45,6 +43,7 @@ fun ProductCard(
     product: ProductUiModel,
     onClick: (ProductUiModel) -> Unit,
     onFavoriteClick: (ProductUiModel) -> Unit,
+    toggleWishlistContentDescription: String,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -65,7 +64,7 @@ fun ProductCard(
 
             CircleIconButton(
                 icon = if (product.isFavorite) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
-                contentDescription = "Toggle wishlist",
+                contentDescription = toggleWishlistContentDescription,
                 onClick = { onFavoriteClick(product) },
                 size = 32.dp,
                 containerColor = Color.Black.copy(alpha = 0.35f),

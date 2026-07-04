@@ -22,6 +22,7 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun SignOutButton(
+    label: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -42,6 +43,6 @@ fun SignOutButton(
             modifier = Modifier.size(18.dp)
         )
         Spacer(Modifier.width(8.dp))
-        Text(text = "Sign Out", style = MaterialTheme.typography.bodyLarge)
+        Text(text = label, style = MaterialTheme.typography.bodyLarge)
     }
 }

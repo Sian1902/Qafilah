@@ -1,7 +1,13 @@
 package com.example.ui_kit.components.auth
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.MaterialTheme
@@ -19,6 +25,9 @@ import com.example.ui_kit.theme.QafilahTheme
 @Composable
 fun LoginTitle(
     logoPainter: Painter,
+    logoContentDescription: String,
+    titleText: String,
+    subtitleText: String,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -28,14 +37,14 @@ fun LoginTitle(
     ) {
         Image(
             painter = logoPainter,
-            contentDescription = "App Logo",
+            contentDescription = logoContentDescription,
             modifier = Modifier.size(150.dp)
         )
 
         Spacer(modifier = Modifier.height(16.dp))
 
         Text(
-            text = "Welcome back",
+            text = titleText,
             style = MaterialTheme.typography.displayMedium,
             color = MaterialTheme.colorScheme.onBackground
         )
@@ -43,7 +52,7 @@ fun LoginTitle(
         Spacer(modifier = Modifier.height(8.dp))
 
         Text(
-            text = "Continue your curated journey",
+            text = subtitleText,
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
         )
@@ -57,6 +66,9 @@ fun LoginTitlePreview() {
         Surface(color = MaterialTheme.colorScheme.background) {
             LoginTitle(
                 logoPainter = rememberVectorPainter(image = Icons.Default.Star),
+                logoContentDescription = "Logo",
+                titleText = "Welcome",
+                subtitleText = "Sign in to continue",
                 modifier = Modifier.padding(16.dp)
             )
         }

@@ -17,7 +17,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun CartEmptyView(modifier: Modifier = Modifier) {
+fun CartEmptyView(
+    emptyCartContentDescription: String,
+    emptyCartMessage: String,
+    exploreMessage: String,
+    modifier: Modifier = Modifier
+) {
     Column(
         modifier = modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Center,
@@ -25,7 +30,7 @@ fun CartEmptyView(modifier: Modifier = Modifier) {
     ) {
         Icon(
             imageVector = Icons.Outlined.ShoppingCart,
-            contentDescription = "Empty cart",
+            contentDescription = emptyCartContentDescription,
             tint = MaterialTheme.colorScheme.primary,
             modifier = Modifier.height(80.dp)
         )
@@ -33,7 +38,7 @@ fun CartEmptyView(modifier: Modifier = Modifier) {
         Spacer(modifier = Modifier.height(24.dp))
 
         Text(
-            text = "Your cart is empty",
+            text = emptyCartMessage,
             style = MaterialTheme.typography.headlineMedium,
             color = MaterialTheme.colorScheme.onBackground,
             textAlign = TextAlign.Center
@@ -42,7 +47,7 @@ fun CartEmptyView(modifier: Modifier = Modifier) {
         Spacer(modifier = Modifier.height(12.dp))
 
         Text(
-            text = "Start exploring and add your favorite items to your cart",
+            text = exploreMessage,
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
             textAlign = TextAlign.Center

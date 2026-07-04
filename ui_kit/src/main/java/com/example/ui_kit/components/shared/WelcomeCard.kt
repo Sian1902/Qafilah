@@ -26,8 +26,11 @@ import coil.compose.AsyncImage
 
 @Composable
 fun WelcomeHeader(
-    userName: String,
     avatarUrl: String?,
+    userAvatarContentDescription: String,
+    welcomeBackLabel: String,
+    welcomeUserLabel: String,
+    notificationsContentDescription: String,
     hasNotification: Boolean = false,
     onNotificationClick: () -> Unit,
     modifier: Modifier = Modifier
@@ -45,18 +48,18 @@ fun WelcomeHeader(
             if (avatarUrl != null) {
                 AsyncImage(
                     model = avatarUrl,
-                    contentDescription = "User avatar",
+                    contentDescription = userAvatarContentDescription,
                     contentScale = ContentScale.Crop,
                     modifier = Modifier.fillMaxSize()
                 )
             } else {
                 Icon(
-                    imageVector = Icons.Filled.Person,
-                    contentDescription = "User avatar",
-                    tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(10.dp)
+                     imageVector = Icons.Filled.Person,
+                     contentDescription = userAvatarContentDescription,
+                     tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+                     modifier = Modifier
+                         .fillMaxSize()
+                         .padding(10.dp)
                 )
             }
         }
@@ -67,12 +70,12 @@ fun WelcomeHeader(
                 .padding(start = 12.dp)
         ) {
             Text(
-                text = "WELCOME BACK",
+                text = welcomeBackLabel,
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f)
             )
             Text(
-                text = "Ahlan, $userName",
+                text = welcomeUserLabel,
                 style = MaterialTheme.typography.headlineMedium,
                 color = MaterialTheme.colorScheme.primary
             )
@@ -80,7 +83,7 @@ fun WelcomeHeader(
 
         CircleIconButton(
             icon = Icons.Filled.Notifications,
-            contentDescription = "Notifications",
+            contentDescription = notificationsContentDescription,
             onClick = onNotificationClick,
             showBadge = hasNotification
         )
