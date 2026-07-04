@@ -124,8 +124,11 @@ fun AppNavHost(
 
         composable(Screen.Checkout.route) {
             Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text(stringResource(R.string.checkout))
-                CheckoutScreen()
+                CheckoutScreen(
+                    onNavigateToAddress = {
+                        navController.navigate(Screen.ShippingAddresses.route)
+                    }
+                )
             }
         }
 

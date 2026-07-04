@@ -14,7 +14,8 @@ import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun CheckoutScreen(
-    sharedViewModel: CheckoutSharedViewModel = koinViewModel()
+    sharedViewModel: CheckoutSharedViewModel = koinViewModel(),
+    onNavigateToAddress: () -> Unit,
 ) {
     val pagerState = rememberPagerState(pageCount = { 3 })
     val coroutineScope = rememberCoroutineScope()
@@ -35,7 +36,8 @@ fun CheckoutScreen(
                 sharedViewModel = sharedViewModel,
                 onNavigateToSummary = {
                     coroutineScope.launch { pagerState.animateScrollToPage(1) }
-                }
+                },
+                onNavigateToAddEditAddress = { onNavigateToAddress() }
             )
             1 -> CheckoutSummaryScreen(
                 sharedViewModel = sharedViewModel,

@@ -25,8 +25,8 @@ val checkoutModule = module {
     factory<UpdateBuyerIdentityUseCase> { UpdateBuyerIdentityUseCase(get()) }
     factory<UpdateDeliveryOptionUseCase> { UpdateDeliveryOptionUseCase(get()) }
 
-    viewModel { CheckoutSharedViewModel() }
+    viewModel { CheckoutSharedViewModel(get()) }
     viewModel { CheckoutSummaryViewModel(get()) }
-    viewModel { CheckoutAddressViewModel(get()) }
+    viewModel { CheckoutAddressViewModel(get(), get(), get()) }
     viewModel { CheckoutPaymentViewModel() }
 }
