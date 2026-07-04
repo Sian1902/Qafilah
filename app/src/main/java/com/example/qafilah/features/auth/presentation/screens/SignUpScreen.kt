@@ -96,11 +96,8 @@ fun SignUpScreen(
         onLoginWithGoogle = {
             coroutineScope.launch {
                 try {
-                    if (activity == null) {
-                        viewModel.setAuthError(errorHostActivityUnavailable)
-                        return@launch
-                    }
-                    val credentialManager = CredentialManager.create(activity)
+
+                    val credentialManager = CredentialManager.create(context)
                     val webClientId = "50329480866-0ismrbov61kq0tj3c4g1282foev660r6.apps.googleusercontent.com"
 
                     val googleIdOption = GetGoogleIdOption.Builder()
@@ -113,7 +110,7 @@ fun SignUpScreen(
                         .addCredentialOption(googleIdOption)
                         .build()
 
-                    val result = credentialManager.getCredential(activity, request)
+                    val result = credentialManager.getCredential(context, request)
                     val credential = result.credential
 
                     if (credential is CustomCredential && credential.type == GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL) {
@@ -225,7 +222,7 @@ private fun SignUpContent(
             )
 
             AuthFooter(
-                isInLogin = false,
+                isInLogin = true,
                 loginPrompt = stringResource(R.string.login_prompt),
                 loginActionLabel = stringResource(R.string.login_action_label),
                 signupPrompt = stringResource(R.string.signup_prompt),

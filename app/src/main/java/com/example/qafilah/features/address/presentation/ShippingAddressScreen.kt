@@ -286,6 +286,7 @@ fun AddAddressSheetContent(
     var province by remember(initialAddress?.id) { mutableStateOf(splitLocation.getOrNull(1).orEmpty()) }
     var country by remember(initialAddress?.id) { mutableStateOf(splitLocation.getOrNull(2).orEmpty()) }
     var zipCode by remember(initialAddress?.id) { mutableStateOf(splitLocation.getOrNull(3).orEmpty()) }
+    var phone by remember(initialAddress?.id) { mutableStateOf(initialAddress?.phone.orEmpty()) }
     var isDefault by remember(initialAddress?.id) { mutableStateOf(initialAddress?.isDefault ?: false) }
 
     Column(
@@ -313,6 +314,12 @@ fun AddAddressSheetContent(
             QafilahTextField(label = stringResource(R.string.address_country_label), value = country, onValueChange = { country = it }, placeholder = "Egypt", modifier = Modifier.weight(1f))
             QafilahTextField(label = stringResource(R.string.address_zip_label), value = zipCode, onValueChange = { zipCode = it }, placeholder = "11511", modifier = Modifier.weight(1f))
         }
+        QafilahTextField(
+            label = stringResource(R.string.phone_number),
+            value = phone,
+            onValueChange = { phone = it },
+            placeholder = "+201XXXXXXXXX"
+        )
 
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -355,6 +362,7 @@ fun AddAddressSheetContent(
                     icon = Icons.Default.Home,
                     street = street.trim(),
                     locationDetails = listOfNotNull(city.trim().ifBlank { null }, province.trim().ifBlank { null }, country.trim().ifBlank { null }, zipCode.trim().ifBlank { null }).joinToString(", "),
+                    phone = phone.trim().ifBlank { null },
                     isDefault = isDefault
                 )
                 onSaveClick(address)

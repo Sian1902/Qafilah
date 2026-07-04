@@ -13,31 +13,31 @@ sealed class NavItem(
     object Home : NavItem(
         route = "home",
         label = R.string.nav_home,
-        icon = R.drawable.home
+        icon = R.drawable.ic_home
     )
 
     object Search : NavItem(
         route = "search",
         label = R.string.nav_search,
-        icon = R.drawable.search
+        icon = R.drawable.ic_search
     )
 
     object Cart : NavItem(
         route = "cart",
         label = R.string.nav_cart,
-        icon = R.drawable.cart
+        icon = R.drawable.ic_shopping_cart
     )
 
     object Wishlist : NavItem(
         route = "wishlist",
         label = R.string.nav_wishlist,
-        icon = R.drawable.fav
+        icon = R.drawable.ic_favorite
     )
 
     object Profile : NavItem(
         route = "profile",
         label = R.string.nav_profile,
-        icon = R.drawable.profile
+        icon = R.drawable.ic_person
     )
 
     companion object {
