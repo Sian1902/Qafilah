@@ -14,4 +14,5 @@ interface CartRepository {
     suspend fun updateCartItemRemote(lineId: String, quantity: Int)
     suspend fun removeCartItemRemote(lineId: String)
     suspend fun hasActiveCart(): Boolean
+    suspend fun updateDiscountCodes(codes: List<String>)
 }

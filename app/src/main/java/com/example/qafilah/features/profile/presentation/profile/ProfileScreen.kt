@@ -339,6 +339,7 @@ private fun ProfileScreenContent(
             item {
                 SignOutButton(
                     label = stringResource(R.string.profile_sign_out),
+                    iconContentDescription = stringResource(R.string.profile_sign_out_cd),
                     onClick = onSignOutClick,
                     modifier = Modifier.padding(horizontal = 20.dp)
                 )

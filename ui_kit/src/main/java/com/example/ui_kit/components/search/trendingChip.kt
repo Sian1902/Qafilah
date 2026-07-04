@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun TrendingPillCard(
     label: String,
+    iconContentDescription: String?,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -39,7 +40,7 @@ fun TrendingPillCard(
     ) {
         Icon(
             imageVector = Icons.Default.TrendingUp,
-            contentDescription = null,
+            contentDescription = iconContentDescription,
             tint = MaterialTheme.colorScheme.primary
         )
         Text(

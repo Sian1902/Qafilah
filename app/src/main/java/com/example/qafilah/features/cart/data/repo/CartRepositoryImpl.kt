@@ -67,4 +67,17 @@ class CartRepositoryImpl(
     override suspend fun hasActiveCart(): Boolean {
         return localDataSource.getCartId() != null
     }
+
+    override suspend fun updateDiscountCodes(codes: List<String>) {
+        val cartId = localDataSource.getCartId()
+            ?: throw Exception("No cart ID found")
+
+        val remoteCart = remoteDataSource.updateDiscountCodes(cartId, codes)
+            ?: throw Exception("Failed to update discount codes")
+
+
+        val storeCart = remoteCart.cartDetails.toDomain()
+
+        _cartState.value = storeCart
+    }
 }

@@ -9,7 +9,7 @@ import kotlinx.coroutines.withContext
 sealed class NetworkError(message: String) : Exception(message) {
     class GraphQLError(graphqlMessage: String) : NetworkError(graphqlMessage)
     class DataIsNull : NetworkError("Data is null")
-    class Unknown : NetworkError("Unknown network error")
+    class Unknown(message: String = "Unknown network error") : NetworkError(message)
 }
 
 suspend fun <D : Operation.Data> safeApiCall(
@@ -29,7 +29,7 @@ suspend fun <D : Operation.Data> safeApiCall(
 
         } catch (e: Exception) {
             if (e is NetworkError) throw e
-            throw NetworkError.Unknown()
+            throw NetworkError.Unknown(e.message ?: "Unknown network error")
         }
     }
 }

@@ -4,7 +4,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.qafilah.core.model.Product
 import com.example.qafilah.features.catalog.domain.usecases.GetBestSellingUseCase
+import com.example.qafilah.features.catalog.domain.usecases.GetCollectionProductsUseCase
 import com.example.qafilah.features.catalog.domain.usecases.GetCollectionsUseCase
+import com.example.qafilah.features.catalog.domain.usecases.GetProductTypesUseCase
+import com.example.qafilah.features.catalog.domain.usecases.GetProductsByTypeUseCase
 import com.example.qafilah.features.catalog.domain.usecases.SearchProductsUseCase
 import com.example.qafilah.core.currency.ConvertPriceUseCase
 import com.example.qafilah.features.search.data.datasource.SearchLocalDataSource
@@ -21,11 +24,16 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
+private const val RESULT_LIMIT = 50
+
 class SearchViewModel(
     private val localDataSource: SearchLocalDataSource,
     private val searchProductsUseCase: SearchProductsUseCase,
     private val getBestSellingUseCase: GetBestSellingUseCase,
     private val getCollectionsUseCase: GetCollectionsUseCase,
+    private val getCollectionProductsUseCase: GetCollectionProductsUseCase,
+    private val getProductTypesUseCase: GetProductTypesUseCase,
+    private val getProductsByTypeUseCase: GetProductsByTypeUseCase,
     private val isProductWishlistedUseCase: IsProductWishlistedUseCase,
     private val addToWishlistUseCase: AddToWishlistUseCase,
     private val removeFromWishlistUseCase: RemoveFromWishlistUseCase,
@@ -37,10 +45,39 @@ class SearchViewModel(
 
     private var rawFetchedProducts: List<Product> = emptyList()
     private var searchJob: Job? = null
+    private var filtersReady = false
+    private var pendingInitialCategory: String? = null
+    private var pendingInitialBrand: String? = null
+    private var brandNameToId: Map<String, String> = emptyMap()
 
     init {
         loadRecentSearches()
         loadTrendingAndFilters()
+    }
+
+    fun applyInitialFilters(category: String?, brand: String?) {
+        if (category == null && brand == null) return
+
+        if (!filtersReady) {
+            pendingInitialCategory = category
+            pendingInitialBrand = brand
+            return
+        }
+
+        _uiState.update { state ->
+            state.copy(
+                selectedCategory = category ?: state.selectedCategory,
+                selectedBrand = brand ?: state.selectedBrand,
+                availableCategories = state.availableCategories.map {
+                    it.copy(isSelected = it.id == (category ?: state.selectedCategory))
+                },
+                availableBrands = state.availableBrands.map {
+                    it.copy(isSelected = it.id == (brand ?: state.selectedBrand))
+                }
+            )
+        }
+
+        fetchResults()
     }
 
     fun onSearchQueryChanged(newQuery: String) {
@@ -49,11 +86,7 @@ class SearchViewModel(
         searchJob?.cancel()
         searchJob = viewModelScope.launch {
             delay(500)
-            if (newQuery.isNotBlank()) {
-                executeSearch(newQuery)
-            } else {
-                _uiState.update { it.copy(searchResults = emptyList(), isLoading = false) }
-            }
+            fetchResults()
         }
     }
 
@@ -79,20 +112,25 @@ class SearchViewModel(
                 val trendingNames = trendingProducts.map { it.title }
 
                 val collections = getCollectionsUseCase(limit = 20, after = null)
-                val brandChips = collections.map {
-                    ChipState(id = it.title, name = it.title)
-                }
+                brandNameToId = collections.associate { it.title to it.id }
+                val brandChips = collections.map { ChipState(id = it.title, name = it.title) }
 
-                val categories = listOf("jewelry", "attire", "scent", "home", "gear").map {
-                    ChipState(id = it, name = it.uppercase())
-                }
+                val productTypes = getProductTypesUseCase(limit = 20)
+                val categoryChips = productTypes.map { ChipState(id = it, name = it) }
 
                 _uiState.update {
                     it.copy(
                         trendingSearches = trendingNames,
-                        availableCategories = categories,
+                        availableCategories = categoryChips,
                         availableBrands = brandChips
                     )
+                }
+
+                filtersReady = true
+                if (pendingInitialCategory != null || pendingInitialBrand != null) {
+                    applyInitialFilters(pendingInitialCategory, pendingInitialBrand)
+                    pendingInitialCategory = null
+                    pendingInitialBrand = null
                 }
             } catch (e: Exception) {
                 _uiState.update { it.copy(error = e.message) }
@@ -100,13 +138,60 @@ class SearchViewModel(
         }
     }
 
-    private suspend fun executeSearch(query: String) {
-        _uiState.update { it.copy(isLoading = true) }
-        searchProductsUseCase(query = query, limit = 50).onSuccess { products ->
-            rawFetchedProducts = products
-            combineAndEmitResults()
-        }.onFailure { error ->
-            _uiState.update { it.copy(isLoading = false, error = error.message) }
+    private fun fetchResults() {
+        searchJob?.cancel()
+
+        val state = _uiState.value
+        val query = state.searchQuery.trim()
+        val category = state.selectedCategory
+        val brand = state.selectedBrand
+
+        if (query.isBlank() && category == null && brand == null) {
+            _uiState.update { it.copy(searchResults = emptyList(), isLoading = false) }
+            return
+        }
+
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true) }
+            try {
+                val products = when {
+                    query.isNotBlank() -> fetchByText(query, category, brand)
+                    brand != null -> fetchByBrand(brand, category)
+                    category != null -> getProductsByTypeUseCase(category, RESULT_LIMIT)
+                    else -> emptyList()
+                }
+                rawFetchedProducts = products
+                val uiModels = products.map { product ->
+                    val convertedPrice =
+                        convertPriceUseCase(product.priceAmount.toDoubleOrNull() ?: 0.0)
+                    product.toUiModel(convertedPrice)
+                }
+                _uiState.update { it.copy(searchResults = uiModels, isLoading = false) }
+                uiModels.forEach { observeWishlistState(it.id) }
+            } catch (e: Exception) {
+                _uiState.update { it.copy(isLoading = false, error = e.message) }
+            }
+        }
+    }
+
+    private suspend fun fetchByText(query: String, category: String?, brand: String?): List<Product> {
+        val result = searchProductsUseCase(query = query, limit = RESULT_LIMIT)
+        val products = result.getOrElse { throw it }
+        return products.filter { product ->
+            val matchesCategory = category == null || product.productType.equals(category, ignoreCase = true)
+            val matchesBrand = brand == null || product.vendor.equals(brand, ignoreCase = true)
+            matchesCategory && matchesBrand
+        }
+    }
+
+    private suspend fun fetchByBrand(brand: String, category: String?): List<Product> {
+        val collectionId = brandNameToId[brand] ?: return emptyList()
+        val collectionWithProducts = getCollectionProductsUseCase(collectionId)
+        val products = collectionWithProducts.products
+        return if (category != null) {
+            products.filter { it.productType.equals(category, ignoreCase = true) }
+        } else {
+            products
         }
     }
 
@@ -118,7 +203,7 @@ class SearchViewModel(
                 availableCategories = state.availableCategories.map { it.copy(isSelected = it.id == newSelection) }
             )
         }
-        combineAndEmitResults()
+        fetchResults()
     }
 
     fun toggleBrandFilter(brandId: String) {
@@ -129,7 +214,7 @@ class SearchViewModel(
                 availableBrands = state.availableBrands.map { it.copy(isSelected = it.id == newSelection) }
             )
         }
-        combineAndEmitResults()
+        fetchResults()
     }
 
     fun resetFilters() {
@@ -170,6 +255,7 @@ class SearchViewModel(
 
             uiResults.forEach { observeWishlistState(it.id) }
         }
+        fetchResults()
     }
 
     private fun observeWishlistState(productId: String) {
@@ -208,6 +294,7 @@ class SearchViewModel(
                 }
             } catch (_: Exception) {
             }
+
         }
     }
 

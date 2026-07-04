@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun SignOutButton(
     label: String,
+    iconContentDescription: String?,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -39,7 +40,7 @@ fun SignOutButton(
     ) {
         Icon(
             imageVector = Icons.Filled.ExitToApp,
-            contentDescription = null,
+            contentDescription = iconContentDescription,
             modifier = Modifier.size(18.dp)
         )
         Spacer(Modifier.width(8.dp))

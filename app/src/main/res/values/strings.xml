@@ -17,6 +17,7 @@
     <string name="error_failed_to_load_cart">Failed to load cart</string>
     <string name="error_something_went_wrong">Something went wrong</string>
     <string name="default_username">Traveler</string>
+    <string name="promo_tag_label">EXCLUSIVE REWARD</string>
     <string name="promo_dune_collection">Dune Collection</string>
     <string name="shop_now">SHOP NOW</string>
     <string name="categories">Categories</string>
@@ -93,6 +94,33 @@
     <string name="cart_tax">Tax</string>
     <string name="cart_checkout_charge">Checkout Charge</string>
     <string name="cart_total">Total</string>
+    <string name="cart_promo_codes_title">Promo Codes</string>
+    <string name="cart_add_code_label">+ Add Code</string>
+    <string name="cart_remove_promo_title">Remove Promo Code</string>
+    <string name="cart_remove_promo_message">Are you sure you want to remove the code \'%s\'? Your cart totals will be recalculated.</string>
+    <string name="cart_remove_code_cd">Remove %s</string>
+    <string name="cart_add_discount_title">Add Promo Code</string>
+    <string name="cart_discount_code_label">Code</string>
+    <string name="cart_discount_apply">Apply</string>
+    <string name="cart_discount_cancel">Cancel</string>
+
+    <string name="address_shipping_addresses_title">Shipping Addresses</string>
+    <string name="address_default_label">DEFAULT</string>
+    <string name="address_delete_cd">Delete address</string>
+    <string name="address_add_new_button">Add New Address</string>
+    <string name="address_updating_label">Updating…</string>
+    <string name="address_delete_button">Delete Address</string>
+    <string name="address_delete_confirm_message">Are you sure you want to delete this address?</string>
+    <string name="address_new_address_title">New Address</string>
+    <string name="address_edit_address_title">Edit Address</string>
+    <string name="address_street_label">Street Address</string>
+    <string name="address_city_label">City</string>
+    <string name="address_province_label">Province</string>
+    <string name="address_country_label">Country</string>
+    <string name="address_zip_label">Zip Code</string>
+    <string name="address_set_default_label">Set as default shipping address</string>
+    <string name="address_save_button">Save Address</string>
+    <string name="address_update_button">Update Address</string>
 
     <!-- UI Kit & Shared Labels -->
     <string name="product_description">Product Description</string>
@@ -146,11 +174,13 @@
     <string name="welcome_user_greeting">Ahlan, %1$s</string>
     <string name="welcome_notifications_cd">Notifications</string>
     <string name="search_remove_chip_cd">Remove search term</string>
+    <string name="category_image_cd">Category image</string>
     <string name="search_empty_title">No products found</string>
     <string name="search_empty_description">We couldn\'t find anything matching your trek. Try refining your path.</string>
     <string name="profile_verified_cd">Verified</string>
     <string name="profile_edit_profile">Edit Profile</string>
     <string name="profile_sign_out">Sign Out</string>
+    <string name="profile_sign_out_cd">Sign out of your account</string>
     <string name="profile_stats_orders">Orders</string>
     <string name="profile_stats_wishlist">Wishlist</string>
     <string name="profile_stats_reviews">Reviews</string>
@@ -195,6 +225,7 @@
     <string name="nav_profile">Profile</string>
 
     <string name="search_icon_cd">Search Icon</string>
+    <string name="trending_icon_cd">Trending</string>
 
     <string name="login_welcome_back_title">Welcome back</string>
     <string name="login_welcome_back_subtitle">Continue your curated journey</string>

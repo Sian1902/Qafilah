@@ -93,6 +93,10 @@ fun SearchScreen(
     val clearAllText = stringResource(R.string.clear_all)
     val trendingNowText = stringResource(R.string.trending_now)
     val resultsText = stringResource(R.string.search_results)
+    val trendingIconDesc = stringResource(R.string.trending_icon_cd)
+
+    val hasActiveFilter = availableCategories.any { it.isSelected } || availableBrands.any { it.isSelected }
+    val showResults = searchQuery.isNotEmpty() || hasActiveFilter
 
     ModalNavigationDrawer(
         drawerState = drawerState,
@@ -182,18 +186,18 @@ fun SearchScreen(
 
                     SearchField(
                         placeholderText = stringResource(R.string.search_placeholder),
+                        searchIconContentDescription = stringResource(R.string.search_icon_cd),
                         value = searchQuery,
                         onValueChange = onSearchQueryChange,
-                        modifier = Modifier.weight(1f),
-                        searchIconContentDescription = stringResource(R.string.search_icon_cd),
-                        onClick = null
+                        modifier = Modifier.weight(1f)
                     )
 
                     IconButton(onClick = { scope.launch { drawerState.open() } }) {
                         Icon(
                             imageVector = Icons.Default.Tune,
                             contentDescription = filtersText,
-                            tint = MaterialTheme.colorScheme.primary
+                            tint = if (hasActiveFilter) MaterialTheme.colorScheme.primary
+                            else MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                 }
@@ -219,7 +223,7 @@ fun SearchScreen(
                     horizontalArrangement = Arrangement.spacedBy(16.dp),
                     verticalArrangement = Arrangement.spacedBy(24.dp)
                 ) {
-                    if (searchQuery.isEmpty()) {
+                    if (!showResults) {
                         if (recentSearches.isNotEmpty()) {
                             item(span = { GridItemSpan(maxLineSpan) }) {
                                 Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
@@ -271,6 +275,7 @@ fun SearchScreen(
                         items(trendingSearches) { searchItem ->
                             TrendingPillCard(
                                 label = searchItem,
+                                iconContentDescription = trendingIconDesc,
                                 onClick = { onSearchQueryChange(searchItem) }
                             )
                         }
@@ -288,7 +293,8 @@ fun SearchScreen(
                             item(span = { GridItemSpan(maxLineSpan) }) {
                                 SearchEmptyState(
                                     title = stringResource(R.string.search_empty_title),
-                                    description = stringResource(R.string.search_empty_description)
+                                    description = stringResource(R.string.search_empty_description),
+                                    iconContentDescription = stringResource(R.string.search_icon_cd)
                                 )
                             }
                         } else {

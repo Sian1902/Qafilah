@@ -18,6 +18,7 @@
     <string name="error_failed_to_load_cart">فشل تحميل السلة</string>
     <string name="error_something_went_wrong">حدث خطأ ما</string>
     <string name="default_username">مسافر</string>
+    <string name="promo_tag_label">مكافأة حصرية</string>
     <string name="promo_dune_collection">مجموعة الكثبان</string>
     <string name="shop_now">تسوق الآن</string>
     <string name="categories">الفئات</string>
@@ -94,6 +95,33 @@
     <string name="cart_tax">الضريبة</string>
     <string name="cart_checkout_charge">رسوم الدفع</string>
     <string name="cart_total">المجموع الكلي</string>
+    <string name="cart_promo_codes_title">الرموز الترويجية</string>
+    <string name="cart_add_code_label">+ إضافة رمز</string>
+    <string name="cart_remove_promo_title">إزالة الرمز الترويجي</string>
+    <string name="cart_remove_promo_message">هل أنت متأكد أنك تريد إزالة الرمز \'%s\'؟ سيتم إعادة حساب إجمالي السلة.</string>
+    <string name="cart_remove_code_cd">إزالة %s</string>
+    <string name="cart_add_discount_title">إضافة رمز ترويجي</string>
+    <string name="cart_discount_code_label">الرمز</string>
+    <string name="cart_discount_apply">تطبيق</string>
+    <string name="cart_discount_cancel">إلغاء</string>
+
+    <string name="address_shipping_addresses_title">عناوين الشحن</string>
+    <string name="address_default_label">افتراضي</string>
+    <string name="address_delete_cd">حذف العنوان</string>
+    <string name="address_add_new_button">إضافة عنوان جديد</string>
+    <string name="address_updating_label">جاري التحديث…</string>
+    <string name="address_delete_button">حذف العنوان</string>
+    <string name="address_delete_confirm_message">هل أنت متأكد أنك تريد حذف هذا العنوان؟</string>
+    <string name="address_new_address_title">عنوان جديد</string>
+    <string name="address_edit_address_title">تعديل العنوان</string>
+    <string name="address_street_label">عنوان الشارع</string>
+    <string name="address_city_label">المدينة</string>
+    <string name="address_province_label">المحافظة</string>
+    <string name="address_country_label">الدولة</string>
+    <string name="address_zip_label">الرمز البريدي</string>
+    <string name="address_set_default_label">تعيين كعنوان شحن افتراضي</string>
+    <string name="address_save_button">حفظ العنوان</string>
+    <string name="address_update_button">تحديث العنوان</string>
 
     <!-- UI Kit & Shared Labels -->
     <string name="product_description">وصف المنتج</string>
@@ -147,11 +175,13 @@
     <string name="welcome_user_greeting">أهلاً، %1$s</string>
     <string name="welcome_notifications_cd">الإشعارات</string>
     <string name="search_remove_chip_cd">حذف عبارة البحث</string>
+    <string name="category_image_cd">صورة الفئة</string>
     <string name="search_empty_title">لم يتم العثور على منتجات</string>
     <string name="search_empty_description">لم نتمكن من العثور على أي شيء يطابق بحثك. حاول تغيير كلمات البحث.</string>
     <string name="profile_verified_cd">موثق</string>
     <string name="profile_edit_profile">تعديل الملف الشخصي</string>
     <string name="profile_sign_out">تسجيل الخروج</string>
+    <string name="profile_sign_out_cd">تسجيل الخروج من حسابك</string>
     <string name="profile_stats_orders">الطلبات</string>
     <string name="profile_stats_wishlist">المفضلة</string>
     <string name="profile_stats_reviews">التقييمات</string>
@@ -196,6 +226,7 @@
     <string name="nav_profile">حسابي</string>
 
     <string name="search_icon_cd">أيقونة البحث</string>
+    <string name="trending_icon_cd">رائج</string>
 
     <!-- Auth & Login/SignUp -->
     <string name="login_welcome_back_title">مرحباً بعودتك</string>

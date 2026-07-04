@@ -34,17 +34,13 @@ class CurrencyRepositoryImpl(
     override suspend fun getExchangeRates(): Map<String, Double> {
         return mutex.withLock {
             cachedRates ?: try {
-                Log.d("CurrencyRepo", "Fetching latest rates...")
                 val response = apiService.getLatestRates(apiKey, "USD")
                 if (response.result == "success") {
-                    Log.d("CurrencyRepo", "Successfully fetched rates")
                     response.conversionRates.also { cachedRates = it }
                 } else {
-                    Log.e("CurrencyRepo", "API Error: ${response.result}")
                     getFallbackRates()
                 }
             } catch (e: Exception) {
-                Log.e("CurrencyRepo", "Network Error: ${e.message}")
                 getFallbackRates()
             }
         }
@@ -53,19 +49,15 @@ class CurrencyRepositoryImpl(
     override suspend fun getSupportedCurrencies(): List<CurrencyMetadata> {
         return mutex.withLock {
             cachedMetadata ?: try {
-                Log.d("CurrencyRepo", "Fetching supported currencies...")
                 val response = apiService.getSupportedCodes(apiKey)
                 if (response.result == "success") {
-                    Log.d("CurrencyRepo", "Successfully fetched currencies")
                     response.supportedCodes.map {
                         CurrencyMetadata(code = it[0], fullName = it[1])
                     }.also { cachedMetadata = it }
                 } else {
-                    Log.e("CurrencyRepo", "API Error: ${response.result}")
                     getFallbackMetadata()
                 }
             } catch (e: Exception) {
-                Log.e("CurrencyRepo", "Network Error: ${e.message}")
                 getFallbackMetadata()
             }
         }

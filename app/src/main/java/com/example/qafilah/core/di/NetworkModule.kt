@@ -5,6 +5,14 @@ import org.koin.core.qualifier.named
 import org.koin.dsl.module
 
 val networkModule = module {
-    single { ShopifyClient.instance }
 
+    single(named(ShopifyClient.QUALIFIER_STOREFRONT)) {
+        ShopifyClient.storefront
+    }
+
+    single(named(ShopifyClient.QUALIFIER_ADMIN)) {
+        ShopifyClient.admin
+    }
+
+    single { ShopifyClient.storefront }
 }

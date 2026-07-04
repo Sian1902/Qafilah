@@ -15,9 +15,19 @@ sealed class Screen(val route: String) {
     object OrderConfirmation : Screen("order_confirmation/{orderId}") {
         fun createRoute(orderId: String) = "order_confirmation/$orderId"
     }
+    object Catalog : Screen("catalog_screen")
+
+    object CatalogProducts : Screen("catalog_products/{categoryId}/{categoryTitle}") {
+        fun createRoute(categoryId: String, categoryTitle: String): String {
+            val encodedId = android.net.Uri.encode(categoryId)
+            val encodedTitle = android.net.Uri.encode(categoryTitle)
+            return "catalog_products/$encodedId/$encodedTitle"
+        }
+    }
 
     object PersonalDetails : Screen("personal_details")
     object EditProfile : Screen("edit_profile")
+    object ShippingAddresses : Screen("shipping_addresses")
     object AddAddress : Screen("add_address")
     object EditAddress : Screen("edit_address/{addressId}") {
         fun createRoute(addressId: String) = "edit_address/$addressId"
@@ -34,6 +44,7 @@ sealed class Screen(val route: String) {
             "order_confirmation/{orderId}",
             PersonalDetails.route,
             EditProfile.route,
+            ShippingAddresses.route,
             AddAddress.route,
             "edit_address/{addressId}"
         )

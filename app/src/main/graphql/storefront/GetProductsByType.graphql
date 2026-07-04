@@ -1,0 +1,21 @@
+query GetProductsByType($query: String!, $first: Int!, $after: String) {
+    products(first: $first, after: $after, query: $query) {
+        edges {
+            cursor
+            node {
+                id
+                title
+                vendor
+                productType
+                availableForSale
+                priceRange {
+                    minVariantPrice { amount currencyCode }
+                }
+                images(first: 1) {
+                    edges { node { url altText } }
+                }
+            }
+        }
+        pageInfo { hasNextPage endCursor }
+    }
+}

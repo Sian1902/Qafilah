@@ -12,6 +12,7 @@ query GetProductsByCollection($id: ID!, $first: Int!, $after: String, $sortKey: 
                     id
                     title
                     vendor
+                    productType
                     availableForSale
                     priceRange {
                         minVariantPrice { amount currencyCode }

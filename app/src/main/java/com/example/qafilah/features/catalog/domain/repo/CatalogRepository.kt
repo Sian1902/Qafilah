@@ -11,4 +11,10 @@ interface CatalogRepository {
     suspend fun getBestSellingProducts(limit: Int, after: String?): List<Product>
     suspend fun getCollections(limit: Int, after: String?): List<StoreCollection>
     suspend fun getProductsByCollection(id: String): CollectionWithProducts
+
+    suspend fun getProductTypes(limit: Int): List<String>
+
+    suspend fun getProductsByType(productType: String, limit: Int): List<Product>
+
+
 }

@@ -1,4 +1,4 @@
-package com.example.ui_kit.components.home
+package com.example.ui_kit.components.shared
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -19,15 +19,17 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.example.ui_kit.components.shared.PillButton
-
 
 @Composable
 fun PromoBannerCard(
     imageUrl: String,
     title: String,
+    tagLabel: String,
+    imageContentDescription: String,
     ctaText: String,
     onCtaClick: () -> Unit,
     modifier: Modifier = Modifier
@@ -40,7 +42,7 @@ fun PromoBannerCard(
     ) {
         AsyncImage(
             model = imageUrl,
-            contentDescription = title,
+            contentDescription = imageContentDescription,
             contentScale = ContentScale.Crop,
             modifier = Modifier.fillMaxSize()
         )
@@ -50,7 +52,7 @@ fun PromoBannerCard(
                 .fillMaxSize()
                 .background(
                     Brush.verticalGradient(
-                        colors = listOf(Color.Transparent, Color.Black.copy(alpha = 0.75f))
+                        colors = listOf(Color.Transparent, Color.Black.copy(alpha = 0.85f))
                     )
                 )
         )
@@ -58,15 +60,23 @@ fun PromoBannerCard(
         Column(
             modifier = Modifier
                 .align(Alignment.BottomStart)
-                .padding(20.dp)
+                .padding(24.dp)
         ) {
+            Text(
+                text = tagLabel,
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.primary,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+
             Text(
                 text = title,
                 style = MaterialTheme.typography.displayMedium,
                 color = Color.White
             )
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(20.dp))
 
             PillButton(text = ctaText, onClick = onCtaClick)
         }

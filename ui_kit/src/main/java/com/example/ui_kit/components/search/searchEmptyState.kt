@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.dp
 fun SearchEmptyState(
     title: String,
     description: String,
+    iconContentDescription: String?,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -42,7 +43,7 @@ fun SearchEmptyState(
         ) {
             Icon(
                 imageVector = Icons.Default.Search,
-                contentDescription = null,
+                contentDescription = iconContentDescription,
                 modifier = Modifier.size(48.dp),
                 tint = MaterialTheme.colorScheme.primary
             )

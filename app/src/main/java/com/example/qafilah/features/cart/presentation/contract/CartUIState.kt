@@ -16,12 +16,16 @@ data class CartUiModel(
     val displaySubtotal: String,
     val displayTotal: String,
     val checkoutUrl: String,
-    val lines: List<CartLineUiModel>
+    val lines: List<CartLineUiModel>,
+    val discountCodes: List<String> = emptyList()
 )
 
 data class CartUIState(
     val isLoading: Boolean = false,
     val showLoginPrompt: Boolean = false,
     val errorMessage: String? = null,
-    val cart: CartUiModel? = null
+    val cart: CartUiModel? = null,
+    val discountInput: String = "",
+    val isApplyingDiscount: Boolean = false,
+    val discountError: String? = null
 )

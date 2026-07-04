@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -17,19 +18,23 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.example.qafilah.MainViewModel
 import com.example.qafilah.R
+import com.example.qafilah.features.address.presentation.AddressViewModel
+import com.example.qafilah.features.address.presentation.ShippingAddressesScreen
 import com.example.qafilah.features.auth.domain.model.AppUser
 import com.example.qafilah.features.auth.presentation.screens.LoginScreen
 import com.example.qafilah.features.auth.presentation.screens.SignUpScreen
 import com.example.qafilah.features.cart.presentation.ui.CartScreen
-import com.example.qafilah.features.home.presentation.HomeScreen
+import com.example.qafilah.features.catalog.presentation.CatalogProductsScreen
+import com.example.qafilah.features.catalog.presentation.CatalogScreen
+import com.example.qafilah.features.checkout.presentation.shared.CheckoutScreen
+import com.example.qafilah.features.home.presentation.ui.HomeScreen
 import com.example.qafilah.features.onboarding.OnboardingScreen
 import com.example.qafilah.features.product_detail.presentation.ProductDetailScreen
-import com.example.qafilah.features.profile.presentation.profile.ProfileScreen
 import com.example.qafilah.features.profile.presentation.editprofile.EditProfileScreen
 import com.example.qafilah.features.profile.presentation.persondetails.PersonalDetailsScreen
+import com.example.qafilah.features.profile.presentation.profile.ProfileScreen
 import com.example.qafilah.features.profile.presentation.profile.ProfileViewModel
 import com.example.qafilah.features.search.SearchScreen
-import com.example.qafilah.features.search.domain.model.ChipState
 import com.example.qafilah.features.search.presentation.SearchViewModel
 import com.example.qafilah.features.splash.SplashScreen
 import com.example.qafilah.features.wishlist.presentation.WishlistScreen
@@ -120,6 +125,7 @@ fun AppNavHost(
         composable(Screen.Checkout.route) {
             Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 Text(stringResource(R.string.checkout))
+                CheckoutScreen()
             }
         }
 
@@ -136,15 +142,51 @@ fun AppNavHost(
 
         composable(NavItem.Home.route) {
             HomeScreen(
-                onSearchClick = {
-                    navController.navigate(NavItem.Search.route)
-                },
+                onSearchClick = { navController.navigate(NavItem.Search.route) },
                 onNotificationClick = { },
-                onCategoryClick = { },
-                onViewAllCategoriesClick = { },
                 onBrandClick = { },
+                onCategoryClick = { categoryUiModel ->
+                    navController.navigate(
+                        Screen.CatalogProducts.createRoute(
+                            categoryUiModel.id,
+                            categoryUiModel.label
+                        )
+                    )
+                },
+                onViewAllCategoriesClick = {
+                    navController.navigate(Screen.Catalog.route)
+                },
                 onProductClick = { product ->
-                    navController.navigate(Screen.ProductDetail.createRoute(Uri.encode(product.id)))
+                    navController.navigate(Screen.ProductDetail.createRoute(product.id))
+                }
+            )
+        }
+        composable(Screen.Catalog.route) {
+            CatalogScreen(
+                onBackClick = { navController.popBackStack() },
+                onCategoryClick = { categoryId, categoryTitle ->
+                    navController.navigate(
+                        Screen.CatalogProducts.createRoute(categoryId, categoryTitle)
+                    )
+                }
+            )
+        }
+        composable(
+            route = Screen.CatalogProducts.route,
+            arguments = listOf(
+                navArgument("categoryId") { type = NavType.StringType },
+                navArgument("categoryTitle") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val categoryId = backStackEntry.arguments?.getString("categoryId") ?: ""
+            val categoryTitle = backStackEntry.arguments?.getString("categoryTitle") ?: ""
+
+            CatalogProductsScreen(
+                categoryId = categoryId,
+                categoryTitle = categoryTitle,
+                onBackClick = { navController.popBackStack() },
+                onProductClick = { product ->
+                    navController.navigate(Screen.ProductDetail.createRoute(product.id))
                 }
             )
         }
@@ -152,6 +194,21 @@ fun AppNavHost(
         composable(NavItem.Search.route) {
             val searchViewModel: SearchViewModel = koinViewModel()
             val uiState by searchViewModel.uiState.collectAsState()
+
+            val initialCategory = navController.previousBackStackEntry
+                ?.savedStateHandle
+                ?.get<String>("search_category")
+            val initialBrand = navController.previousBackStackEntry
+                ?.savedStateHandle
+                ?.get<String>("search_brand")
+
+            LaunchedEffect(Unit) {
+                if (initialCategory != null || initialBrand != null) {
+                    searchViewModel.applyInitialFilters(initialCategory, initialBrand)
+                    navController.previousBackStackEntry?.savedStateHandle?.remove<String>("search_category")
+                    navController.previousBackStackEntry?.savedStateHandle?.remove<String>("search_brand")
+                }
+            }
 
             SearchScreen(
                 searchQuery = uiState.searchQuery,
@@ -185,6 +242,7 @@ fun AppNavHost(
                 }
             )
         }
+
         composable(NavItem.Cart.route) {
             CartScreen(
                 onNavigateToLogin = { navController.navigate(Screen.Login.route) },
@@ -193,6 +251,9 @@ fun AppNavHost(
                     navController.navigate(NavItem.Home.route) {
                         popUpTo(NavItem.Cart.route) { inclusive = true }
                     }
+                },
+                onNavigateToCheckout = {
+                    navController.navigate(Screen.Checkout.route)
                 }
             )
         }
@@ -226,7 +287,7 @@ fun AppNavHost(
                 onSavedPaymentsClick = {
                 },
                 onShippingAddressesClick = {
-                    navController.navigate(Screen.AddAddress.route)
+                    navController.navigate(Screen.ShippingAddresses.route)
                 },
                 onSignOutClick = {
                     navController.navigate(Screen.Login.route) {
@@ -255,6 +316,36 @@ fun AppNavHost(
             )
         }
 
+        composable(Screen.ShippingAddresses.route) {
+            val addressViewModel: AddressViewModel = koinViewModel()
+            val uiState by addressViewModel.uiState.collectAsState()
+
+            LaunchedEffect(Unit) {
+                addressViewModel.loadAddresses()
+            }
+
+            ShippingAddressesScreen(
+                uiState = uiState,
+                onBackClick = { navController.popBackStack() },
+                onSaveNewAddress = { address ->
+                    addressViewModel.createAddress(address)
+                },
+                onEditAddress = { address ->
+                    addressViewModel.updateAddress(address)
+                },
+                onDeleteAddress = { addressId ->
+                    addressViewModel.deleteAddress(addressId)
+                },
+                onSetDefaultAddress = { addressId ->
+                    addressViewModel.setDefaultAddress(addressId)
+                },
+                onConsumeOperationResult = {
+                    addressViewModel.consumeOperationResult()
+                }
+            )
+
+        }
+
         composable(Screen.AddAddress.route) {
             Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 Text(stringResource(R.string.add_address_wip))
@@ -272,5 +363,6 @@ fun AppNavHost(
                 Text(stringResource(R.string.edit_address_wip, addressId))
             }
         }
+
     }
 }

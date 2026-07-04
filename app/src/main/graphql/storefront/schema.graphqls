@@ -1048,6 +1048,26 @@ enum CartCardSource {
 }
 
 """
+Return type for `cartClone` mutation.
+"""
+type CartClonePayload {
+  """
+  The newly created cart without PII. This is a different cart from the source.
+  """
+  cart: Cart
+
+  """
+  The list of errors that occurred from executing the mutation.
+  """
+  userErrors: [CartUserError!]!
+
+  """
+  A list of warnings that occurred during the mutation.
+  """
+  warnings: [CartWarning!]!
+}
+
+"""
 A discount allocation applied to a cart line when a customer enters a [discount code](https://help.shopify.com/manual/discounts/discount-methods/discount-codes).
 """
 type CartCodeDiscountAllocation implements CartDiscountAllocation {
@@ -1443,6 +1463,26 @@ type CartDeliveryAddressesRemovePayload {
 }
 
 """
+Return type for `cartDeliveryAddressesReplace` mutation.
+"""
+type CartDeliveryAddressesReplacePayload {
+  """
+  The updated cart.
+  """
+  cart: Cart
+
+  """
+  The list of errors that occurred from executing the mutation.
+  """
+  userErrors: [CartUserError!]!
+
+  """
+  A list of warnings that occurred during the mutation.
+  """
+  warnings: [CartWarning!]!
+}
+
+"""
 Return type for `cartDeliveryAddressesUpdate` mutation.
 """
 type CartDeliveryAddressesUpdatePayload {
@@ -1821,6 +1861,16 @@ enum CartErrorCode {
   INVALID_MERCHANDISE_LINE
 
   """
+  Item cannot be purchased as configured.
+  """
+  MERCHANDISE_NOT_APPLICABLE
+
+  """
+  An error occurred while processing cart transformations.
+  """
+  MERCHANDISE_LINE_TRANSFORMERS_RUN_ERROR
+
+  """
   Missing discount code.
   """
   MISSING_DISCOUNT_CODE
@@ -1929,6 +1979,36 @@ enum CartErrorCode {
   Buyer cannot purchase for company location.
   """
   BUYER_CANNOT_PURCHASE_FOR_COMPANY_LOCATION
+
+  """
+  Bundles and addons cannot be mixed.
+  """
+  BUNDLES_AND_ADDONS_CANNOT_BE_MIXED
+
+  """
+  Cannot reference existing parent lines by variant_id.
+  """
+  PARENT_LINE_INVALID_REFERENCE
+
+  """
+  Parent line not found.
+  """
+  PARENT_LINE_NOT_FOUND
+
+  """
+  Parent line nesting is too deep or circular.
+  """
+  PARENT_LINE_NESTING_TOO_DEEP
+
+  """
+  Nested cartlines are blocked due to an incompatibility.
+  """
+  PARENT_LINE_OPERATION_BLOCKED
+
+  """
+  The specified gift card recipient is invalid.
+  """
+  GIFT_CARD_RECIPIENT_INVALID
 
   """
   The specified address field is required.
@@ -2099,6 +2179,26 @@ input CartFreePaymentMethodInput {
 }
 
 """
+Return type for `cartGiftCardCodesAdd` mutation.
+"""
+type CartGiftCardCodesAddPayload {
+  """
+  The updated cart.
+  """
+  cart: Cart
+
+  """
+  The list of errors that occurred from executing the mutation.
+  """
+  userErrors: [CartUserError!]!
+
+  """
+  A list of warnings that occurred during the mutation.
+  """
+  warnings: [CartWarning!]!
+}
+
+"""
 Return type for `cartGiftCardCodesRemove` mutation.
 """
 type CartGiftCardCodesRemovePayload {
@@ -2257,9 +2357,19 @@ type CartLine implements BaseCartLine & Node {
   id: ID!
 
   """
+  The instructions for the line item.
+  """
+  instructions: CartLineInstructions!
+
+  """
   The merchandise that the buyer intends to purchase.
   """
   merchandise: Merchandise!
+
+  """
+  The parent of the line item.
+  """
+  parentRelationship: CartLineParentRelationship
 
   """
   The quantity of the merchandise that the customer intends to purchase.
@@ -2351,6 +2461,51 @@ input CartLineInput {
   The ID of the selling plan that the merchandise is being purchased with.
   """
   sellingPlanId: ID
+
+  """
+  The parent line item of the cart line.
+  """
+  parent: CartLineParentInput
+}
+
+"""
+Represents instructions for a cart line item.
+"""
+type CartLineInstructions {
+  """
+  Whether the line item can be removed from the cart.
+  """
+  canRemove: Boolean!
+
+  """
+  Whether the line item quantity can be updated.
+  """
+  canUpdateQuantity: Boolean!
+}
+
+"""
+The parent line item of the cart line.
+"""
+input CartLineParentInput @oneOf {
+  """
+  The id of the parent line item.
+  """
+  lineId: ID
+
+  """
+  The ID of the parent line merchandise.
+  """
+  merchandiseId: ID
+}
+
+"""
+Represents the parent relationship of a cart line.
+"""
+type CartLineParentRelationship {
+  """
+  The parent cart line.
+  """
+  parent: CartLine!
 }
 
 """
@@ -3000,6 +3155,11 @@ enum CartWarningCode {
   The purchase type is incompatible with this discount.
   """
   DISCOUNT_INCOMPATIBLE_PURCHASE_TYPE
+
+  """
+  Only one-time purchase is available for B2B orders.
+  """
+  MERCHANDISE_SELLING_PLAN_NOT_APPLICABLE_ON_COMPANY_LOCATION
 }
 
 """
@@ -5649,6 +5809,11 @@ type Customer implements HasMetafields {
   addresses("Returns up to the first `n` elements from the list." first: Int, "Returns the elements that come after the specified cursor." after: String, "Returns up to the last `n` elements from the list." last: Int, "Returns the elements that come before the specified cursor." before: String, "Reverse the order of the underlying list." reverse: Boolean = false): MailingAddressConnection!
 
   """
+  The URL of the customer's avatar image.
+  """
+  avatarUrl: String
+
+  """
   The date and time when the customer was created.
   """
   createdAt: DateTime!
@@ -5707,6 +5872,11 @@ type Customer implements HasMetafields {
   The customer’s phone number.
   """
   phone: String
+
+  """
+  The social login provider associated with the customer.
+  """
+  socialLoginProvider: SocialLoginProvider
 
   """
   A comma separated list of tags that have been added to the customer.
@@ -8853,7 +9023,7 @@ The resource that a metafield points to when its type is a resource reference. M
 
 Returned by the `Metafield` object's [`reference`](https://shopify.dev/docs/api/storefront/current/objects/Metafield#field-Metafield.fields.reference) field for single references or the [`references`](https://shopify.dev/docs/api/storefront/current/objects/Metafield#field-Metafield.fields.references) field for lists.
 """
-union MetafieldReference = Collection|GenericFile|MediaImage|Metaobject|Model3d|Page|Product|ProductVariant|Video
+union MetafieldReference = Article|Collection|GenericFile|MediaImage|Metaobject|Model3d|Page|Product|ProductVariant|Video
 
 """
 An auto-generated type for paginating through multiple MetafieldReferences.
@@ -9227,6 +9397,11 @@ type Mutation {
   cartBuyerIdentityUpdate("The ID of the cart." cartId: ID!, "The customer associated with the cart. Used to determine\n[international pricing](https://shopify.dev/custom-storefronts/internationalization/international-pricing).\nBuyer identity should match the customer's shipping address.\n" buyerIdentity: CartBuyerIdentityInput!): CartBuyerIdentityUpdatePayload
 
   """
+  Creates a clone of the specified cart with all personally identifiable information removed.
+  """
+  cartClone("The ID of the cart to clone." cartId: ID!): CartClonePayload
+
+  """
   Creates a new [`Cart`](https://shopify.dev/docs/api/storefront/current/objects/Cart) for a buyer session. You can optionally initialize the cart with merchandise lines, discount codes, gift card codes, buyer identity for international pricing, and custom attributes.
 
   The returned cart includes a `checkoutUrl` that directs the buyer to complete their purchase.
@@ -9244,6 +9419,13 @@ type Mutation {
   cartDeliveryAddressesRemove("The ID of the cart." cartId: ID!, "A list of delivery addresses by handle to remove from the cart.\n\nThe input must not contain more than `250` values." addressIds: [ID!]!): CartDeliveryAddressesRemovePayload
 
   """
+  Replaces all delivery addresses on a [`Cart`](https://shopify.dev/docs/api/storefront/current/objects/Cart) with a new set of addresses in a single operation. Unlike [`cartDeliveryAddressesUpdate`](https://shopify.dev/docs/api/storefront/current/mutations/cartDeliveryAddressesUpdate), which modifies existing addresses, this mutation removes all current addresses and sets the provided list as the new delivery addresses.
+
+  One address can be marked as selected, and each address can be flagged for one-time use or configured with a specific validation strategy.
+  """
+  cartDeliveryAddressesReplace("The ID of the cart." cartId: ID!, "A list of delivery addresses to replace on the cart.\n\nThe input must not contain more than `250` values." addresses: [CartSelectableAddressInput!]!): CartDeliveryAddressesReplacePayload
+
+  """
   Updates one or more delivery addresses on a [`Cart`](https://shopify.dev/docs/api/storefront/current/objects/Cart). Each address can be modified to change its details, set it as the pre-selected address for checkout, or mark it for one-time use so it isn't saved to the customer's account.
   """
   cartDeliveryAddressesUpdate("The ID of the cart." cartId: ID!, "The delivery addresses to update.\n\nThe input must not contain more than `250` values." addresses: [CartSelectableAddressUpdateInput!]!): CartDeliveryAddressesUpdatePayload
@@ -9253,7 +9435,14 @@ type Mutation {
 
   After updating, check each [`CartDiscountCode`](https://shopify.dev/docs/api/storefront/current/objects/CartDiscountCode) in the cart's [`discountCodes`](https://shopify.dev/docs/api/storefront/current/objects/Cart#field-Cart.fields.discountCodes) field to see whether the code is applicable to the cart's current contents.
   """
-  cartDiscountCodesUpdate("The ID of the cart." cartId: ID!, "The case-insensitive discount codes that the customer added at checkout.\n\nThe input must not contain more than `250` values." discountCodes: [String!]): CartDiscountCodesUpdatePayload
+  cartDiscountCodesUpdate("The ID of the cart." cartId: ID!, "The case-insensitive discount codes that the customer added at checkout.\n\nThe input must not contain more than `250` values." discountCodes: [String!]!): CartDiscountCodesUpdatePayload
+
+  """
+  Adds gift card codes to a [`Cart`](https://shopify.dev/docs/api/storefront/current/objects/Cart) without replacing any codes already applied. Gift card codes are case-insensitive.
+
+  To replace all gift card codes instead of adding to them, use [`cartGiftCardCodesUpdate`](https://shopify.dev/docs/api/storefront/current/mutations/cartGiftCardCodesUpdate).
+  """
+  cartGiftCardCodesAdd("The ID of the cart." cartId: ID!, "The case-insensitive gift card codes to add.\n\nThe input must not contain more than `250` values." giftCardCodes: [String!]!): CartGiftCardCodesAddPayload
 
   """
   Removes gift cards from a [`Cart`](https://shopify.dev/docs/api/storefront/current/objects/Cart) using their IDs. You can retrieve the IDs of applied gift cards from the cart's [`appliedGiftCards`](https://shopify.dev/docs/api/storefront/current/objects/Cart#field-Cart.fields.appliedGiftCards) field.
@@ -12267,6 +12456,16 @@ type Shop implements HasMetafields & Node {
   brand: Brand
 
   """
+  The shop's contact information.
+  """
+  contactInformation: ShopPolicy
+
+  """
+  Translations for customer accounts.
+  """
+  customerAccountTranslations: [Translation!]
+
+  """
   The URL for the customer account (only present if shop has a customer account vanity domain).
   """
   customerAccountUrl: String
@@ -12280,6 +12479,11 @@ type Shop implements HasMetafields & Node {
   A globally-unique ID.
   """
   id: ID!
+
+  """
+  The shop's legal notice.
+  """
+  legalNotice: ShopPolicy
 
   """
   A [custom field](https://shopify.dev/docs/apps/build/custom-data), including its `namespace` and `key`, that's associated with a Shopify resource for the purposes of adding and storing additional information.
@@ -12337,9 +12541,19 @@ type Shop implements HasMetafields & Node {
   shopPayInstallmentsPricing: ShopPayInstallmentsPricing
 
   """
+  The social login providers for customer accounts.
+  """
+  socialLoginProviders: [SocialLoginProvider!]!
+
+  """
   The shop’s subscription policy.
   """
   subscriptionPolicy: ShopPolicyWithDefault
+
+  """
+  The shop's terms of sale.
+  """
+  termsOfSale: ShopPolicy
 
   """
   The shop’s terms of service.
@@ -13359,6 +13573,16 @@ enum SitemapType {
 }
 
 """
+A social login provider for customer accounts.
+"""
+type SocialLoginProvider {
+  """
+  The handle of the social login provider.
+  """
+  handle: String!
+}
+
+"""
 Inventory information for a product variant at a physical store location that offers local pickup. Includes stock availability, quantity on hand, and estimated pickup readiness time. Availability also includes inventory that can be moved to the location through a store transfer route, so a variant can be available for pickup with no on-hand stock at the location.
 
 Local pickup must be [enabled in the store's shipping settings](https://help.shopify.com/manual/shipping/setting-up-and-managing-your-shipping/local-methods/local-pickup) for this data to be returned. Results can be sorted by proximity to a customer's location using the `near` argument on the [`ProductVariant.storeAvailability`](https://shopify.dev/docs/api/storefront/current/objects/ProductVariant#field-ProductVariant.fields.storeAvailability) connection. 
@@ -13800,6 +14024,21 @@ interface Trackable {
 }
 
 """
+Translation represents a translation of a key-value pair.
+"""
+type Translation {
+  """
+  The key of the translation.
+  """
+  key: String!
+
+  """
+  The value of the translation.
+  """
+  value: String!
+}
+
+"""
 Represents an [RFC 3986](https://datatracker.ietf.org/doc/html/rfc3986) and
 [RFC 3987](https://datatracker.ietf.org/doc/html/rfc3987)-compliant URI string.
 
@@ -14210,6 +14449,31 @@ type VideoSource {
 }
 
 """
+The visitor's consent to data processing purposes for the shop. true means accepting the purposes, false means declining them, and null means that the visitor didn't express a preference.
+"""
+input VisitorConsent {
+  """
+  The visitor accepts or rejects the preferences data processing purpose.
+  """
+  preferences: Boolean
+
+  """
+  The visitor accepts or rejects the analytics data processing purpose.
+  """
+  analytics: Boolean
+
+  """
+  The visitor accepts or rejects the first and third party marketing data processing purposes.
+  """
+  marketing: Boolean
+
+  """
+  The visitor accepts or rejects the sale or sharing of their data with third parties.
+  """
+  saleOfData: Boolean
+}
+
+"""
 Units of measurement for weight, supporting both metric and imperial systems. Used by [`ProductVariant`](https://shopify.dev/docs/api/storefront/current/objects/ProductVariant) to specify the unit for the variant's weight value.
 """
 enum WeightUnit {
@@ -14549,7 +14813,7 @@ directive @deprecated("Explains why this element was deprecated, usually also in
 """
 Contextualizes data based on the additional information provided by the directive. For example, you can use the `@inContext(country: CA)` directive to [query a product's price](https://shopify.dev/custom-storefronts/internationalization/international-pricing) in a storefront within the context of Canada.
 """
-directive @inContext("The country code for context. For example, `CA`." country: CountryCode, "The language code for context. For example, `EN`." language: LanguageCode, "The identifier of the customer's preferred location." preferredLocationId: ID, "The buyer's identity." buyer: BuyerInput) on QUERY | MUTATION
+directive @inContext("The country code for context. For example, `CA`." country: CountryCode, "The language code for context. For example, `EN`." language: LanguageCode, "The identifier of the customer's preferred location." preferredLocationId: ID, "The buyer's identity." buyer: BuyerInput, "The visitor's consent preferences for data processing purposes." visitorConsent: VisitorConsent) on QUERY | MUTATION
 
 """
 Directs the executor to include this field or fragment only when the `if` argument is true.

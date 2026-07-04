@@ -1,5 +1,6 @@
 package com.example.qafilah.features.profile.di
 
+import com.example.qafilah.core.network.ShopifyClient
 import com.example.qafilah.core.token.TokenLocalDataSource
 import com.example.qafilah.core.token.TokenProvider
 import com.example.qafilah.core.token.TokenProviderImpl
@@ -15,6 +16,7 @@ import com.example.qafilah.features.profile.presentation.editprofile.EditProfile
 import com.example.qafilah.features.profile.presentation.persondetails.PersonalDetailsViewModel
 import com.example.qafilah.features.profile.presentation.profile.ProfileViewModel
 import org.koin.androidx.viewmodel.dsl.viewModel
+import org.koin.core.qualifier.named
 import org.koin.dsl.module
 
 val profileModule = module {
@@ -23,7 +25,7 @@ val profileModule = module {
     }
 
     single<ProfileRemoteDataSource> {
-        ProfileRemoteDataSourceImpl(apolloClient = get())
+        ProfileRemoteDataSourceImpl(apolloClient = get(named(ShopifyClient.QUALIFIER_STOREFRONT)))
     }
 
     single<ProfileRepository> {

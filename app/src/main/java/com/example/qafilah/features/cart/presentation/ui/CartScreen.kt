@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -18,10 +19,14 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -36,6 +41,7 @@ import com.example.qafilah.features.cart.presentation.viewmodel.CartViewModel
 import com.example.ui_kit.components.cart.CartEmptyView
 import com.example.ui_kit.components.cart.CartItemCard
 import com.example.ui_kit.components.cart.CartSummaryCard
+import com.example.ui_kit.components.cart.DiscountCodesCard
 import com.example.ui_kit.components.login.LoginPromptBottomSheet
 import org.koin.androidx.compose.koinViewModel
 
@@ -52,6 +58,8 @@ fun CartScreen(
     val state by viewModel.state.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val errorFailedToLoadCart = stringResource(R.string.error_failed_to_load_cart)
+
+    var showDiscountDialog by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         viewModel.onIntent(CartIntent.EnterScreen(fallbackErrorMessage = errorFailedToLoadCart))
@@ -71,49 +79,50 @@ fun CartScreen(
         }
     }
 
-    Box(
-        modifier = modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background),
-        contentAlignment = Alignment.Center
-    ) {
-        state.cart?.let { cart ->
-            CartContent(
-                modifier = Modifier.fillMaxSize(),
-                cart = cart,
-                onIncreaseQuantity = { lineId ->
-                    viewModel.onIntent(CartIntent.IncreaseQuantity(lineId))
-                },
-                onDecreaseQuantity = { lineId ->
-                    viewModel.onIntent(CartIntent.DecreaseQuantity(lineId))
-                },
-                onRemoveItem = { lineId ->
-                    viewModel.onIntent(CartIntent.RemoveItem(lineId))
-                },
-                onCheckout = onNavigateToCheckout
-            )
-        }
+    Scaffold(
+        containerColor = MaterialTheme.colorScheme.background
+    ) { innerPadding ->
+        Box(
+            modifier = modifier
+                .fillMaxSize()
+                .padding(innerPadding),
+            contentAlignment = Alignment.Center
+        ) {
+            state.cart?.let { cart ->
+                CartContent(
+                    modifier = Modifier.fillMaxSize(),
+                    cart = cart,
+                    onIncreaseQuantity = { lineId ->
+                        viewModel.onIntent(CartIntent.IncreaseQuantity(lineId))
+                    },
+                    onDecreaseQuantity = { lineId ->
+                        viewModel.onIntent(CartIntent.DecreaseQuantity(lineId))
+                    },
+                    onRemoveItem = { lineId ->
+                        viewModel.onIntent(CartIntent.RemoveItem(lineId))
+                    },
+                    onAddDiscountClick = { showDiscountDialog = true },
+                    onRemoveDiscount = { code -> viewModel.onIntent(CartIntent.RemoveDiscountCode(code)) },
+                    onCheckout = onNavigateToCheckout
+                )
+            }
 
-        if (state.isLoading && state.cart == null) {
-            CircularProgressIndicator(
-                color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(64.dp),
-                strokeWidth = 6.dp
-            )
+            if (state.isLoading && state.cart == null) {
+                CircularProgressIndicator(
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(64.dp),
+                    strokeWidth = 6.dp
+                )
+            }
         }
     }
 
-    if (state.showLoginPrompt) {
-        LoginPromptBottomSheet(
-            title = stringResource(R.string.login_prompt_title),
-            subtitle = stringResource(R.string.login_prompt_subtitle, stringResource(R.string.feature_name_cart)),
-            loginButtonLabel = stringResource(R.string.login_button_label),
-            signUpButtonLabel = stringResource(R.string.signup_action_label),
-            onDismiss = { viewModel.onIntent(CartIntent.DismissLoginPrompt) },
-            onNavigateToLogin = { viewModel.onIntent(CartIntent.NavigateToLogin) },
-            onNavigateToSignUp = { viewModel.onIntent(CartIntent.NavigateToSignUp) }
-        )
-    }
+    CartOverlays(
+        state = state,
+        viewModel = viewModel,
+        showDiscountDialog = showDiscountDialog,
+        onDismissDiscountDialog = { showDiscountDialog = false }
+    )
 }
 
 @Composable
@@ -123,6 +132,8 @@ private fun CartContent(
     onIncreaseQuantity: (String) -> Unit,
     onDecreaseQuantity: (String) -> Unit,
     onRemoveItem: (String) -> Unit,
+    onAddDiscountClick: () -> Unit,
+    onRemoveDiscount: (String) -> Unit,
     onCheckout: () -> Unit
 ) {
     if (cart.lines.isEmpty()) {
@@ -159,18 +170,35 @@ private fun CartContent(
                         onRemoveItem = { onRemoveItem(line.id) }
                     )
                 }
-            }
 
-            CartSummaryCard(
-                subTotalAmount = cart.displaySubtotal,
-                totalAmount = cart.displayTotal,
-                totalTaxAmount = null,
-                checkoutChargeAmount = cart.displayTotal,
-                subtotalLabel = stringResource(R.string.cart_subtotal),
-                taxLabel = stringResource(R.string.cart_tax),
-                checkoutChargeLabel = stringResource(R.string.cart_checkout_charge),
-                totalLabel = stringResource(R.string.cart_total)
-            )
+                item {
+                    DiscountCodesCard(
+                        appliedCodes = cart.discountCodes,
+                        title = stringResource(R.string.cart_promo_codes_title),
+                        addCodeLabel = stringResource(R.string.cart_add_code_label),
+                        removeDialogTitle = stringResource(R.string.cart_remove_promo_title),
+                        removeDialogMessageTemplate = stringResource(R.string.cart_remove_promo_message),
+                        removeDialogConfirmLabel = stringResource(R.string.dialog_confirm_remove),
+                        removeDialogCancelLabel = stringResource(R.string.dialog_dismiss_cancel),
+                        removeIconContentDescriptionTemplate = stringResource(R.string.cart_remove_code_cd),
+                        onAddClick = onAddDiscountClick,
+                        onRemoveDiscount = onRemoveDiscount
+                    )
+                }
+
+                item {
+                    CartSummaryCard(
+                        subTotalAmount = cart.displaySubtotal,
+                        totalAmount = cart.displayTotal,
+                        totalTaxAmount = null,
+                        checkoutChargeAmount = cart.displayTotal,
+                        subtotalLabel = stringResource(R.string.cart_subtotal),
+                        taxLabel = stringResource(R.string.cart_tax),
+                        checkoutChargeLabel = stringResource(R.string.cart_checkout_charge),
+                        totalLabel = stringResource(R.string.cart_total)
+                    )
+                }
+            }
 
             Spacer(modifier = Modifier.height(16.dp))
 

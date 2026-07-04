@@ -2,18 +2,22 @@ package com.example.qafilah.features.cart.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.qafilah.core.currency.ConvertPriceUseCase
 import com.example.qafilah.features.auth.domain.util.RequireAuth
 import com.example.qafilah.features.cart.domain.model.CartItemCommand
 import com.example.qafilah.features.cart.domain.model.StoreCart
+import com.example.qafilah.features.cart.domain.usecase.ApplyDiscountUseCase
 import com.example.qafilah.features.cart.domain.usecase.FetchCartUseCase
 import com.example.qafilah.features.cart.domain.usecase.ManageCartItemUseCase
 import com.example.qafilah.features.cart.domain.usecase.ObserveCartStateUseCase
+import com.example.qafilah.features.cart.domain.usecase.RemoveDiscountUseCase
 import com.example.qafilah.features.cart.presentation.contract.CartEvent
 import com.example.qafilah.features.cart.presentation.contract.CartIntent
 import com.example.qafilah.features.cart.presentation.contract.CartLineUiModel
 import com.example.qafilah.features.cart.presentation.contract.CartUIState
 import com.example.qafilah.features.cart.presentation.contract.CartUiModel
-import com.example.qafilah.core.currency.ConvertPriceUseCase
+import com.example.qafilah.features.catalog.domain.usecases.ClearPendingAdCouponUseCase
+import com.example.qafilah.features.catalog.domain.usecases.GetPendingAdCouponUseCase
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
@@ -31,6 +35,10 @@ class CartViewModel(
     private val observeCartStateUseCase: ObserveCartStateUseCase,
     private val fetchCartUseCase: FetchCartUseCase,
     private val manageCartItemUseCase: ManageCartItemUseCase,
+    private val applyDiscountUseCase: ApplyDiscountUseCase,
+    private val removeDiscountUseCase: RemoveDiscountUseCase,
+    private val getPendingAdCouponUseCase: GetPendingAdCouponUseCase,
+    private val clearPendingAdCouponUseCase: ClearPendingAdCouponUseCase,
     private val convertPriceUseCase: ConvertPriceUseCase
 ) : ViewModel() {
 
@@ -75,7 +83,8 @@ class CartViewModel(
                     imageUrl = line.merchandise.image?.url,
                     variantTitle = line.merchandise.title
                 )
-            }
+            },
+            discountCodes = appliedDiscounts.map { it.code }
         )
     }
 
@@ -99,6 +108,11 @@ class CartViewModel(
             is CartIntent.DecreaseQuantity -> handleDecreaseQuantity(intent.lineId)
             is CartIntent.RemoveItem -> handleRemoveItem(intent.lineId)
             is CartIntent.DismissError -> _state.update { it.copy(errorMessage = null) }
+            is CartIntent.UpdateDiscountInput -> {
+                _state.update { it.copy(discountInput = intent.code, discountError = null) }
+            }
+            is CartIntent.ApplyDiscountCode -> handleApplyDiscount()
+            is CartIntent.RemoveDiscountCode -> handleRemoveDiscount(intent.code)
         }
     }
 
@@ -115,6 +129,7 @@ class CartViewModel(
 
             try {
                 fetchCartUseCase()
+                checkAndApplyPendingCoupon()
             } catch (e: Exception) {
                 _state.update {
                     it.copy(
@@ -212,5 +227,76 @@ class CartViewModel(
 
     private fun currentLineQuantity(lineId: String): Int? {
         return rawCart?.lines?.firstOrNull { it.id == lineId }?.quantity
+    }
+
+    private fun handleApplyDiscount() {
+        val codeToApply = _state.value.discountInput.trim()
+        if (codeToApply.isEmpty()) return
+
+        _state.update { it.copy(isApplyingDiscount = true, discountError = null) }
+
+        viewModelScope.launch {
+            try {
+                applyDiscountUseCase(codeToApply)
+
+                _state.update { it.copy(
+                    isApplyingDiscount = false,
+                    discountInput = ""
+                )}
+            } catch (e: Exception) {
+                _state.update { it.copy(
+                    isApplyingDiscount = false,
+                    discountError = e.message ?: "Failed to apply discount"
+                )}
+            }
+        }
+    }
+
+    private fun handleRemoveDiscount(codeToRemove: String) {
+        _state.update { it.copy(isApplyingDiscount = true, discountError = null) }
+
+        viewModelScope.launch {
+            try {
+                removeDiscountUseCase(codeToRemove)
+                _state.update { it.copy(isApplyingDiscount = false) }
+            } catch (e: Exception) {
+                _state.update { it.copy(
+                    isApplyingDiscount = false,
+                    errorMessage = e.message ?: "Failed to remove discount"
+                )}
+            }
+        }
+    }
+
+    private suspend fun checkAndApplyPendingCoupon() {
+        val currentCart = _state.value.cart
+        if (currentCart == null || currentCart.lines.isEmpty()) return
+
+        val pendingCodeResult = getPendingAdCouponUseCase()
+        val pendingCode = pendingCodeResult.getOrNull()
+
+        if (!pendingCode.isNullOrEmpty()) {
+            try {
+                _state.update { it.copy(isApplyingDiscount = true) }
+
+                applyDiscountUseCase(pendingCode)
+
+                clearPendingAdCouponUseCase()
+
+                _state.update { it.copy(
+                    isApplyingDiscount = false,
+                    discountInput = ""
+                )}
+
+
+            } catch (e: Exception) {
+                clearPendingAdCouponUseCase()
+
+                _state.update { it.copy(
+                    isApplyingDiscount = false,
+                    discountError = "Your saved promo code $pendingCode is no longer valid."
+                )}
+            }
+        }
     }
 }
