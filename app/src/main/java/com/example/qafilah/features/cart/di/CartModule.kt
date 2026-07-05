@@ -9,6 +9,7 @@ import com.example.qafilah.features.cart.data.repo.CartRepositoryImpl
 import com.example.qafilah.features.cart.domain.repo.CartRepository
 import com.example.qafilah.features.cart.domain.usecase.AddCartItemUseCase
 import com.example.qafilah.features.cart.domain.usecase.ApplyDiscountUseCase
+import com.example.qafilah.features.cart.domain.usecase.ClearCartUseCase
 import com.example.qafilah.features.cart.domain.usecase.FetchCartUseCase
 import com.example.qafilah.features.cart.domain.usecase.ManageCartItemUseCase
 import com.example.qafilah.features.cart.domain.usecase.ObserveCartStateUseCase
@@ -29,7 +30,7 @@ val cartModule = module {
     factory<ManageCartItemUseCase> { ManageCartItemUseCase(get()) }
     factory<ApplyDiscountUseCase> { ApplyDiscountUseCase(get()) }
     factory<RemoveDiscountUseCase> { RemoveDiscountUseCase(get()) }
-
+    factory<ClearCartUseCase> { ClearCartUseCase(get()) }
 
     viewModel { CartViewModel(
         get(),

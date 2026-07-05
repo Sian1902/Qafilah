@@ -75,6 +75,7 @@ class CartViewModel(
             lines = lines.map { line ->
                 CartLineUiModel(
                     id = line.id,
+                    productId = line.merchandise.product.id,
                     title = line.merchandise.product.title,
                     vendor = line.merchandise.product.vendor,
                     quantity = line.quantity,

@@ -1,4 +1,4 @@
-package com.example.qafilah.features.profile.domain.model
+package com.example.qafilah.features.orders.domain.model
 
 data class Order(
     val id: String,
