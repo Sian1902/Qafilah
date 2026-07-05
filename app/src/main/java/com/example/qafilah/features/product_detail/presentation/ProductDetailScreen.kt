@@ -1,5 +1,6 @@
 package com.example.qafilah.features.product_detail.presentation
 
+import android.net.Uri
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -74,7 +75,7 @@ fun ProductDetailScreen(
     val wishlistNotLoggedInMessage = stringResource(R.string.error_login_to_manage_wishlist)
     val cartNotLoggedInMessage = stringResource(R.string.error_login_to_add_to_cart)
     val addToCartSuccessMessage = stringResource(R.string.added_to_cart_success)
-    val decodedId = android.net.Uri.decode(productId)
+    val decodedId = Uri.decode(productId)
 
     LaunchedEffect(decodedId) {
         viewModel.loadProduct(decodedId, loadProductErrorFallback)
@@ -302,16 +303,21 @@ fun ProductDetailScreen(
                     StickyBottomBar(
                         price = state.displayPrice,
                         totalPriceLabel = stringResource(R.string.product_total_price_label),
-                        addToCartLabel = stringResource(R.string.product_add_to_cart_label),
+                        addToCartLabel = if (inStock) stringResource(R.string.product_add_to_cart_label) else outOfStockText,
                         addToCartContentDescription = stringResource(R.string.product_add_to_cart_cd),
                         isLoading = isAddingToCart,
                         onAddToCartClick = {
-                            viewModel.addToCart(
-                                variantId = selectedVariant.id,
-                                fallbackErrorMessage = addToCartErrorFallback,
-                                notLoggedInMessage = cartNotLoggedInMessage,
-                                successMessage = addToCartSuccessMessage
-                            )
+                            if (inStock) {
+                                viewModel.addToCart(
+                                    variantId = selectedVariant.id,
+                                    fallbackErrorMessage = addToCartErrorFallback,
+                                    notLoggedInMessage = cartNotLoggedInMessage,
+                                    quantity = 1,
+                                    successMessage = addToCartSuccessMessage
+                                )
+                            } else {
+                                Toast.makeText(context, outOfStockText, Toast.LENGTH_SHORT).show()
+                            }
                         }
                     )
                 }

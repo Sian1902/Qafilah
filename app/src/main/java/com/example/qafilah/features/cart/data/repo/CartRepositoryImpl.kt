@@ -80,4 +80,10 @@ class CartRepositoryImpl(
 
         _cartState.value = storeCart
     }
+
+    override suspend fun clearCart() {
+        localDataSource.deleteCartId()
+        _cartState.value = null
+    }
+
 }
