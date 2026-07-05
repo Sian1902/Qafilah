@@ -90,7 +90,7 @@ fun AppNavHost(
                 },
                 onContinueAsGuest = {
                     navController.navigate(NavItem.Home.route) {
-                        popUpTo(Screen.Login.route) { inclusive = true }
+                        popUpTo(0) { inclusive = true }
                     }
                 }
             )
@@ -128,8 +128,11 @@ fun AppNavHost(
 
         composable(Screen.Checkout.route) {
             Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text(stringResource(R.string.checkout))
-                CheckoutScreen()
+                CheckoutScreen(
+                    onNavigateToAddress = {
+                        navController.navigate(Screen.ShippingAddresses.route)
+                    }
+                )
             }
         }
 
@@ -148,7 +151,13 @@ fun AppNavHost(
             HomeScreen(
                 onSearchClick = { navController.navigate(NavItem.Search.route) },
                 onNotificationClick = { },
-                onBrandClick = { },
+                onBrandClick = { categoryName ->
+                    navController.currentBackStackEntry?.savedStateHandle?.set(
+                        "search_category",
+                        categoryName.lowercase()
+                    )
+                    navController.navigate(NavItem.Search.route)
+                },
                 onCategoryClick = { categoryUiModel ->
                     navController.navigate(
                         Screen.CatalogProducts.createRoute(
@@ -297,8 +306,10 @@ fun AppNavHost(
                     navController.navigate(Screen.ShippingAddresses.route)
                 },
                 onSignOutClick = {
-                    navController.navigate(Screen.Login.route) {
-                        popUpTo(0) { inclusive = true }
+                    profileViewModel.signOut {
+                        navController.navigate(Screen.Login.route) {
+                            popUpTo(0) { inclusive = true }
+                        }
                     }
                 },
                 onNavigateToLogin = {

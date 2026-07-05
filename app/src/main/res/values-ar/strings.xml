@@ -150,6 +150,27 @@
 
     <string name="login_prompt_title">سجل الدخول للمتابعة</string>
     <string name="login_prompt_subtitle">تحتاج إلى حساب للوصول إلى %s.</string>
+    <string name="error_login_to_manage_wishlist">تحتاج إلى تسجيل الدخول للوصول إلى المفضله</string>
+    <string name="error_login_to_add_to_cart">تحتاج إلى تسجيل الدخول للوصول إلى السله</string>
+
+    <!-- Checkout -->
+    <string name="checkout_shipping_address_title">عنوان الشحن</string>
+    <string name="checkout_manage_addresses">إضافة أو تعديل العناوين</string>
+    <string name="checkout_continue_to_summary">المتابعة إلى الملخص</string>
+    <string name="checkout_auth_error">حدث خطأ في المصادقة. يرجى تسجيل الدخول مرة أخرى.</string>
+    <string name="checkout_order_summary_title">ملخص الطلب</string>
+    <string name="checkout_proceed_to_payment">المتابعة إلى الدفع</string>
+    <string name="checkout_step_payment_title">الخطوة 3: الدفع</string>
+    <string name="checkout_amount_to_charge">المبلغ المطلوب تحصيله: %1$s</string>
+    <string name="checkout_submit_payment">تأكيد الدفع</string>
+    <string name="checkout_currency_amount">$%1$s</string>
+    <string name="checkout_quantity_label">الكمية: %1$d</string>
+    <string name="checkout_shipping_method_title">طريقة الشحن</string>
+    <string name="checkout_subtotal_label">المجموع الفرعي</string>
+    <string name="checkout_discount_label">الخصم</string>
+    <string name="checkout_shipping_label">الشحن</string>
+    <string name="checkout_tax_label">الضرائب</string>
+    <string name="checkout_total_label">الإجمالي</string>
 
     <string name="ui_common_or">أو</string>
     <string name="first_name">الاسم الأول</string>

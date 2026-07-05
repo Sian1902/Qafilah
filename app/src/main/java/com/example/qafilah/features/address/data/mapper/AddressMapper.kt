@@ -12,6 +12,7 @@ fun CustomerAddress.toDomain(): ShippingAddress {
         icon = Icons.Default.Home,
         street = listOfNotNull(address1, address2).filter { it.isNotBlank() }.joinToString(separator = ", "),
         locationDetails = listOfNotNull(city, province, country, zip).filter { it.isNullOrBlank().not() }.joinToString(separator = ", "),
+        phone = phone,
         isDefault = isDefault
     )
 }
@@ -29,6 +30,6 @@ fun ShippingAddress.toData(): CustomerAddress {
         province = parts.getOrNull(1),
         country = parts.getOrNull(2),
         zip = parts.getOrNull(3),
-        phone = null
+        phone = phone
     )
 }

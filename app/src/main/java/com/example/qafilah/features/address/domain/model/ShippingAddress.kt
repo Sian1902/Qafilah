@@ -9,6 +9,7 @@ data class ShippingAddress(
     val icon: ImageVector,
     val street: String,
     val locationDetails: String,
+    val phone: String? = null,
     val isDefault: Boolean = false
 )
 
@@ -19,6 +20,7 @@ fun ShippingAddress.toUiModel(): AddressUiModel {
         icon = this.icon,
         street = this.street,
         locationDetails = this.locationDetails,
+        phone = this.phone,
         isDefault = this.isDefault
     )
 }

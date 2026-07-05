@@ -1,5 +1,6 @@
 package com.example.qafilah.features.checkout.di
 
+import com.example.qafilah.core.currency.ConvertPriceUseCase
 import com.example.qafilah.core.network.ShopifyClient
 import com.example.qafilah.features.checkout.data.datasource.CheckoutRemoteDataSource
 import com.example.qafilah.features.checkout.data.datasource.CheckoutRemoteDataSourceImpl
@@ -25,8 +26,8 @@ val checkoutModule = module {
     factory<UpdateBuyerIdentityUseCase> { UpdateBuyerIdentityUseCase(get()) }
     factory<UpdateDeliveryOptionUseCase> { UpdateDeliveryOptionUseCase(get()) }
 
-    viewModel { CheckoutSharedViewModel() }
+    viewModel { CheckoutSharedViewModel(get(), get<ConvertPriceUseCase>()) }
     viewModel { CheckoutSummaryViewModel(get()) }
-    viewModel { CheckoutAddressViewModel(get()) }
+    viewModel { CheckoutAddressViewModel(get(), get(), get()) }
     viewModel { CheckoutPaymentViewModel() }
 }

@@ -56,6 +56,7 @@ fun HomeScreen(
     val homeErrorFallback = stringResource(R.string.error_something_went_wrong)
     val wishlistAddedTemplate = stringResource(R.string.wishlist_item_added)
     val wishlistErrorFallback = stringResource(R.string.error_failed_to_update_wishlist)
+    val notLoggedInMessage = stringResource(R.string.error_login_to_manage_wishlist)
 
     LaunchedEffect(Unit) {
         viewModel.loadHome(homeErrorFallback)
@@ -101,7 +102,8 @@ fun HomeScreen(
                             viewModel.toggleFavorite(
                                 product.id,
                                 wishlistAddedTemplate,
-                                wishlistErrorFallback
+                                wishlistErrorFallback,
+                                notLoggedInMessage = notLoggedInMessage
                             )
                         },
                         onClaimPromo = { code -> viewModel.claimPromoCode(code) },
@@ -134,11 +136,15 @@ private fun HomeContent(
     )
     {
         item {
+            val currentUser = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser
+            val userName = currentUser?.displayName?.takeIf { it.isNotBlank() } ?: stringResource(R.string.default_username)
+            val avatarUrl = currentUser?.photoUrl?.toString()
+
             WelcomeHeader(
-                avatarUrl = null,
+                avatarUrl = avatarUrl,
                 userAvatarContentDescription = stringResource(R.string.welcome_avatar_cd),
                 welcomeBackLabel = stringResource(R.string.welcome_back_label),
-                welcomeUserLabel = stringResource(R.string.welcome_user_greeting, stringResource(R.string.default_username)),
+                welcomeUserLabel = stringResource(R.string.welcome_user_greeting, userName),
                 notificationsContentDescription = stringResource(R.string.welcome_notifications_cd),
                 hasNotification = true,
                 onNotificationClick = onNotificationClick,
@@ -166,7 +172,7 @@ private fun HomeContent(
 
         item {
             SectionHeader(
-                title = stringResource(R.string.categories),
+                title = stringResource(R.string.brands),
                 trailingText = stringResource(R.string.view_all),
                 onTrailingClick = onViewAllCategoriesClick,
                 modifier = Modifier.padding(horizontal = 20.dp)
@@ -183,7 +189,7 @@ private fun HomeContent(
 
         item {
             SectionHeader(
-                title = stringResource(R.string.shop_by_brand),
+                title = stringResource(R.string.categories),
                 modifier = Modifier.padding(horizontal = 20.dp)
             )
         }

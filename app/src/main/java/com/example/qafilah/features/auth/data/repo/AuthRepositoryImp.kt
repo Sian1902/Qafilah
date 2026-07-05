@@ -31,7 +31,7 @@ class AuthRepositoryImpl(
     override suspend fun registerPrimary(
         email: String, password: String, fullName: String
     ): Result<AppUser> = runCatching {
-        firebaseDataSource.signUpPrimary(email, password, fullName)
+        firebaseDataSource.signUpPrimary(name = fullName, email = email, password = password)
     }
 
     override suspend fun authenticateStorefront(email: String, password: String): Result<String> =
