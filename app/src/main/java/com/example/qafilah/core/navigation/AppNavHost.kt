@@ -263,6 +263,9 @@ fun AppNavHost(
                 },
                 onNavigateToCheckout = {
                     navController.navigate(Screen.Checkout.route)
+                },
+                onProductClick = { productId ->
+                    navController.navigate(Screen.ProductDetail.createRoute(Uri.encode(productId)))
                 }
             )
         }

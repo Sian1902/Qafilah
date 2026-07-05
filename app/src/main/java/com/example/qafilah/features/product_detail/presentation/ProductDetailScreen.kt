@@ -303,16 +303,19 @@ fun ProductDetailScreen(
                     StickyBottomBar(
                         price = state.displayPrice,
                         totalPriceLabel = stringResource(R.string.product_total_price_label),
-                        addToCartLabel = stringResource(R.string.product_add_to_cart_label),
+                        addToCartLabel = if (inStock) stringResource(R.string.product_add_to_cart_label) else outOfStockText,
                         addToCartContentDescription = stringResource(R.string.product_add_to_cart_cd),
                         isLoading = isAddingToCart,
                         onAddToCartClick = {
-
-                            viewModel.addToCart(
-                                variantId = selectedVariant.id,
-                                fallbackErrorMessage = addToCartErrorFallback,
-                                notLoggedInMessage = cartNotLoggedInMessage
-                            )
+                            if (inStock) {
+                                viewModel.addToCart(
+                                    variantId = selectedVariant.id,
+                                    fallbackErrorMessage = addToCartErrorFallback,
+                                    notLoggedInMessage = cartNotLoggedInMessage
+                                )
+                            } else {
+                                Toast.makeText(context, outOfStockText, Toast.LENGTH_SHORT).show()
+                            }
                         }
                     )
                 }
