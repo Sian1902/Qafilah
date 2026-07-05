@@ -16,12 +16,14 @@ class WishlistLocalDataSource(
     private val httpClient: OkHttpClient
 ) {
 
-    fun getWishlist(): Flow<List<WishlistItem>> =
-        dao.getWishlist().map { entities -> entities.map { it.toDomain() } }
+    fun getWishlist(userId: String): Flow<List<WishlistItem>> =
+        dao.getWishlist(userId).map { entities -> entities.map { it.toDomain() } }
 
-    fun isWishlisted(productId: String): Flow<Boolean> = dao.isWishlisted(productId)
+    fun isWishlisted(userId: String, productId: String): Flow<Boolean> =
+        dao.isWishlisted(userId, productId)
 
     suspend fun addItem(
+        userId: String,
         productId: String,
         handle: String,
         title: String,
@@ -33,6 +35,7 @@ class WishlistLocalDataSource(
         val localPath = imageUrl?.let { cacheImageLocally(it, productId) }
         dao.add(
             WishlistItemEntity(
+                userId = userId,
                 productId = productId,
                 handle = handle,
                 title = title,
@@ -45,17 +48,14 @@ class WishlistLocalDataSource(
         )
     }
 
-    suspend fun removeItem(productId: String) {
-        val localPath = dao.getLocalImagePath(productId)
-        dao.remove(productId)
+    suspend fun removeItem(userId: String, productId: String) {
+        val localPath = dao.getLocalImagePath(userId, productId)
+        dao.remove(userId, productId)
         localPath?.let { File(it).delete() }
     }
 
-    suspend fun clearAll() {
-        dao.clearAll()
-        withContext(Dispatchers.IO) {
-            File(context.filesDir, "wishlist_images").deleteRecursively()
-        }
+    suspend fun clearAll(userId: String) {
+        dao.clearAll(userId)
     }
 
     private suspend fun cacheImageLocally(imageUrl: String, productId: String): String? =

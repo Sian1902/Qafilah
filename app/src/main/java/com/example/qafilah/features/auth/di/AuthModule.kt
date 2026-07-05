@@ -12,6 +12,7 @@ import com.example.qafilah.features.auth.domain.usecase.GetAuthStateUseCase
 import com.example.qafilah.features.auth.domain.usecase.SignInUseCase
 import com.example.qafilah.features.auth.domain.usecase.SignInWithGoogleUseCase
 import com.example.qafilah.features.auth.domain.usecase.SignUpUseCase
+import com.example.qafilah.features.auth.domain.usecase.SignOutUseCase
 import com.example.qafilah.features.auth.domain.util.RequireAuth
 import com.example.qafilah.features.auth.presentation.AuthViewModel
 import com.example.qafilah.features.wishlist.presentation.WishlistViewModel
@@ -44,6 +45,8 @@ val authModule = module {
     factory { SignInUseCase(repository = get()) }
 
     factory { SignUpUseCase(repository = get()) }
+
+    factory { SignOutUseCase(repository = get()) }
 
     factory { GetAuthStateUseCase(repository = get()) }
 
