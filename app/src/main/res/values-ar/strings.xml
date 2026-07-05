@@ -263,5 +263,8 @@
     <string name="order_items_label">عناصر الطلب</string>
     <string name="order_summary_label">ملخص الطلب</string>
     <string name="order_total_label">المبلغ الإجمالي</string>
+    <string name="error_order_not_found">الطلب غير موجود</string>
+    <string name="currency_format">%1$s %2$s</string>
+    <string name="quantity_format">%d×</string>
 
 </resources>

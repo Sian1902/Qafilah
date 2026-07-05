@@ -68,8 +68,14 @@ fun OrdersScreen(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
+                        val unknownErrorMessage = stringResource(R.string.error_unknown)
+                        val notAuthenticatedMessage = stringResource(R.string.error_not_authenticated)
+
                         Text(text = state.error!!, color = MaterialTheme.colorScheme.error)
-                        Button(onClick = { viewModel.loadOrders() }) {
+                        Button(onClick = { viewModel.loadOrders(
+                            notAuthenticatedMessage = notAuthenticatedMessage,
+                            unknownErrorMessage = unknownErrorMessage
+                        ) }) {
                             Text(stringResource(R.string.retry))
                         }
                     }
@@ -97,7 +103,7 @@ fun OrdersScreen(
                             OrderCard(
                                 orderNumber = stringResource(R.string.order_number_label, order.orderNumber),
                                 date = stringResource(R.string.order_date_label, order.processedAt.substringBefore("T")),
-                                totalPrice = "${order.totalPrice.amount} ${order.totalPrice.currencyCode}",
+                                totalPrice = stringResource(R.string.currency_format, order.totalPrice.amount, order.totalPrice.currencyCode),
                                 status = order.fulfillmentStatus,
                                 statusLabel = statusLabel,
                                 viewDetailsLabel = stringResource(R.string.order_view_details),

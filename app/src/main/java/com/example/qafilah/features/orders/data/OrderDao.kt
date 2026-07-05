@@ -1,6 +1,12 @@
 package com.example.qafilah.features.orders.data
 
-import androidx.room.*
+import androidx.room.Dao
+import androidx.room.Embedded
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
+import androidx.room.Query
+import androidx.room.Relation
+import androidx.room.Transaction
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -19,19 +25,25 @@ interface OrderDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertLineItems(items: List<OrderLineItemEntity>)
 
+    @Query("DELETE FROM orders WHERE id NOT IN (SELECT id FROM orders ORDER BY processedAt DESC LIMIT 10)")
+    suspend fun pruneOldOrders()
+
+    @Query("DELETE FROM order_line_items WHERE orderId NOT IN (SELECT id FROM orders)")
+    suspend fun deleteOrphanLineItems()
+
+    @Transaction
+    suspend fun syncOrders(orders: List<OrderEntity>, lineItems: List<OrderLineItemEntity>) {
+        insertOrders(orders)
+        insertLineItems(lineItems)
+        pruneOldOrders()
+        deleteOrphanLineItems()
+    }
+
     @Query("DELETE FROM orders")
     suspend fun clearOrders()
 
     @Query("DELETE FROM order_line_items")
     suspend fun clearLineItems()
-
-    @Transaction
-    suspend fun replaceOrders(orders: List<OrderEntity>, lineItems: List<OrderLineItemEntity>) {
-        clearOrders()
-        clearLineItems()
-        insertOrders(orders)
-        insertLineItems(lineItems)
-    }
 }
 
 data class OrderWithLineItems(

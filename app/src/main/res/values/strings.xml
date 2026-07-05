@@ -263,5 +263,8 @@
     <string name="order_items_label">Order Items</string>
     <string name="order_summary_label">Order Summary</string>
     <string name="order_total_label">Total Amount</string>
+    <string name="error_order_not_found">Order not found</string>
+    <string name="currency_format">%1$s %2$s</string>
+    <string name="quantity_format">x%d</string>
 
 </resources>

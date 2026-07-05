@@ -12,7 +12,7 @@ class OrderLocalDataSource(private val orderDao: OrderDao) {
     suspend fun getOrderById(orderId: String): OrderWithLineItems? = orderDao.getOrderById(orderId)
 
     suspend fun saveOrders(orders: List<OrderEntity>, lineItems: List<OrderLineItemEntity>) {
-        orderDao.replaceOrders(orders, lineItems)
+        orderDao.syncOrders(orders, lineItems)
     }
 
     suspend fun clearCache() {

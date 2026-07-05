@@ -33,12 +33,13 @@ import com.example.ui_kit.components.orders.OrderStatusBadge
 fun OrderDetailsScreen(
     orderId: String,
     viewModel: OrderDetailsViewModel,
+    orderNotFoundMessage: String,
     onBackClick: () -> Unit
 ) {
     val state by viewModel.state.collectAsState()
 
     LaunchedEffect(orderId) {
-        viewModel.loadOrderDetails(orderId)
+        viewModel.loadOrderDetails(orderId, orderNotFoundMessage)
     }
 
     Scaffold(
@@ -192,12 +193,12 @@ private fun OrderLineItemCard(item: OrderLineItem) {
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Text(
-                        text = "x${item.quantity}",
+                        text = stringResource(R.string.quantity_format, item.quantity),
                         style = MaterialTheme.typography.bodyMedium,
                         fontWeight = FontWeight.Bold
                     )
                     Text(
-                        text = "${item.price.amount} ${item.price.currencyCode}",
+                        text = stringResource(R.string.currency_format, item.price.amount, item.price.currencyCode),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.primary,
                         fontWeight = FontWeight.Bold
@@ -218,7 +219,7 @@ private fun OrderSummarySection(order: Order) {
             Spacer(modifier = Modifier.height(4.dp))
             SummaryRow(
                 label = stringResource(R.string.order_total_label),
-                value = "${order.totalPrice.amount} ${order.totalPrice.currencyCode}",
+                value = stringResource(R.string.currency_format, order.totalPrice.amount, order.totalPrice.currencyCode),
                 isTotal = true
             )
         }

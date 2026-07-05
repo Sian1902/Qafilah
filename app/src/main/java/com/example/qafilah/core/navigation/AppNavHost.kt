@@ -318,8 +318,11 @@ fun AppNavHost(
 
         composable(Screen.Orders.route) {
             val ordersViewModel: OrdersViewModel = koinViewModel()
+            val notAuthenticatedMessage = stringResource(R.string.error_not_authenticated)
+            val unknownErrorMessage = stringResource(R.string.error_unknown)
+            
             LaunchedEffect(Unit) {
-                ordersViewModel.loadOrders()
+                ordersViewModel.loadOrders(notAuthenticatedMessage, unknownErrorMessage)
             }
             OrdersScreen(
                 viewModel = ordersViewModel,
@@ -336,9 +339,12 @@ fun AppNavHost(
         ) { backStackEntry ->
             val orderId = backStackEntry.arguments?.getString("orderId") ?: ""
             val detailsViewModel: OrderDetailsViewModel = koinViewModel()
+            val orderNotFoundMessage = stringResource(R.string.error_order_not_found)
+            
             OrderDetailsScreen(
                 orderId = orderId,
                 viewModel = detailsViewModel,
+                orderNotFoundMessage = orderNotFoundMessage,
                 onBackClick = { navController.popBackStack() }
             )
         }
