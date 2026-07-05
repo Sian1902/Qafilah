@@ -36,6 +36,7 @@
     <string name="stock_out_of_stock">Out of Stock</string>
     <string name="share_product_message">Shared product: %s</string>
     <string name="adding_to_cart_toast">Adding to cart…</string>
+    <string name="added_to_cart_success">Item added to cart</string>
     <string name="error_failed_to_load_product_details">Failed to load product details</string>
     <string name="error_failed_to_add_to_cart">Failed to add item to cart</string>
     <string name="error_not_authenticated">Not authenticated</string>
@@ -266,5 +267,26 @@
     <string name="signup_confirm_password_placeholder">••••••••</string>
     <string name="signup_confirm_password_error_message">Passwords do not match</string>
 
+
+    <string name="my_orders">My Orders</string>
+    <string name="orders_count">%d orders</string>
+    <string name="orders_icon_cd">Order history</string>
+    <string name="order_history_title">Order History</string>
+    <string name="orders_empty_title">No orders yet</string>
+    <string name="orders_empty_subtitle">You haven\'t made any journeys yet. Start exploring now.</string>
+    <string name="order_number_label">Order #%s</string>
+    <string name="order_date_label">Placed on %s</string>
+    <string name="order_total_items">%d items</string>
+    <string name="order_status_paid">Paid</string>
+    <string name="order_status_fulfilled">Fulfilled</string>
+    <string name="order_status_processing">Processing</string>
+    <string name="order_view_details">View Details</string>
+    <string name="order_details_title">Order Details</string>
+    <string name="order_items_label">Order Items</string>
+    <string name="order_summary_label">Order Summary</string>
+    <string name="order_total_label">Total Amount</string>
+    <string name="error_order_not_found">Order not found</string>
+    <string name="currency_format">%1$s %2$s</string>
+    <string name="quantity_format">x%d</string>
 
 </resources>

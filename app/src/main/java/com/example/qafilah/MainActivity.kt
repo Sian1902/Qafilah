@@ -13,6 +13,8 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
@@ -36,8 +38,16 @@ class MainActivity : ComponentActivity() {
             val appState by mainViewModel.appState.collectAsState()
 
             val context = LocaleHelper.wrapContext(LocalContext.current, appState.languageCode)
+            val layoutDirection = if (appState.languageCode == "ar") {
+                LayoutDirection.Rtl
+            } else {
+                LayoutDirection.Ltr
+            }
 
-            CompositionLocalProvider(LocalContext provides context) {
+            CompositionLocalProvider(
+                LocalContext provides context,
+                LocalLayoutDirection provides layoutDirection
+            ) {
                 val darkTheme = when (appState.themeMode) {
                     ThemeMode.LIGHT -> false
                     ThemeMode.DARK -> true

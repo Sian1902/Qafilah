@@ -21,6 +21,7 @@ import androidx.compose.material.icons.filled.CreditCard
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.ShoppingBag
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
@@ -61,6 +62,7 @@ fun ProfileScreen(
     mainViewModel: MainViewModel = koinViewModel(),
     onEditProfileClick: () -> Unit = {},
     onPersonalDetailsClick: () -> Unit = {},
+    onOrdersClick: () -> Unit = {},
     onSavedPaymentsClick: () -> Unit = {},
     onShippingAddressesClick: () -> Unit = {},
     onSignOutClick: () -> Unit = {},
@@ -172,6 +174,7 @@ fun ProfileScreen(
                 },
                 onEditProfileClick = onEditProfileClick,
                 onPersonalDetailsClick = onPersonalDetailsClick,
+                onOrdersClick = onOrdersClick,
                 onSavedPaymentsClick = onSavedPaymentsClick,
                 onShippingAddressesClick = onShippingAddressesClick,
                 onLanguageClick = { showLanguagePicker = true },
@@ -192,6 +195,7 @@ private fun ProfileScreenContent(
     onEditProfileClick: () -> Unit = {},
     onNotificationsClick: () -> Unit = {},
     onPersonalDetailsClick: () -> Unit = {},
+    onOrdersClick: () -> Unit = {},
     onSavedPaymentsClick: () -> Unit = {},
     onShippingAddressesClick: () -> Unit = {},
     onLanguageClick: () -> Unit = {},
@@ -277,6 +281,16 @@ private fun ProfileScreenContent(
                         title = stringResource(R.string.personal_details),
                         iconContentDescription = stringResource(R.string.personal_details_icon_cd),
                         onClick = onPersonalDetailsClick
+                    )
+                    AccountMenuItem(
+                        icon = Icons.Filled.ShoppingBag,
+                        title = stringResource(R.string.my_orders),
+                        subtitle = stringResource(
+                            R.string.orders_count,
+                            profile.orders.size
+                        ),
+                        iconContentDescription = stringResource(R.string.orders_icon_cd),
+                        onClick = onOrdersClick
                     )
                     AccountMenuItem(
                         icon = Icons.Filled.CreditCard,
