@@ -43,6 +43,7 @@ import com.example.ui_kit.components.cart.CartItemCard
 import com.example.ui_kit.components.cart.CartSummaryCard
 import com.example.ui_kit.components.cart.DiscountCodesCard
 import com.example.ui_kit.components.login.LoginPromptBottomSheet
+import com.example.ui_kit.components.shared.PrimaryButton
 import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -51,6 +52,7 @@ fun CartScreen(
     onNavigateToLogin: () -> Unit,
     onNavigateToSignUp: () -> Unit,
     onNavigateToHome: () -> Unit,
+    onProductClick: (String) -> Unit,
     modifier: Modifier = Modifier,
     onNavigateToCheckout: () -> Unit = {},
     viewModel: CartViewModel = koinViewModel()
@@ -88,10 +90,10 @@ fun CartScreen(
                 .padding(innerPadding),
             contentAlignment = Alignment.Center
         ) {
-            state.cart?.let { cart ->
+            if (state.cart != null) {
                 CartContent(
                     modifier = Modifier.fillMaxSize(),
-                    cart = cart,
+                    cart = state.cart!!,
                     onIncreaseQuantity = { lineId ->
                         viewModel.onIntent(CartIntent.IncreaseQuantity(lineId))
                     },
@@ -103,7 +105,17 @@ fun CartScreen(
                     },
                     onAddDiscountClick = { showDiscountDialog = true },
                     onRemoveDiscount = { code -> viewModel.onIntent(CartIntent.RemoveDiscountCode(code)) },
-                    onCheckout = onNavigateToCheckout
+                    onCheckout = onNavigateToCheckout,
+                    onProductClick = onProductClick
+                )
+            } else if (!state.isLoading) {
+                CartEmptyView(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(16.dp),
+                    emptyCartMessage = stringResource(R.string.empty_cart_message),
+                    emptyCartContentDescription = stringResource(R.string.empty_cart_content_description),
+                    exploreMessage = stringResource(R.string.explore_message)
                 )
             }
 
@@ -134,7 +146,8 @@ private fun CartContent(
     onRemoveItem: (String) -> Unit,
     onAddDiscountClick: () -> Unit,
     onRemoveDiscount: (String) -> Unit,
-    onCheckout: () -> Unit
+    onCheckout: () -> Unit,
+    onProductClick: (String) -> Unit,
 ) {
     if (cart.lines.isEmpty()) {
         CartEmptyView(
@@ -145,8 +158,7 @@ private fun CartContent(
         )
     } else {
         Column(
-            modifier = modifier.padding(16.dp)
-        ) {
+            modifier = modifier.padding(start = 16.dp, top = 16.dp, end = 16.dp, bottom = 2.dp)        ) {
             LazyColumn(
                 modifier = Modifier.weight(1f),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -167,7 +179,8 @@ private fun CartContent(
                         removeItemContentDescription = stringResource(R.string.cart_remove_item_cd),
                         onIncreaseQuantity = { onIncreaseQuantity(line.id) },
                         onDecreaseQuantity = { onDecreaseQuantity(line.id) },
-                        onRemoveItem = { onRemoveItem(line.id) }
+                        onRemoveItem = { onRemoveItem(line.id) },
+                        onClick = { onProductClick(line.productId) }
                     )
                 }
 
@@ -202,18 +215,10 @@ private fun CartContent(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            Button(
-                onClick = onCheckout,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp),
-                shape = RoundedCornerShape(28.dp)
-            ) {
-                Text(
-                    text = stringResource(R.string.proceed_to_checkout),
-                    style = MaterialTheme.typography.titleMedium
-                )
-            }
+            PrimaryButton(
+                text = stringResource(R.string.proceed_to_checkout),
+                onClick = onCheckout
+            )
         }
     }
 }

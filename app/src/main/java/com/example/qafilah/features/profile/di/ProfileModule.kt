@@ -46,7 +46,8 @@ val profileModule = module {
             getCustomerProfile = get(),
             signOutUseCase = get(),
             tokenProvider = get(),
-            currencyRepository = get()
+            currencyRepository = get(),
+            clearCartUseCase = get()
         )
     }
 
