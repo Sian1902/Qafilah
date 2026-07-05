@@ -260,5 +260,8 @@
     <string name="order_status_processing">Processing</string>
     <string name="order_view_details">View Details</string>
     <string name="order_details_title">Order Details</string>
+    <string name="order_items_label">Order Items</string>
+    <string name="order_summary_label">Order Summary</string>
+    <string name="order_total_label">Total Amount</string>
 
 </resources>

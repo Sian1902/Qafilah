@@ -13,7 +13,10 @@ sealed class Screen(val route: String) {
 
     object Checkout : Screen("checkout")
     object OrderConfirmation : Screen("order_confirmation/{orderId}") {
-        fun createRoute(orderId: String) = "order_confirmation/$orderId"
+        fun createRoute(orderId: String) = "order_confirmation/${android.net.Uri.encode(orderId)}"
+    }
+    object OrderDetails : Screen("order_details/{orderId}") {
+        fun createRoute(orderId: String) = "order_details/${android.net.Uri.encode(orderId)}"
     }
     object Catalog : Screen("catalog_screen")
 

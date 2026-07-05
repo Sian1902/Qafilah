@@ -43,8 +43,10 @@ class AuthRepositoryImpl(
                 loginResult?.customerUserErrors?.any { it.code.toString() == "UNIDENTIFIED_CUSTOMER" } == true
             if (isUnrecognized) throw AuthError.StorefrontProfileMissing
 
-            loginResult?.customerAccessToken?.accessToken
+            val accessToken = loginResult?.customerAccessToken?.accessToken
                 ?: throw Exception("Failed to acquire token.")
+            
+            accessToken
         }
 
     override suspend fun registerStorefront(

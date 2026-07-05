@@ -49,7 +49,7 @@ fun GetCustomerQuery.Customer.toDomain(firebaseUid: String): CustomerProfile {
             Order(
                 id = it.id,
                 orderNumber = it.orderNumber,
-                processedAt = (it.processedAt as? String) ?: "",
+                processedAt = it.processedAt.toString(),
                 financialStatus = it.financialStatus?.toString() ?: "",
                 fulfillmentStatus = it.fulfillmentStatus?.toString() ?: "",
                 totalPrice = Money(

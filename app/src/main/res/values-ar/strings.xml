@@ -260,5 +260,8 @@
     <string name="order_status_processing">قيد المعالجة</string>
     <string name="order_view_details">عرض التفاصيل</string>
     <string name="order_details_title">تفاصيل الطلب</string>
+    <string name="order_items_label">عناصر الطلب</string>
+    <string name="order_summary_label">ملخص الطلب</string>
+    <string name="order_total_label">المبلغ الإجمالي</string>
 
 </resources>
