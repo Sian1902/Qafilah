@@ -1,8 +1,8 @@
 package com.example.qafilah.features.checkout.presentation.address
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.qafilah.R
 import com.example.qafilah.core.token.TokenProvider
 import com.example.qafilah.features.address.domain.model.ShippingAddress
 import com.example.qafilah.features.address.domain.usecase.GetAddressesUseCase
@@ -25,11 +25,16 @@ class CheckoutAddressViewModel(
 
     fun loadAddresses() {
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoadingAddresses = true, error = null) }
+            _uiState.update { it.copy(isLoadingAddresses = true, error = null, errorMessageResId = null) }
 
             val token = tokenProvider.getToken()
             if (token == null) {
-                _uiState.update { it.copy(isLoadingAddresses = false, error = "Authentication error. Please log in again.") }
+                _uiState.update {
+                    it.copy(
+                        isLoadingAddresses = false,
+                        errorMessageResId = R.string.checkout_auth_error
+                    )
+                }
                 return@launch
             }
 
@@ -55,7 +60,7 @@ class CheckoutAddressViewModel(
                 }
             }.onFailure { error ->
                 _uiState.update {
-                    it.copy(isLoadingAddresses = false, error = error.message)
+                    it.copy(isLoadingAddresses = false, error = error.message, errorMessageResId = null)
                 }
             }
         }
@@ -75,7 +80,7 @@ class CheckoutAddressViewModel(
         }
 
         viewModelScope.launch {
-            _uiState.update { it.copy(isSubmitting = true, error = null) }
+            _uiState.update { it.copy(isSubmitting = true, error = null, errorMessageResId = null) }
 
             val result = updateBuyerIdentityUseCase(cartId, selectedAddress)
 
@@ -85,7 +90,7 @@ class CheckoutAddressViewModel(
                 onSuccess(updatedCart, selectedAddress)
             }.onFailure { error ->
                 _uiState.update {
-                    it.copy(error = error.message)
+                    it.copy(error = error.message, errorMessageResId = null)
                 }
             }
         }

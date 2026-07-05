@@ -152,6 +152,25 @@
     <string name="error_login_to_manage_wishlist">Please log in to manage your wishlist</string>
     <string name="error_login_to_add_to_cart">Please log in to add items to your cart.</string>
 
+    <!-- Checkout -->
+    <string name="checkout_shipping_address_title">Shipping Address</string>
+    <string name="checkout_manage_addresses">Add or Edit Addresses</string>
+    <string name="checkout_continue_to_summary">Continue to Summary</string>
+    <string name="checkout_auth_error">Authentication error. Please log in again.</string>
+    <string name="checkout_order_summary_title">Order Summary</string>
+    <string name="checkout_proceed_to_payment">Proceed to Payment</string>
+    <string name="checkout_step_payment_title">Step 3: Payment</string>
+    <string name="checkout_amount_to_charge">Amount to charge: %1$s</string>
+    <string name="checkout_submit_payment">Submit Payment</string>
+    <string name="checkout_currency_amount">$%1$s</string>
+    <string name="checkout_quantity_label">Qty: %1$d</string>
+    <string name="checkout_shipping_method_title">Shipping Method</string>
+    <string name="checkout_subtotal_label">Subtotal</string>
+    <string name="checkout_discount_label">Discount</string>
+    <string name="checkout_shipping_label">Shipping</string>
+    <string name="checkout_tax_label">Taxes</string>
+    <string name="checkout_total_label">Total</string>
+
     <string name="ui_common_or">OR</string>
     <string name="first_name">First Name</string>
     <string name="last_name">Last Name</string>

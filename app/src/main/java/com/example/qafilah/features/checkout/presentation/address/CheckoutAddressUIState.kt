@@ -7,5 +7,6 @@ data class CheckoutAddressUIState(
     val isSubmitting: Boolean = false,
     val addresses: List<ShippingAddress> = emptyList(),
     val selectedAddressId: String? = null,
-    val error: String? = null
+    val error: String? = null,
+    val errorMessageResId: Int? = null
 )
