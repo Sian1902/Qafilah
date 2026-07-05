@@ -37,6 +37,7 @@
     <string name="stock_out_of_stock">غير متوفر</string>
     <string name="share_product_message">تمت مشاركة المنتج: %s</string>
     <string name="adding_to_cart_toast">جارٍ الإضافة إلى السلة…</string>
+    <string name="added_to_cart_success">تمت إضافة العنصر إلى السلة</string>
     <string name="error_failed_to_load_product_details">فشل تحميل تفاصيل المنتج</string>
     <string name="error_failed_to_add_to_cart">فشل إضافة العنصر إلى السلة</string>
     <string name="error_not_authenticated">غير مصادق عليه</string>

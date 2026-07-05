@@ -10,7 +10,7 @@ import com.example.qafilah.features.wishlist.data.WishlistItemEntity
 
 @Database(
     entities = [WishlistItemEntity::class, OrderEntity::class, OrderLineItemEntity::class],
-    version = 3,
+    version = 5,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {

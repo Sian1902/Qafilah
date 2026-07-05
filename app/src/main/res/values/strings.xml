@@ -36,6 +36,7 @@
     <string name="stock_out_of_stock">Out of Stock</string>
     <string name="share_product_message">Shared product: %s</string>
     <string name="adding_to_cart_toast">Adding to cart…</string>
+    <string name="added_to_cart_success">Item added to cart</string>
     <string name="error_failed_to_load_product_details">Failed to load product details</string>
     <string name="error_failed_to_add_to_cart">Failed to add item to cart</string>
     <string name="error_not_authenticated">Not authenticated</string>
