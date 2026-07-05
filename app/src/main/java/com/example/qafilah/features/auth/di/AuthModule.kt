@@ -17,7 +17,7 @@ import com.example.qafilah.features.auth.domain.util.RequireAuth
 import com.example.qafilah.features.auth.presentation.AuthViewModel
 import com.example.qafilah.features.wishlist.presentation.WishlistViewModel
 import com.google.firebase.auth.FirebaseAuth
-import org.koin.androidx.viewmodel.dsl.viewModel
+import org.koin.core.module.dsl.viewModel
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
 

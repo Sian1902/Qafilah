@@ -19,6 +19,7 @@ import com.example.qafilah.core.navigation.AppNavHost
 import com.example.qafilah.core.navigation.NavItem
 import com.example.qafilah.core.navigation.Screen
 import com.example.qafilah.core.preferences.ThemeMode
+import com.example.qafilah.core.util.LocalRealActivity
 import com.example.qafilah.core.util.LocaleHelper
 import com.example.ui_kit.components.bottomnav.BottomNavBar
 import com.example.ui_kit.components.bottomnav.BottomNavBarItem
@@ -34,9 +35,21 @@ class MainActivity : ComponentActivity() {
             val mainViewModel: MainViewModel = koinViewModel()
             val appState by mainViewModel.appState.collectAsState()
 
-            val context = LocaleHelper.wrapContext(LocalContext.current, appState.languageCode)
+            // Capture the real Activity context BEFORE any wrapping happens.
+            // LocaleHelper.wrapContext() below calls createConfigurationContext(),
+            // which returns a brand new ContextImpl that is NOT chained back to
+            // this Activity via baseContext — so anything downstream reading
+            // LocalContext.current can never resolve back to an Activity.
+            // We provide LocalRealActivity separately so the rest of the app
+            // (Paymob SDK launch, permission requests, etc.) has a reliable way
+            // to get a real Activity regardless of locale/context wrapping.
+            val realActivityContext = LocalContext.current
+            val localizedContext = LocaleHelper.wrapContext(realActivityContext, appState.languageCode)
 
-            CompositionLocalProvider(LocalContext provides context) {
+            CompositionLocalProvider(
+                LocalRealActivity provides this,
+                LocalContext provides localizedContext
+            ) {
                 val darkTheme = when (appState.themeMode) {
                     ThemeMode.LIGHT -> false
                     ThemeMode.DARK -> true

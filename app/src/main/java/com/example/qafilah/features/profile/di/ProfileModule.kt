@@ -16,7 +16,7 @@ import com.example.qafilah.features.profile.domain.usecase.UpdateProfileUseCase
 import com.example.qafilah.features.profile.presentation.editprofile.EditProfileViewModel
 import com.example.qafilah.features.profile.presentation.persondetails.PersonalDetailsViewModel
 import com.example.qafilah.features.profile.presentation.profile.ProfileViewModel
-import org.koin.androidx.viewmodel.dsl.viewModel
+import org.koin.core.module.dsl.viewModel
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
 

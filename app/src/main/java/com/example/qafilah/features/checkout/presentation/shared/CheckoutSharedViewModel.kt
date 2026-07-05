@@ -24,6 +24,9 @@ class CheckoutSharedViewModel(
     private val _displayCartState = MutableStateFlow<CheckoutDisplayCart?>(null)
     val displayCartState = _displayCartState.asStateFlow()
 
+    private val _isOrderPaid = MutableStateFlow(false)
+    val isOrderPaid = _isOrderPaid.asStateFlow()
+
     init {
         viewModelScope.launch {
             observeCartStateUseCase().collect { storeCart ->
@@ -47,6 +50,10 @@ class CheckoutSharedViewModel(
     }
 
     fun setShippingAddress(@Suppress("unused") address: ShippingAddress) {
+    }
+
+    fun updatePaymentStatus(isPaid: Boolean) {
+        _isOrderPaid.value = isPaid
     }
 
     private suspend fun emitCart(storeCart: StoreCart?) {

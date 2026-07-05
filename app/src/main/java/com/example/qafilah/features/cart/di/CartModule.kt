@@ -14,7 +14,7 @@ import com.example.qafilah.features.cart.domain.usecase.ManageCartItemUseCase
 import com.example.qafilah.features.cart.domain.usecase.ObserveCartStateUseCase
 import com.example.qafilah.features.cart.domain.usecase.RemoveDiscountUseCase
 import com.example.qafilah.features.cart.presentation.viewmodel.CartViewModel
-import org.koin.androidx.viewmodel.dsl.viewModel
+import org.koin.core.module.dsl.viewModel
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
 
