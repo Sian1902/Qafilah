@@ -11,8 +11,11 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
+import com.example.qafilah.features.auth.domain.usecase.SignOutUseCase
+
 class ProfileViewModel(
     private val getCustomerProfile: GetCustomerProfileUseCase,
+    private val signOutUseCase: SignOutUseCase,
     private val tokenProvider: TokenProvider,
     private val currencyRepository: CurrencyRepository
 ) : ViewModel() {
@@ -70,6 +73,13 @@ class ProfileViewModel(
                         isAuthError = false
                     )
                 }
+        }
+    }
+
+    fun signOut(onComplete: () -> Unit) {
+        viewModelScope.launch {
+            signOutUseCase()
+            onComplete()
         }
     }
 }

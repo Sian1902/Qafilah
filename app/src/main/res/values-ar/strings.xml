@@ -150,6 +150,8 @@
 
     <string name="login_prompt_title">سجل الدخول للمتابعة</string>
     <string name="login_prompt_subtitle">تحتاج إلى حساب للوصول إلى %s.</string>
+    <string name="error_login_to_manage_wishlist">تحتاج إلى تسجيل الدخول للوصول إلى المفضله</string>
+    <string name="error_login_to_add_to_cart">تحتاج إلى تسجيل الدخول للوصول إلى السله</string>
 
     <string name="ui_common_or">أو</string>
     <string name="first_name">الاسم الأول</string>

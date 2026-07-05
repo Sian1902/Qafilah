@@ -8,5 +8,6 @@ data class AddressUiModel(
     val icon: ImageVector,
     val street: String,
     val locationDetails: String,
+    val phone: String? = null,
     val isDefault: Boolean
 )
