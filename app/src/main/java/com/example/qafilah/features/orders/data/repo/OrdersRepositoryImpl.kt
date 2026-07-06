@@ -36,6 +36,8 @@ class OrdersRepositoryImpl(
                     order.lineItems.map { it.toEntity(order.id) }
                 }
 
+
+                localDataSource.clearCache()
                 localDataSource.saveOrders(orderEntities, lineItemEntities)
                 Result.success(Unit)
             } catch (e: Exception) {
