@@ -1,5 +1,6 @@
 package com.example.qafilah.features.home.presentation.ui
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -13,16 +14,14 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.example.qafilah.R
@@ -50,25 +49,26 @@ fun HomeScreen(
     modifier: Modifier = Modifier,
     viewModel: HomeViewModel = koinViewModel(),
 ) {
+    val context = LocalContext.current
     val uiState by viewModel.uiState.collectAsState()
 
-    val snackbarHostState = remember { SnackbarHostState() }
     val homeErrorFallback = stringResource(R.string.error_something_went_wrong)
     val wishlistAddedTemplate = stringResource(R.string.wishlist_item_added)
     val wishlistErrorFallback = stringResource(R.string.error_failed_to_update_wishlist)
+    val notLoggedInMessage = stringResource(R.string.error_login_to_manage_wishlist)
 
     LaunchedEffect(Unit) {
         viewModel.loadHome(homeErrorFallback)
         viewModel.events.collect { event ->
             when (event) {
-                is HomeEvent.ShowSnackbar -> {
-                    snackbarHostState.showSnackbar(message = event.message)
+                is HomeEvent.ShowToast -> {
+                    Toast.makeText(context, event.message, Toast.LENGTH_SHORT).show()
                 }
             }
         }
     }
     Scaffold(
-        snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
+        modifier = modifier
     ) { paddingValues ->
         Box(modifier = Modifier.padding(paddingValues)) {
             when {
@@ -101,7 +101,8 @@ fun HomeScreen(
                             viewModel.toggleFavorite(
                                 product.id,
                                 wishlistAddedTemplate,
-                                wishlistErrorFallback
+                                wishlistErrorFallback,
+                                notLoggedInMessage = notLoggedInMessage
                             )
                         },
                         onClaimPromo = { code -> viewModel.claimPromoCode(code) },
@@ -134,11 +135,15 @@ private fun HomeContent(
     )
     {
         item {
+            val currentUser = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser
+            val userName = currentUser?.displayName?.takeIf { it.isNotBlank() } ?: stringResource(R.string.default_username)
+            val avatarUrl = currentUser?.photoUrl?.toString()
+
             WelcomeHeader(
-                avatarUrl = null,
+                avatarUrl = avatarUrl,
                 userAvatarContentDescription = stringResource(R.string.welcome_avatar_cd),
                 welcomeBackLabel = stringResource(R.string.welcome_back_label),
-                welcomeUserLabel = stringResource(R.string.welcome_user_greeting, stringResource(R.string.default_username)),
+                welcomeUserLabel = stringResource(R.string.welcome_user_greeting, userName),
                 notificationsContentDescription = stringResource(R.string.welcome_notifications_cd),
                 hasNotification = true,
                 onNotificationClick = onNotificationClick,
@@ -166,7 +171,7 @@ private fun HomeContent(
 
         item {
             SectionHeader(
-                title = stringResource(R.string.categories),
+                title = stringResource(R.string.brands),
                 trailingText = stringResource(R.string.view_all),
                 onTrailingClick = onViewAllCategoriesClick,
                 modifier = Modifier.padding(horizontal = 20.dp)
@@ -183,7 +188,7 @@ private fun HomeContent(
 
         item {
             SectionHeader(
-                title = stringResource(R.string.shop_by_brand),
+                title = stringResource(R.string.categories),
                 modifier = Modifier.padding(horizontal = 20.dp)
             )
         }

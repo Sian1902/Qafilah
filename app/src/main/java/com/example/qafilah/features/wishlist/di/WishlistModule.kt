@@ -1,6 +1,6 @@
 package com.example.qafilah.features.wishlist.di
 
-import androidx.room.Room // <-- Add this import
+import androidx.room.Room
 import com.example.qafilah.core.data.AppDatabase
 import com.example.qafilah.features.wishlist.data.WishlistLocalDataSource
 import com.example.qafilah.features.wishlist.domain.usecase.AddToWishlistUseCase
@@ -11,7 +11,7 @@ import com.example.qafilah.features.wishlist.domain.usecase.RemoveFromWishlistUs
 import com.example.qafilah.features.wishlist.presentation.WishlistViewModel
 import okhttp3.OkHttpClient
 import org.koin.android.ext.koin.androidContext
-import org.koin.androidx.viewmodel.dsl.viewModel
+import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
 
 val wishlistModule = module {
@@ -30,11 +30,11 @@ val wishlistModule = module {
     single { OkHttpClient() }
     single { WishlistLocalDataSource(get(), androidContext(), get()) }
 
-    factory { GetWishlistUseCase(get()) }
-    factory { IsProductWishlistedUseCase(get()) }
-    factory { AddToWishlistUseCase(get()) }
-    factory { RemoveFromWishlistUseCase(get()) }
-    factory { ClearWishlistUseCase(get()) }
+    factory { GetWishlistUseCase(get(),get()) }
+    factory { IsProductWishlistedUseCase(get(),get()) }
+    factory { AddToWishlistUseCase(get(),get()) }
+    factory { RemoveFromWishlistUseCase(get(),get()) }
+    factory { ClearWishlistUseCase(get(),get()) }
 
     viewModel { WishlistViewModel(get(), get(), get(), get(), get()) }
 }

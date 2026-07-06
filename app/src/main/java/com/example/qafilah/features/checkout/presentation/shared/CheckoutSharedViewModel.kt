@@ -34,6 +34,9 @@ class CheckoutSharedViewModel(
     private val _selectedDeliveryHandle = MutableStateFlow<String?>(null)
     val selectedDeliveryHandle = _selectedDeliveryHandle.asStateFlow()
 
+    private val _isOrderPaid = MutableStateFlow(false)
+    val isOrderPaid = _isOrderPaid.asStateFlow()
+
     init {
         viewModelScope.launch {
             observeCartStateUseCase().collect { storeCart ->
@@ -64,6 +67,10 @@ class CheckoutSharedViewModel(
 
     fun setCustomerProfile(user: AppUser) {
         _appUser.value = user
+    }
+
+    fun updatePaymentStatus(isPaid: Boolean) {
+        _isOrderPaid.value = isPaid
     }
 
     private suspend fun emitCart(storeCart: StoreCart?) {

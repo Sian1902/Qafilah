@@ -2,6 +2,8 @@ package com.example.ui_kit.components.cart
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -52,7 +54,8 @@ fun CartItemCard(
     removeItemContentDescription: String,
     onIncreaseQuantity: () -> Unit,
     onDecreaseQuantity: () -> Unit,
-    onRemoveItem: () -> Unit
+    onRemoveItem: () -> Unit,
+    onClick: () -> Unit
 ) {
     val colorScheme = MaterialTheme.colorScheme
     val cardShape = RoundedCornerShape(28.dp)
@@ -74,13 +77,20 @@ fun CartItemCard(
         noButtonText = removeCancelLabel
     )
 
+    val interactionSource = remember { MutableInteractionSource() }
+
     Row(
         modifier = modifier
             .fillMaxWidth()
             .clip(cardShape)
             .background(colorScheme.surface)
             .border(1.dp, colorScheme.onSurface.copy(alpha = 0.12f), cardShape)
-            .padding(16.dp),
+            .padding(16.dp)
+            .clickable(
+                interactionSource = interactionSource,
+                indication = null,
+                onClick = onClick
+            ),
         horizontalArrangement = Arrangement.spacedBy(16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {

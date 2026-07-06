@@ -28,7 +28,7 @@ private const val COLLECTIONS_LIMIT = 10
 private const val CATEGORIES_LIMIT = 10
 
 sealed interface HomeEvent {
-    data class ShowSnackbar(val message: String) : HomeEvent
+    data class ShowToast(val message: String) : HomeEvent
 }
 
 class HomeViewModel(
@@ -75,11 +75,11 @@ class HomeViewModel(
                             CategoryUiModel(
                                 id = collection.id,
                                 label = collection.title.uppercase(),
-                                icon = R.drawable.ic_logo, // Default icon
+                                icon = R.drawable.ic_logo,
                                 imageUrl = collection.imageUrl
                             )
                         },
-                        brands = collections.map { it.toBrandLabel() },
+                        brands = productTypes.map { it.uppercase() },
                         products = uiProducts
                     )
                 }
@@ -112,8 +112,14 @@ class HomeViewModel(
     fun toggleFavorite(
         productId: String,
         addedToWishlistTemplate: String,
-        fallbackErrorMessage: String
+        fallbackErrorMessage: String,
+        notLoggedInMessage: String
     ) {
+        if (com.google.firebase.auth.FirebaseAuth.getInstance().currentUser == null) {
+            _events.trySend(HomeEvent.ShowToast(notLoggedInMessage))
+            return
+        }
+
         val uiProduct = _uiState.value.products.find { it.id == productId } ?: return
         val domainProduct = domainProductsCache.find { it.id == productId } ?: return
         val wasFavorite = uiProduct.isFavorite
@@ -133,7 +139,7 @@ class HomeViewModel(
                         currencyCode = "USD"
                     )
                     _events.trySend(
-                        HomeEvent.ShowSnackbar(
+                        HomeEvent.ShowToast(
                             String.format(
                                 addedToWishlistTemplate,
                                 domainProduct.title
@@ -154,9 +160,9 @@ class HomeViewModel(
             val result = saveAdCouponUseCase(code)
 
             if (result.isSuccess) {
-                _events.send(HomeEvent.ShowSnackbar("🎉 Promo Code $code saved! It will be applied at checkout."))
+                _events.send(HomeEvent.ShowToast("🎉 Promo Code $code saved! It will be applied at checkout."))
             } else {
-                _events.send(HomeEvent.ShowSnackbar("Failed to claim promo code."))
+                _events.send(HomeEvent.ShowToast("Failed to claim promo code."))
             }
         }
     }

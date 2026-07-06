@@ -31,7 +31,7 @@ class AuthRepositoryImpl(
     override suspend fun registerPrimary(
         email: String, password: String, fullName: String
     ): Result<AppUser> = runCatching {
-        firebaseDataSource.signUpPrimary(email, password, fullName)
+        firebaseDataSource.signUpPrimary(name = fullName, email = email, password = password)
     }
 
     override suspend fun authenticateStorefront(email: String, password: String): Result<String> =
@@ -43,8 +43,10 @@ class AuthRepositoryImpl(
                 loginResult?.customerUserErrors?.any { it.code.toString() == "UNIDENTIFIED_CUSTOMER" } == true
             if (isUnrecognized) throw AuthError.StorefrontProfileMissing
 
-            loginResult?.customerAccessToken?.accessToken
+            val accessToken = loginResult?.customerAccessToken?.accessToken
                 ?: throw Exception("Failed to acquire token.")
+            
+            accessToken
         }
 
     override suspend fun registerStorefront(

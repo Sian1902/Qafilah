@@ -9,10 +9,15 @@ import com.example.qafilah.core.currency.ConvertPriceUseCase
 import com.example.qafilah.features.wishlist.domain.usecase.AddToWishlistUseCase
 import com.example.qafilah.features.wishlist.domain.usecase.IsProductWishlistedUseCase
 import com.example.qafilah.features.wishlist.domain.usecase.RemoveFromWishlistUseCase
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+sealed interface ProductDetailEvent {
+    data class ShowToast(val message: String) : ProductDetailEvent
+}
 
 class ProductDetailViewModel(
     private val getProductDetailUseCase: GetSingleProductUseCase,
@@ -22,6 +27,9 @@ class ProductDetailViewModel(
     private val addCartItemUseCase: AddCartItemUseCase,
     private val convertPriceUseCase: ConvertPriceUseCase
 ) : ViewModel() {
+
+    private val _events = Channel<ProductDetailEvent>(Channel.BUFFERED)
+    val events = _events.receiveAsFlow()
 
     private val _uiState = MutableStateFlow<ProductDetailUiState>(ProductDetailUiState.Loading)
     val uiState: StateFlow<ProductDetailUiState> = _uiState.asStateFlow()
@@ -93,7 +101,12 @@ class ProductDetailViewModel(
         }
     }
 
-    fun toggleFavorite() {
+    fun toggleFavorite(notLoggedInMessage: String, fallbackErrorMessage: String, addedToWishlistTemplate: String) {
+        if (com.google.firebase.auth.FirebaseAuth.getInstance().currentUser == null) {
+            _events.trySend(ProductDetailEvent.ShowToast(notLoggedInMessage))
+            return
+        }
+
         val current = _uiState.value as? ProductDetailUiState.Success ?: return
         val product = current.product
         val wasFavorite = current.isFavorite
@@ -112,13 +125,20 @@ class ProductDetailViewModel(
                         price = product.variants.firstOrNull()?.price?.toDoubleOrNull() ?: 0.0,
                         currencyCode = "USD"
                     )
+                    _events.trySend(ProductDetailEvent.ShowToast(String.format(addedToWishlistTemplate, product.title)))
                 }
-            } catch (_: Exception) {
+            } catch (e: Exception) {
+                _events.trySend(ProductDetailEvent.ShowToast(e.message ?: fallbackErrorMessage))
             }
         }
     }
 
-    fun addToCart(variantId: String, quantity: Int = 1, fallbackErrorMessage: String) {
+    fun addToCart(variantId: String, quantity: Int = 1, fallbackErrorMessage: String, notLoggedInMessage: String, successMessage: String) {
+        if (com.google.firebase.auth.FirebaseAuth.getInstance().currentUser == null) {
+            _events.trySend(ProductDetailEvent.ShowToast(notLoggedInMessage))
+            return
+        }
+
         val currentState = _uiState.value as? ProductDetailUiState.Success ?: return
 
         viewModelScope.launch {
@@ -126,8 +146,8 @@ class ProductDetailViewModel(
 
             try {
                 addCartItemUseCase(variantId, quantity)
-
                 _uiState.value = currentState.copy(isAddingToCart = false)
+                _events.trySend(ProductDetailEvent.ShowToast(successMessage))
             } catch (e: Exception) {
                 _uiState.value = currentState.copy(
                     isAddingToCart = false,

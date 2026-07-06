@@ -15,7 +15,7 @@ kotlin = "2.2.10"
 composeBom = "2026.02.01"
 androidxCore = "1.15.0"
 
-koin = "3.5.6"
+koin = "4.1.0"
 room = "2.8.4"
 apollo = "5.0.0"
 datastore = "1.2.1"
@@ -49,6 +49,8 @@ material = { group = "com.google.android.material", name = "material", version.r
 androidx-compose-foundation = { group = "androidx.compose.foundation", name = "foundation" }
 
 # Koin
+koin-android-ext = { module = "io.insert-koin:koin-android", version.ref = "koin" }
+koin-core-ext = { module = "io.insert-koin:koin-core", version.ref = "koin" }
 koin-androidx-compose = { module = "io.insert-koin:koin-androidx-compose", version.ref = "koin" }
 # Room
 room-runtime = { module = "androidx.room:room-runtime", version.ref = "room" }

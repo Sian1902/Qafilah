@@ -20,7 +20,7 @@ import com.example.qafilah.features.catalog.domain.usecases.GetSingleProductUseC
 import com.example.qafilah.features.catalog.domain.usecases.SaveAdCouponUseCase
 import com.example.qafilah.features.catalog.domain.usecases.SearchProductsUseCase
 import com.example.qafilah.features.catalog.presentation.CatalogViewModel
-import org.koin.androidx.viewmodel.dsl.viewModel
+import org.koin.core.module.dsl.viewModel
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
 

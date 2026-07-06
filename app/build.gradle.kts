@@ -9,6 +9,7 @@ plugins {
     alias(libs.plugins.googleServices)
 }
 
+// Load local properties safely
 val localProperties = Properties()
 val localPropertiesFile = rootProject.file("local.properties")
 if (localPropertiesFile.exists()) {
@@ -16,12 +17,12 @@ if (localPropertiesFile.exists()) {
 }
 
 val shopifyApiKey = localProperties.getProperty("SHOPIFY_API_KEY") ?: ""
-
 val exchangeRateApiKey = localProperties.getProperty("EXCHANGE_RATE_API_KEY") ?: ""
-
 val adminApiKey = localProperties.getProperty("ADMIN_API_KEY") ?: ""
 val storefrontEndpoint = localProperties.getProperty("STOREFRONT_ENDPOINT") ?: ""
 val adminEndpoint = localProperties.getProperty("ADMIN_ENDPOINT") ?: ""
+val paymobPublicKey = localProperties.getProperty("PAYMOB_PUBLIC_KEY") ?: ""
+val paymobSecretKey = localProperties.getProperty("PAYMOB_SECRET_KEY")?:""
 
 android {
     namespace = "com.example.qafilah"
@@ -38,11 +39,21 @@ android {
         versionName = "1.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
+        // Inject variables securely into BuildConfig
         buildConfigField("String", "SHOPIFY_API_KEY", "\"$shopifyApiKey\"")
         buildConfigField("String", "EXCHANGE_RATE_API_KEY", "\"$exchangeRateApiKey\"")
         buildConfigField("String", "ADMIN_API_KEY", "\"$adminApiKey\"")
         buildConfigField("String", "STOREFRONT_ENDPOINT", "\"$storefrontEndpoint\"")
         buildConfigField("String", "ADMIN_ENDPOINT", "\"$adminEndpoint\"")
+        buildConfigField("String", "PAYMOB_PUBLIC_KEY", "\"$paymobPublicKey\"")
+        buildConfigField("String",  "PAYMOB_SECRET_KEY", "\"$paymobSecretKey\"" )
+    }
+
+    buildFeatures {
+        buildConfig = true
+        compose = true
+        dataBinding = true
+
     }
 
     buildTypes {
@@ -54,19 +65,19 @@ android {
             )
         }
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
-    buildFeatures {
-        compose = true
-    }
+
     kotlinOptions {
         jvmTarget = "11"
     }
 }
 
 dependencies {
+    // Jetpack Compose & Core Android
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.compose.foundation)
@@ -76,17 +87,12 @@ dependencies {
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
-    testImplementation(libs.junit)
-    androidTestImplementation(platform(libs.androidx.compose.bom))
-    androidTestImplementation(libs.androidx.compose.ui.test.junit4)
-    androidTestImplementation(libs.androidx.espresso.core)
-    androidTestImplementation(libs.androidx.junit)
-    debugImplementation(libs.androidx.compose.ui.test.manifest)
-    debugImplementation(libs.androidx.compose.ui.tooling)
-    implementation(project(":ui_kit"))
+    implementation(libs.compose.material.icons.extended)
+    implementation(libs.androidx.navigation.compose)
 
-    // --- New Dependencies ---
-
+    // Dependency Injection (Koin)
+    implementation(libs.koin.android.ext)
+    implementation(libs.koin.core.ext)
     implementation("androidx.core:core-ktx:1.15.0")
     implementation("androidx.core:core:1.15.0")
 
@@ -94,47 +100,43 @@ dependencies {
 
     // Koin
     implementation(libs.koin.androidx.compose)
-
-    // Room
+    implementation("com.paymob.sdk:Paymob-SDK:1.9.2")
+    // Local Storage (Room & DataStore)
     implementation(libs.room.runtime)
     implementation(libs.room.ktx)
     ksp(libs.room.compiler)
-
-    // Apollo Client (GraphQL)
-    implementation(libs.apollo.runtime)
-
-    // DataStore Preferences
     implementation(libs.datastore.preferences)
 
-    // Firebase Auth (via BOM)
-    implementation(platform(libs.firebase.bom))
-    implementation(libs.firebase.auth.ktx)
+    // Networking & APIs (Retrofit & Apollo GraphQL)
+    implementation(libs.retrofit)
+    implementation(libs.retrofit.gson)
+    implementation(libs.apollo.runtime)
 
-    // Coroutines
-    implementation(libs.coroutines.android)
-
-    // Material Icons Extended
-    implementation(libs.compose.material.icons.extended)
-
-    implementation(libs.androidx.navigation.compose)
+    // Image Loading
     implementation("io.coil-kt:coil-compose:2.7.0")
 
-    // Jetpack DataStore
-    implementation(libs.androidx.datastore.preferences.v111)
-
-    // Google Tink for secure, reliable encryption
+    // Security & Authentication
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.auth.ktx)
     implementation(libs.tink.android)
-
-
-    // Credential Manager libraries
     implementation("androidx.credentials:credentials:1.2.2")
     implementation("androidx.credentials:credentials-play-services-auth:1.2.2")
     implementation("com.google.android.libraries.identity.googleid:googleid:1.1.1")
 
-    // Retrofit
-    implementation(libs.retrofit)
-    implementation(libs.retrofit.gson)
+    // Asynchronous Programming
+    implementation(libs.coroutines.android)
 
+    // Multi-module project references
+    implementation(project(":ui_kit"))
+
+    // Testing
+    testImplementation(libs.junit)
+    androidTestImplementation(platform(libs.androidx.compose.bom))
+    androidTestImplementation(libs.androidx.compose.ui.test.junit4)
+    androidTestImplementation(libs.androidx.espresso.core)
+    androidTestImplementation(libs.androidx.junit)
+    debugImplementation(libs.androidx.compose.ui.test.manifest)
+    debugImplementation(libs.androidx.compose.ui.tooling)
 }
 
 apollo {
@@ -143,7 +145,7 @@ apollo {
         srcDir("src/main/graphql/storefront")
 
         introspection {
-            endpointUrl.set("$storefrontEndpoint")
+            endpointUrl.set(storefrontEndpoint)
             schemaFile.set(file("src/main/graphql/storefront/schema.graphqls"))
             headers.put("X-Shopify-Storefront-Access-Token", shopifyApiKey)
         }
@@ -153,10 +155,9 @@ apollo {
         srcDir("src/main/graphql/admin")
 
         introspection {
-            endpointUrl.set("$adminEndpoint")
+            endpointUrl.set(adminEndpoint)
             schemaFile.set(file("src/main/graphql/admin/schema.graphqls"))
             headers.put("X-Shopify-Access-Token", adminApiKey)
         }
     }
-
 }

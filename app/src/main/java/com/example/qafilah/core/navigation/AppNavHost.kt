@@ -31,6 +31,10 @@ import com.example.qafilah.features.home.presentation.ui.HomeScreen
 import com.example.qafilah.features.onboarding.OnboardingScreen
 import com.example.qafilah.features.product_detail.presentation.ProductDetailScreen
 import com.example.qafilah.features.profile.presentation.editprofile.EditProfileScreen
+import com.example.qafilah.features.orders.presentation.order_details.OrderDetailsScreen
+import com.example.qafilah.features.orders.presentation.order_details.OrderDetailsViewModel
+import com.example.qafilah.features.orders.presentation.order.OrdersScreen
+import com.example.qafilah.features.orders.presentation.order.OrdersViewModel
 import com.example.qafilah.features.profile.presentation.persondetails.PersonalDetailsScreen
 import com.example.qafilah.features.profile.presentation.profile.ProfileScreen
 import com.example.qafilah.features.profile.presentation.profile.ProfileViewModel
@@ -86,7 +90,7 @@ fun AppNavHost(
                 },
                 onContinueAsGuest = {
                     navController.navigate(NavItem.Home.route) {
-                        popUpTo(Screen.Login.route) { inclusive = true }
+                        popUpTo(0) { inclusive = true }
                     }
                 }
             )
@@ -147,7 +151,13 @@ fun AppNavHost(
             HomeScreen(
                 onSearchClick = { navController.navigate(NavItem.Search.route) },
                 onNotificationClick = { },
-                onBrandClick = { },
+                onBrandClick = { categoryName ->
+                    navController.currentBackStackEntry?.savedStateHandle?.set(
+                        "search_category",
+                        categoryName.lowercase()
+                    )
+                    navController.navigate(NavItem.Search.route)
+                },
                 onCategoryClick = { categoryUiModel ->
                     navController.navigate(
                         Screen.CatalogProducts.createRoute(
@@ -257,6 +267,9 @@ fun AppNavHost(
                 },
                 onNavigateToCheckout = {
                     navController.navigate(Screen.Checkout.route)
+                },
+                onProductClick = { productId ->
+                    navController.navigate(Screen.ProductDetail.createRoute(Uri.encode(productId)))
                 }
             )
         }
@@ -287,14 +300,19 @@ fun AppNavHost(
                 onPersonalDetailsClick = {
                     navController.navigate(Screen.PersonalDetails.route)
                 },
+                onOrdersClick = {
+                    navController.navigate(Screen.Orders.route)
+                },
                 onSavedPaymentsClick = {
                 },
                 onShippingAddressesClick = {
                     navController.navigate(Screen.ShippingAddresses.route)
                 },
                 onSignOutClick = {
-                    navController.navigate(Screen.Login.route) {
-                        popUpTo(0) { inclusive = true }
+                    profileViewModel.signOut {
+                        navController.navigate(Screen.Login.route) {
+                            popUpTo(0) { inclusive = true }
+                        }
                     }
                 },
                 onNavigateToLogin = {
@@ -309,6 +327,39 @@ fun AppNavHost(
             PersonalDetailsScreen(
                 onBackClick = { navController.popBackStack() },
                 onEditClick = { navController.navigate(Screen.EditProfile.route) }
+            )
+        }
+
+        composable(Screen.Orders.route) {
+            val ordersViewModel: OrdersViewModel = koinViewModel()
+            val notAuthenticatedMessage = stringResource(R.string.error_not_authenticated)
+            val unknownErrorMessage = stringResource(R.string.error_unknown)
+            
+            LaunchedEffect(Unit) {
+                ordersViewModel.loadOrders(notAuthenticatedMessage, unknownErrorMessage)
+            }
+            OrdersScreen(
+                viewModel = ordersViewModel,
+                onBackClick = { navController.popBackStack() },
+                onOrderClick = { orderId ->
+                    navController.navigate(Screen.OrderDetails.createRoute(orderId))
+                }
+            )
+        }
+
+        composable(
+            route = Screen.OrderDetails.route,
+            arguments = listOf(navArgument("orderId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val orderId = backStackEntry.arguments?.getString("orderId") ?: ""
+            val detailsViewModel: OrderDetailsViewModel = koinViewModel()
+            val orderNotFoundMessage = stringResource(R.string.error_order_not_found)
+            
+            OrderDetailsScreen(
+                orderId = orderId,
+                viewModel = detailsViewModel,
+                orderNotFoundMessage = orderNotFoundMessage,
+                onBackClick = { navController.popBackStack() }
             )
         }
 

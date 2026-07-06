@@ -1,5 +1,6 @@
 package com.example.qafilah.features.product_detail.presentation
 
+import android.net.Uri
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -16,7 +17,9 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -41,6 +44,7 @@ import com.example.ui_kit.components.product.StickyBottomBar
 import com.example.ui_kit.components.product.TopIconBar
 import org.koin.androidx.compose.koinViewModel
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProductDetailScreen(
     productId: String,
@@ -55,7 +59,6 @@ fun ProductDetailScreen(
     val inStockTemplate = stringResource(R.string.stock_in_stock)
     val outOfStockText = stringResource(R.string.stock_out_of_stock)
     val sharedProductTemplate = stringResource(R.string.share_product_message)
-    val addingToCartText = stringResource(R.string.adding_to_cart_toast)
     val loadProductErrorFallback = stringResource(R.string.error_failed_to_load_product_details)
     val addToCartErrorFallback = stringResource(R.string.error_failed_to_add_to_cart)
 
@@ -67,222 +70,257 @@ fun ProductDetailScreen(
     val addToWishlistDesc = stringResource(R.string.add_to_wishlist)
     val removeFromWishlistDesc = stringResource(R.string.remove_from_wishlist)
 
-    val decodedId = android.net.Uri.decode(productId)
+    val wishlistErrorFallback = stringResource(R.string.error_something_went_wrong)
+    val wishlistAddedTemplate = stringResource(R.string.wishlist_item_added)
+    val wishlistNotLoggedInMessage = stringResource(R.string.error_login_to_manage_wishlist)
+    val cartNotLoggedInMessage = stringResource(R.string.error_login_to_add_to_cart)
+    val addToCartSuccessMessage = stringResource(R.string.added_to_cart_success)
+    val decodedId = Uri.decode(productId)
+
     LaunchedEffect(decodedId) {
         viewModel.loadProduct(decodedId, loadProductErrorFallback)
     }
 
-    when (val state = uiState) {
-        is ProductDetailUiState.Loading -> {
-            Box(
-                modifier = modifier
-                    .fillMaxSize()
-                    .background(MaterialTheme.colorScheme.background),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
+    LaunchedEffect(Unit) {
+        viewModel.events.collect { event ->
+            when (event) {
+                is ProductDetailEvent.ShowToast -> {
+                    Toast.makeText(context, event.message, Toast.LENGTH_SHORT).show()
+                }
             }
         }
+    }
 
-        is ProductDetailUiState.Error -> {
-            Box(
-                modifier = modifier
-                    .fillMaxSize()
-                    .background(MaterialTheme.colorScheme.background)
-                    .padding(24.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
+    Scaffold(
+        modifier = modifier
+    ) { paddingValues ->
+        when (val state = uiState) {
+            is ProductDetailUiState.Loading -> {
+                Box(
+                    modifier = Modifier
+                        .padding(paddingValues)
+                        .fillMaxSize()
+                        .background(MaterialTheme.colorScheme.background),
+                    contentAlignment = Alignment.Center
                 ) {
-                    Text(
-                        text = state.message,
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.error
-                    )
-                }
-            }
-        }
-
-        is ProductDetailUiState.Success -> {
-            val product = state.product
-            val selectedVariant = state.selectedVariant
-            val selectedOptions = state.selectedOptions
-            val isFavorite = state.isFavorite
-            val isAddingToCart = state.isAddingToCart
-            val addToCartError = state.addToCartError
-
-            LaunchedEffect(addToCartError) {
-                if (addToCartError != null) {
-                    Toast.makeText(context, addToCartError, Toast.LENGTH_LONG).show()
-                    viewModel.dismissCartError()
+                    CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
                 }
             }
 
-            val optionGroups = remember(product.variants) {
-                val groups = mutableMapOf<String, MutableList<String>>()
-                for (variant in product.variants) {
-                    for ((name, value) in variant.options) {
-                        if (name.equals("Title", ignoreCase = true) && value.equals(
-                                "Default Title",
-                                ignoreCase = true
-                            )
-                        ) {
-                            continue
-                        }
-                        val list = groups.getOrPut(name) { mutableListOf() }
-                        if (!list.contains(value)) {
-                            list.add(value)
-                        }
+            is ProductDetailUiState.Error -> {
+                Box(
+                    modifier = Modifier
+                        .padding(paddingValues)
+                        .fillMaxSize()
+                        .background(MaterialTheme.colorScheme.background)
+                        .padding(24.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        Text(
+                            text = state.message,
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.error
+                        )
                     }
                 }
-                groups.toMap()
             }
 
-            val specs = remember { emptyList<SpecItem>() }
+            is ProductDetailUiState.Success -> {
+                val product = state.product
+                val selectedVariant = state.selectedVariant
+                val selectedOptions = state.selectedOptions
+                val isFavorite = state.isFavorite
+                val isAddingToCart = state.isAddingToCart
+                val addToCartError = state.addToCartError
 
-            val inStock =
-                selectedVariant.inventoryQuantity != null && selectedVariant.inventoryQuantity > 0
-            val stockText = if (inStock) {
-                String.format(inStockTemplate, selectedVariant.inventoryQuantity)
-            } else {
-                outOfStockText
-            }
-            val stockColor =
-                if (inStock) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
+                LaunchedEffect(addToCartError) {
+                    if (addToCartError != null) {
+                        Toast.makeText(context, addToCartError, Toast.LENGTH_LONG).show()
+                        viewModel.dismissCartError()
+                    }
+                }
 
-            val rating = product.rating
-            val reviewCount = product.ratingCount
+                val optionGroups = remember(product.variants) {
+                    val groups = mutableMapOf<String, MutableList<String>>()
+                    for (variant in product.variants) {
+                        for ((name, value) in variant.options) {
+                            if (name.equals("Title", ignoreCase = true) && value.equals(
+                                    "Default Title",
+                                    ignoreCase = true
+                                )
+                            ) {
+                                continue
+                            }
+                            val list = groups.getOrPut(name) { mutableListOf() }
+                            if (!list.contains(value)) {
+                                list.add(value)
+                            }
+                        }
+                    }
+                    groups.toMap()
+                }
 
-            Column(
-                modifier = modifier
-                    .fillMaxSize()
-                    .background(MaterialTheme.colorScheme.background)
-            ) {
+                val specs = remember { emptyList<SpecItem>() }
+
+                val inStock =
+                    selectedVariant.inventoryQuantity != null && selectedVariant.inventoryQuantity > 0
+                val stockText = if (inStock) {
+                    String.format(inStockTemplate, selectedVariant.inventoryQuantity)
+                } else {
+                    outOfStockText
+                }
+                val stockColor =
+                    if (inStock) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
+
+                val rating = product.rating
+                val reviewCount = product.ratingCount
+
                 Column(
                     modifier = Modifier
-                        .weight(1f)
-                        .verticalScroll(rememberScrollState())
+                        .padding(paddingValues)
+                        .fillMaxSize()
+                        .background(MaterialTheme.colorScheme.background)
                 ) {
-                    Box(modifier = Modifier.fillMaxWidth()) {
-                        ProductImageHeader(
-                            images = product.images,
-                            collectionName = product.tags.firstOrNull()?.uppercase()
-                                ?: defaultCollectionLabel,
-                            imageContentDescription = { page ->
-                                stringResource(
-                                    R.string.product_image_cd,
-                                    page + 1,
-                                    product.title
-                                )
-                            }
-                        )
-                        TopIconBar(
-                            isFavorite = isFavorite,
-                            onBackClick = onBackClick,
-                            onShareClick = {
-                                Toast.makeText(
-                                    context,
-                                    String.format(sharedProductTemplate, product.title),
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                            },
-                            onFavoriteToggle = { viewModel.toggleFavorite() },
-                            backContentDescription = backDesc,
-                            shareContentDescription = shareDesc,
-                            addToWishlistContentDescription = addToWishlistDesc,
-                            removeFromWishlistContentDescription = removeFromWishlistDesc
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.height(24.dp))
-
                     Column(
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 20.dp),
-                        verticalArrangement = Arrangement.spacedBy(20.dp)
+                            .weight(1f)
+                            .verticalScroll(rememberScrollState())
                     ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            Box(
-                                modifier = Modifier
-                                    .size(8.dp)
-                                    .clip(CircleShape)
-                                    .background(stockColor)
+                        Box(modifier = Modifier.fillMaxWidth()) {
+                            ProductImageHeader(
+                                images = product.images,
+                                collectionName = product.tags.firstOrNull()?.uppercase()
+                                    ?: defaultCollectionLabel,
+                                imageContentDescription = { page ->
+                                    stringResource(
+                                        R.string.product_image_cd,
+                                        page + 1,
+                                        product.title
+                                    )
+                                }
                             )
-                            Text(
-                                text = stockText,
-                                style = MaterialTheme.typography.bodyMedium.copy(
-                                    fontSize = 14.sp,
-                                    color = stockColor
-                                )
+                            TopIconBar(
+                                isFavorite = isFavorite,
+                                onBackClick = onBackClick,
+                                onShareClick = {
+                                    Toast.makeText(
+                                        context,
+                                        String.format(sharedProductTemplate, product.title),
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                },
+                                onFavoriteToggle = {
+                                    viewModel.toggleFavorite(
+                                        notLoggedInMessage = wishlistNotLoggedInMessage,
+                                        fallbackErrorMessage = wishlistErrorFallback,
+                                        addedToWishlistTemplate = wishlistAddedTemplate
+                                    )
+                                },
+                                backContentDescription = backDesc,
+                                shareContentDescription = shareDesc,
+                                addToWishlistContentDescription = addToWishlistDesc,
+                                removeFromWishlistContentDescription = removeFromWishlistDesc
                             )
                         }
 
-                        Text(
-                            text = product.title,
-                            style = MaterialTheme.typography.displayMedium.copy(
-                                fontSize = 28.sp,
-                                lineHeight = 36.sp
-                            ),
-                            color = MaterialTheme.colorScheme.onBackground
-                        )
+                        Spacer(modifier = Modifier.height(24.dp))
 
-                        RatingBadge(
-                            rating = rating,
-                            reviewCount = reviewCount,
-                            starContentDescription = stringResource(R.string.product_rating_star_cd),
-                            ratingLabel = stringResource(
-                                R.string.product_rating_label,
-                                rating ?: 0.0,
-                                reviewCount ?: 0
-                            )
-                        )
-
-                        if (optionGroups.isNotEmpty()) {
-                            optionGroups.forEach { (optionName, optionValues) ->
-                                SelectablePillGroup(
-                                    selectionLabel = optionName,
-                                    options = optionValues,
-                                    selectedOption = selectedOptions[optionName],
-                                    onOptionSelected = { selectedVal ->
-                                        viewModel.selectOption(optionName, selectedVal)
-                                    }
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 20.dp),
+                            verticalArrangement = Arrangement.spacedBy(20.dp)
+                        ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(8.dp)
+                                        .clip(CircleShape)
+                                        .background(stockColor)
+                                )
+                                Text(
+                                    text = stockText,
+                                    style = MaterialTheme.typography.bodyMedium.copy(
+                                        fontSize = 14.sp,
+                                        color = stockColor
+                                    )
                                 )
                             }
+
+                            Text(
+                                text = product.title,
+                                style = MaterialTheme.typography.displayMedium.copy(
+                                    fontSize = 28.sp,
+                                    lineHeight = 36.sp
+                                ),
+                                color = MaterialTheme.colorScheme.onBackground
+                            )
+
+                            RatingBadge(
+                                rating = rating,
+                                reviewCount = reviewCount,
+                                starContentDescription = stringResource(R.string.product_rating_star_cd),
+                                ratingLabel = stringResource(
+                                    R.string.product_rating_label,
+                                    rating ?: 0.0,
+                                    reviewCount ?: 0
+                                )
+                            )
+
+                            if (optionGroups.isNotEmpty()) {
+                                optionGroups.forEach { (optionName, optionValues) ->
+                                    SelectablePillGroup(
+                                        selectionLabel = optionName,
+                                        options = optionValues,
+                                        selectedOption = selectedOptions[optionName],
+                                        onOptionSelected = { selectedVal ->
+                                            viewModel.selectOption(optionName, selectedVal)
+                                        }
+                                    )
+                                }
+                            }
+
+                            ExpandableDescriptionBlock(
+                                title = productDescriptionLabel,
+                                descriptionHtml = product.description ?: "",
+                                readMoreLabel = readMoreLabel,
+                                readLessLabel = readLessLabel
+                            )
+
+                            SpecTagPairs(specs = specs)
+
+                            Spacer(modifier = Modifier.height(16.dp))
                         }
-
-                        ExpandableDescriptionBlock(
-                            title = productDescriptionLabel,
-                            descriptionHtml = product.description ?: "",
-                            readMoreLabel = readMoreLabel,
-                            readLessLabel = readLessLabel
-                        )
-
-                        SpecTagPairs(specs = specs)
-
-                        Spacer(modifier = Modifier.height(16.dp))
                     }
+
+                    StickyBottomBar(
+                        price = state.displayPrice,
+                        totalPriceLabel = stringResource(R.string.product_total_price_label),
+                        addToCartLabel = if (inStock) stringResource(R.string.product_add_to_cart_label) else outOfStockText,
+                        addToCartContentDescription = stringResource(R.string.product_add_to_cart_cd),
+                        isLoading = isAddingToCart,
+                        onAddToCartClick = {
+                            if (inStock) {
+                                viewModel.addToCart(
+                                    variantId = selectedVariant.id,
+                                    fallbackErrorMessage = addToCartErrorFallback,
+                                    notLoggedInMessage = cartNotLoggedInMessage,
+                                    quantity = 1,
+                                    successMessage = addToCartSuccessMessage
+                                )
+                            } else {
+                                Toast.makeText(context, outOfStockText, Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                    )
                 }
-
-                StickyBottomBar(
-                    price = state.displayPrice,
-                    totalPriceLabel = stringResource(R.string.product_total_price_label),
-                    addToCartLabel = stringResource(R.string.product_add_to_cart_label),
-                    addToCartContentDescription = stringResource(R.string.product_add_to_cart_cd),
-                    isLoading = isAddingToCart,
-                    onAddToCartClick = {
-                        viewModel.addToCart(
-                            variantId = selectedVariant.id,
-                            fallbackErrorMessage = addToCartErrorFallback
-                        )
-                        Toast.makeText(context, addingToCartText, Toast.LENGTH_SHORT).show()
-                    }
-                )
             }
         }
     }

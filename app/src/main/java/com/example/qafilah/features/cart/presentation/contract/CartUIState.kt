@@ -2,6 +2,7 @@ package com.example.qafilah.features.cart.presentation.contract
 
 data class CartLineUiModel(
     val id: String,
+    val productId: String,
     val title: String,
     val vendor: String,
     val quantity: Int,
