@@ -19,6 +19,7 @@ import com.example.qafilah.features.checkout.presentation.shared.CheckoutSharedV
 import com.example.ui_kit.components.checkout.CheckoutProductCard
 import com.example.ui_kit.components.checkout.CheckoutSummaryCard
 import com.example.ui_kit.components.checkout.DeliveryOptionsRadioGroup
+import com.example.ui_kit.components.shared.PrimaryButton
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
@@ -161,45 +162,19 @@ fun CheckoutSummaryContent(
             }
         }
 
-        Button(
+        PrimaryButton(
+            text = stringResource(R.string.checkout_proceed_to_payment),
             onClick = onProceedToPayment,
-            enabled = !uiState.isRecalculating && uiState.selectedDeliveryHandle != null,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 16.dp)
-                .height(60.dp),
-            shape = RoundedCornerShape(30.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = MaterialTheme.colorScheme.onPrimary
-            ),
-            contentPadding = PaddingValues(horizontal = 24.dp)
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
+            enabled = uiState.selectedDeliveryHandle != null,
+            isLoading = uiState.isRecalculating,
+            modifier = Modifier.padding(top = 16.dp),
+            trailingContent = {
                 Text(
-                    text = stringResource(R.string.checkout_proceed_to_payment),
-                    style = MaterialTheme.typography.bodyLarge
+                    text = displayedCart.displayTotal,
+                    style = MaterialTheme.typography.bodyMedium
                 )
-
-                if (uiState.isRecalculating) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(24.dp),
-                        color = MaterialTheme.colorScheme.onPrimary,
-                        strokeWidth = 2.dp
-                    )
-                } else {
-                    Text(
-                        text = displayedCart.displayTotal,
-                        style = MaterialTheme.typography.bodyMedium,
-                        textAlign = TextAlign.End
-                    )
-                }
             }
-        }
+        )
     }
 }
 

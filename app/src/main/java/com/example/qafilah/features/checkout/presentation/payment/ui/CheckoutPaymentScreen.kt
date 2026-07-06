@@ -16,6 +16,7 @@ import com.example.qafilah.R
 import com.example.qafilah.features.checkout.presentation.payment.CheckoutPaymentViewModel
 import com.example.qafilah.features.checkout.presentation.payment.PaymentMethod
 import com.example.qafilah.features.checkout.presentation.shared.CheckoutSharedViewModel
+import com.example.ui_kit.components.shared.PrimaryButton
 import org.koin.androidx.compose.koinViewModel
 import java.text.NumberFormat
 import java.util.Locale
@@ -24,7 +25,7 @@ import java.util.Locale
 fun CheckoutPaymentScreen(
     sharedViewModel: CheckoutSharedViewModel,
     paymentViewModel: CheckoutPaymentViewModel = koinViewModel(),
-    onNavigateToHome: () -> Unit
+    onNavigateToSuccess: () -> Unit
 ) {
     val context = LocalContext.current
     val uiState by paymentViewModel.uiState.collectAsState()
@@ -40,8 +41,7 @@ fun CheckoutPaymentScreen(
 
     LaunchedEffect(uiState.successOrderId, uiState.error) {
         if (uiState.successOrderId != null) {
-            Toast.makeText(context, "Congratulations! Order Placed Successfully.", Toast.LENGTH_LONG).show()
-            onNavigateToHome()
+            onNavigateToSuccess()
         }
         if (uiState.error != null) {
             Toast.makeText(context, uiState.error, Toast.LENGTH_LONG).show()
@@ -138,7 +138,8 @@ fun CheckoutPaymentScreen(
             "Pay now"
         }
 
-        Button(
+        PrimaryButton(
+            text = if (uiState.selectedMethod == PaymentMethod.COD) "Place order" else "Pay now",
             onClick = {
                 paymentViewModel.initiatePayment(
                     cart = currentCart,
@@ -147,21 +148,7 @@ fun CheckoutPaymentScreen(
                     }
                 )
             },
-            enabled = !uiState.isProcessing,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(56.dp),
-            shape = MaterialTheme.shapes.medium
-        ) {
-            if (uiState.isProcessing) {
-                CircularProgressIndicator(
-                    modifier = Modifier.size(24.dp),
-                    color = MaterialTheme.colorScheme.onPrimary,
-                    strokeWidth = 2.dp
-                )
-            } else {
-                Text(buttonText, style = MaterialTheme.typography.titleMedium)
-            }
-        }
+            isLoading = uiState.isProcessing
+        )
     }
 }

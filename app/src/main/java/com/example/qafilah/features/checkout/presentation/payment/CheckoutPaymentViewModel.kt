@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.qafilah.features.address.domain.model.ShippingAddress
 import com.example.qafilah.features.auth.domain.model.AppUser
+import com.example.qafilah.features.cart.domain.usecase.ClearCartUseCase
 import com.example.qafilah.features.checkout.domain.model.CheckoutCart
 import com.example.qafilah.features.checkout.domain.usecase.CompleteOrderUseCase
 import com.example.qafilah.features.checkout.domain.usecase.CreateCardPaymentIntentionUseCase
@@ -36,7 +37,8 @@ data class CheckoutPaymentUiState(
 
 class CheckoutPaymentViewModel(
     private val completeOrderUseCase: CompleteOrderUseCase,
-    private val createCardPaymentIntentionUseCase: CreateCardPaymentIntentionUseCase
+    private val createCardPaymentIntentionUseCase: CreateCardPaymentIntentionUseCase,
+    private val clearCartUseCase: ClearCartUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(CheckoutPaymentUiState())
@@ -127,6 +129,10 @@ class CheckoutPaymentViewModel(
             val result = completeOrderUseCase(cart, user, address, selectedDeliveryHandle)
 
             result.onSuccess { orderId ->
+
+                clearCartUseCase()
+
+
                 _uiState.update { it.copy(isProcessing = false, successOrderId = orderId) }
             }.onFailure { error ->
                 _uiState.update { it.copy(isProcessing = false, error = error.message) }

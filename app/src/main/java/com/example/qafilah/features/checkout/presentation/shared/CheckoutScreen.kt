@@ -18,12 +18,16 @@ fun CheckoutScreen(
     onNavigateToAddress: () -> Unit,
     onNavigateToHome: () -> Unit
 ) {
-    val pagerState = rememberPagerState(pageCount = { 3 })
+    val pagerState = rememberPagerState(pageCount = { 4 })
     val coroutineScope = rememberCoroutineScope()
 
     BackHandler(enabled = pagerState.currentPage > 0) {
-        coroutineScope.launch {
-            pagerState.animateScrollToPage(pagerState.currentPage - 1)
+        if (pagerState.currentPage == 3) {
+            onNavigateToHome()
+        } else {
+            coroutineScope.launch {
+                pagerState.animateScrollToPage(pagerState.currentPage - 1)
+            }
         }
     }
 
@@ -48,6 +52,11 @@ fun CheckoutScreen(
             )
             2 -> CheckoutPaymentScreen(
                 sharedViewModel = sharedViewModel,
+                onNavigateToSuccess = {
+                    coroutineScope.launch { pagerState.animateScrollToPage(3) }
+                }
+            )
+            3 -> CheckoutSuccessScreen(
                 onNavigateToHome = onNavigateToHome
             )
         }
