@@ -4,14 +4,10 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.example.qafilah.R
 import com.example.qafilah.features.checkout.presentation.shared.CheckoutDisplayCart
@@ -47,6 +43,8 @@ fun CheckoutSummaryScreen(
                 summaryViewModel.selectShippingOption(safeCart.id, firstGroup.id, defaultOption.handle) { updatedCart ->
                     sharedViewModel.updateCartStateWithSelectedShipping(updatedCart, defaultOption.handle)
                 }
+            } else {
+                sharedViewModel.updateCartStateWithSelectedShipping(safeCart, "standard")
             }
         }
     }
@@ -54,19 +52,21 @@ fun CheckoutSummaryScreen(
     val finalUiState = buildSummaryUiState(
         cart = cart,
         isRecalculating = localUiState.isRecalculating,
-        localSelectedHandle = localUiState.selectedDeliveryHandle
+        localSelectedHandle = selectedDeliveryHandle ?: localUiState.selectedDeliveryHandle
     )
-
 
     CheckoutSummaryContent(
         modifier = modifier,
         uiState = finalUiState,
         displayCart = displayCart,
         onShippingOptionSelected = { handle ->
-            val groupId = cart!!.deliveryGroups.firstOrNull()?.id ?: return@CheckoutSummaryContent
-
-            summaryViewModel.selectShippingOption(cart!!.id, groupId, handle) { updatedCart ->
-                sharedViewModel.updateCartStateWithSelectedShipping(updatedCart, handle)
+            if (handle == "standard") {
+                sharedViewModel.updateCartStateWithSelectedShipping(cart!!, handle)
+            } else {
+                val groupId = cart!!.deliveryGroups.firstOrNull()?.id ?: return@CheckoutSummaryContent
+                summaryViewModel.selectShippingOption(cart!!.id, groupId, handle) { updatedCart ->
+                    sharedViewModel.updateCartStateWithSelectedShipping(updatedCart, handle)
+                }
             }
         },
         onProceedToPayment = onNavigateToPayment
@@ -84,8 +84,12 @@ fun CheckoutSummaryContent(
     val cart = uiState.cart ?: return
     val displayedCart = displayCart ?: return
 
-    val uiKitDeliveryOptions = displayedCart.deliveryOptions.map { option ->
-        Triple(option.handle, option.title, option.displayCost)
+    val uiKitDeliveryOptions = if (displayedCart.deliveryOptions.isNotEmpty()) {
+        displayedCart.deliveryOptions.map { option ->
+            Triple(option.handle, option.title, option.displayCost)
+        }
+    } else {
+        listOf(Triple("standard", "Standard", "Free"))
     }
 
     Column(
@@ -177,5 +181,3 @@ fun CheckoutSummaryContent(
         )
     }
 }
-
-

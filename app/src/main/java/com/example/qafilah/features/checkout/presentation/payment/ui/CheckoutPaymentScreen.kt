@@ -1,6 +1,5 @@
 package com.example.qafilah.features.checkout.presentation.payment.ui
 
-import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
@@ -18,8 +17,9 @@ import com.example.qafilah.features.checkout.presentation.payment.PaymentMethod
 import com.example.qafilah.features.checkout.presentation.shared.CheckoutSharedViewModel
 import com.example.ui_kit.components.shared.PrimaryButton
 import org.koin.androidx.compose.koinViewModel
-import java.text.NumberFormat
-import java.util.Locale
+import androidx.compose.foundation.background
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.Alignment
 
 @Composable
 fun CheckoutPaymentScreen(
@@ -81,27 +81,51 @@ fun CheckoutPaymentScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(20.dp)
+            .background(MaterialTheme.colorScheme.background)
+            .padding(16.dp)
     ) {
         Text(
             text = stringResource(R.string.checkout_step_payment_title),
-            style = MaterialTheme.typography.headlineMedium
+            style = MaterialTheme.typography.displayMedium,
+            color = MaterialTheme.colorScheme.onBackground,
+            modifier = Modifier.padding(bottom = 8.dp)
         )
 
-        Spacer(modifier = Modifier.height(4.dp))
 
         val displayTotal = displayCart?.displayTotal ?: ""
-        Text(
-            text = "Total due $displayTotal",
-            style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
+
+        Surface(
+            color = MaterialTheme.colorScheme.surface,
+            shape = RoundedCornerShape(12.dp),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+
+                    text = "Total due",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Text(
+                    text = displayTotal,
+                    style = MaterialTheme.typography.headlineSmall,
+                    color = MaterialTheme.colorScheme.primary,
+                )
+            }
+        }
 
         Spacer(modifier = Modifier.height(28.dp))
 
         Text(
-            text = "Payment method",
-            style = MaterialTheme.typography.titleMedium
+            text = stringResource(R.string.checkout_payment_method),
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.onBackground
         )
 
         Spacer(modifier = Modifier.height(12.dp))
@@ -109,8 +133,8 @@ fun CheckoutPaymentScreen(
         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
             PaymentMethodCard(
                 icon = Icons.Filled.CreditCard,
-                title = "Credit / Debit Card",
-                subtitle = "Pay securely via Paymob",
+                title = stringResource(R.string.checkout_credit_debit_card),
+                subtitle = stringResource(R.string.checkout_pay_securely_via_paymob),
                 isSelected = uiState.selectedMethod == PaymentMethod.CARD,
                 isEnabled = true,
                 onClick = { paymentViewModel.selectPaymentMethod(PaymentMethod.CARD) }
@@ -118,11 +142,11 @@ fun CheckoutPaymentScreen(
 
             PaymentMethodCard(
                 icon = Icons.Filled.LocalShipping,
-                title = "Cash on Delivery",
+                title = stringResource(R.string.checkout_cash_on_delivery),
                 subtitle = if (uiState.isCodAvailable) {
-                    "Pay when your order arrives"
+                    stringResource(R.string.checkout_pay_on_arrival)
                 } else {
-                    "Only available for orders under ${uiState.codLimit.toInt()} EGP"
+                    stringResource(R.string.checkout_cod_limit_warning, uiState.codLimit.toInt())
                 },
                 isSelected = uiState.selectedMethod == PaymentMethod.COD,
                 isEnabled = uiState.isCodAvailable,
@@ -133,13 +157,13 @@ fun CheckoutPaymentScreen(
         Spacer(modifier = Modifier.weight(1f))
 
         val buttonText = if (uiState.selectedMethod == PaymentMethod.COD) {
-            "Place order"
+            stringResource(R.string.checkout_place_order)
         } else {
-            "Pay now"
+            stringResource(R.string.checkout_pay_now)
         }
 
         PrimaryButton(
-            text = if (uiState.selectedMethod == PaymentMethod.COD) "Place order" else "Pay now",
+            text = buttonText,
             onClick = {
                 paymentViewModel.initiatePayment(
                     cart = currentCart,

@@ -57,7 +57,8 @@ fun CheckoutScreen(
                 }
             )
             3 -> CheckoutSuccessScreen(
-                onNavigateToHome = onNavigateToHome
+                onNavigateToHome = onNavigateToHome,
+                isAnimationPlaying = pagerState.currentPage == 3
             )
         }
     }

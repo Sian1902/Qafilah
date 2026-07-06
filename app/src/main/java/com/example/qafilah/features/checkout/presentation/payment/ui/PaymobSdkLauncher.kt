@@ -3,7 +3,8 @@ package com.example.qafilah.features.checkout.presentation.payment.ui
 import android.content.Intent
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import com.example.qafilah.R
 import com.example.qafilah.core.util.LocalRealActivity
 import com.paymob.paymob_sdk.ui.PaymobSdkActivity
 import com.paymob.paymob_sdk.ui.PaymobSdkListener
@@ -14,8 +15,11 @@ fun PaymobSdkLauncher(
     clientSecret: String,
     onResult: (Boolean, String?) -> Unit
 ) {
-    val context = LocalContext.current
     val activity = LocalRealActivity.current
+
+    val pendingMessage = stringResource(R.string.payment_pending_confirmation)
+    val errorPrefix = stringResource(R.string.payment_error_prefix)
+    val sdkLaunchFailedTemplate = stringResource(R.string.payment_sdk_launch_failed)
 
     LaunchedEffect(publicKey, clientSecret) {
         var hasResolved = false
@@ -36,14 +40,14 @@ fun PaymobSdkLauncher(
                     if (msg == null || msg.contains("cancel", ignoreCase = true)) {
                         onResult(true, null)
                     } else {
-                        onResult(false, "Paymob Error: $msg")
+                        onResult(false, errorPrefix.format(msg))
                     }
                 }
 
                 override fun onPending() {
                     if (hasResolved) return
                     hasResolved = true
-                    onResult(false, "Payment is pending confirmation.")
+                    onResult(false, pendingMessage)
                 }
             })
 
@@ -55,7 +59,7 @@ fun PaymobSdkLauncher(
             }
             activity.startActivity(intent)
         } catch (e: Exception) {
-            onResult(false, "SDK Launch Failed: ${e.message}")
+            onResult(false, sdkLaunchFailedTemplate.format(e.message.orEmpty()))
         }
     }
 }
