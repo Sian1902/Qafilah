@@ -36,6 +36,7 @@
     <string name="stock_out_of_stock">Out of Stock</string>
     <string name="share_product_message">Shared product: %s</string>
     <string name="adding_to_cart_toast">Adding to cart…</string>
+    <string name="added_to_cart_success">Item added to cart</string>
     <string name="error_failed_to_load_product_details">Failed to load product details</string>
     <string name="error_failed_to_add_to_cart">Failed to add item to cart</string>
     <string name="error_not_authenticated">Not authenticated</string>
@@ -152,6 +153,25 @@
     <string name="error_login_to_manage_wishlist">Please log in to manage your wishlist</string>
     <string name="error_login_to_add_to_cart">Please log in to add items to your cart.</string>
 
+    <!-- Checkout -->
+    <string name="checkout_shipping_address_title">Shipping Address</string>
+    <string name="checkout_manage_addresses">Add or Edit Addresses</string>
+    <string name="checkout_continue_to_summary">Continue to Summary</string>
+    <string name="checkout_auth_error">Authentication error. Please log in again.</string>
+    <string name="checkout_order_summary_title">Order Summary</string>
+    <string name="checkout_proceed_to_payment">Proceed to Payment</string>
+    <string name="checkout_step_payment_title">Payment</string>
+    <string name="checkout_amount_to_charge">Amount to charge: %1$s</string>
+    <string name="checkout_submit_payment">Submit Payment</string>
+    <string name="checkout_currency_amount">$%1$s</string>
+    <string name="checkout_quantity_label">Qty: %1$d</string>
+    <string name="checkout_shipping_method_title">Shipping Method</string>
+    <string name="checkout_subtotal_label">Subtotal</string>
+    <string name="checkout_discount_label">Discount</string>
+    <string name="checkout_shipping_label">Shipping</string>
+    <string name="checkout_tax_label">Taxes</string>
+    <string name="checkout_total_label">Total</string>
+
     <string name="ui_common_or">OR</string>
     <string name="first_name">First Name</string>
     <string name="last_name">Last Name</string>
@@ -254,5 +274,26 @@
     <string name="you">You</string>
 
 
+
+    <string name="my_orders">My Orders</string>
+    <string name="orders_count">%d orders</string>
+    <string name="orders_icon_cd">Order history</string>
+    <string name="order_history_title">Order History</string>
+    <string name="orders_empty_title">No orders yet</string>
+    <string name="orders_empty_subtitle">You haven\'t made any journeys yet. Start exploring now.</string>
+    <string name="order_number_label">Order #%s</string>
+    <string name="order_date_label">Placed on %s</string>
+    <string name="order_total_items">%d items</string>
+    <string name="order_status_paid">Paid</string>
+    <string name="order_status_fulfilled">Fulfilled</string>
+    <string name="order_status_processing">Processing</string>
+    <string name="order_view_details">View Details</string>
+    <string name="order_details_title">Order Details</string>
+    <string name="order_items_label">Order Items</string>
+    <string name="order_summary_label">Order Summary</string>
+    <string name="order_total_label">Total Amount</string>
+    <string name="error_order_not_found">Order not found</string>
+    <string name="currency_format">%1$s %2$s</string>
+    <string name="quantity_format">x%d</string>
 
 </resources>

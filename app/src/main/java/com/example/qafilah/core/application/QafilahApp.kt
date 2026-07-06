@@ -13,6 +13,7 @@ import com.example.qafilah.features.cart.di.cartModule
 import com.example.qafilah.features.catalog.di.catalogModule
 import com.example.qafilah.features.checkout.di.checkoutModule
 import com.example.qafilah.features.home.di.homeModule
+import com.example.qafilah.features.orders.di.ordersModule
 import com.example.qafilah.features.product_detail.di.productDetailsModule
 import com.example.qafilah.features.profile.di.profileModule
 import com.example.qafilah.features.wishlist.di.wishlistModule
@@ -30,6 +31,7 @@ class QafilahApp : Application() {
         homeModule,
         productDetailsModule,
         profileModule,
+        ordersModule,
         addressModule,
         wishlistModule,
         databaseModule,

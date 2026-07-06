@@ -14,7 +14,10 @@ sealed class Screen(val route: String) {
 
     object Checkout : Screen("checkout")
     object OrderConfirmation : Screen("order_confirmation/{orderId}") {
-        fun createRoute(orderId: String) = "order_confirmation/$orderId"
+        fun createRoute(orderId: String) = "order_confirmation/${android.net.Uri.encode(orderId)}"
+    }
+    object OrderDetails : Screen("order_details/{orderId}") {
+        fun createRoute(orderId: String) = "order_details/${android.net.Uri.encode(orderId)}"
     }
     object Catalog : Screen("catalog_screen")
 
@@ -29,6 +32,7 @@ sealed class Screen(val route: String) {
     object PersonalDetails : Screen("personal_details")
     object EditProfile : Screen("edit_profile")
     object ShippingAddresses : Screen("shipping_addresses")
+    object Orders : Screen("orders")
     object AddAddress : Screen("add_address")
     object EditAddress : Screen("edit_address/{addressId}") {
         fun createRoute(addressId: String) = "edit_address/$addressId"
@@ -46,6 +50,7 @@ sealed class Screen(val route: String) {
             PersonalDetails.route,
             EditProfile.route,
             ShippingAddresses.route,
+            Orders.route,
             AddAddress.route,
             "edit_address/{addressId}",
             Chat.route

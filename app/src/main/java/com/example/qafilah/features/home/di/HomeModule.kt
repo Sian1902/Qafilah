@@ -1,7 +1,7 @@
 package com.example.qafilah.features.home.di
 
 import com.example.qafilah.features.home.presentation.viewmodel.HomeViewModel
-import org.koin.androidx.viewmodel.dsl.viewModel
+import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
 
 val homeModule = module {

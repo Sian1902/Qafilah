@@ -1,5 +1,6 @@
 package com.example.qafilah.features.product_detail.presentation
 
+import android.net.Uri
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -16,10 +17,9 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -44,6 +44,7 @@ import com.example.ui_kit.components.product.StickyBottomBar
 import com.example.ui_kit.components.product.TopIconBar
 import org.koin.androidx.compose.koinViewModel
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProductDetailScreen(
     productId: String,
@@ -58,7 +59,6 @@ fun ProductDetailScreen(
     val inStockTemplate = stringResource(R.string.stock_in_stock)
     val outOfStockText = stringResource(R.string.stock_out_of_stock)
     val sharedProductTemplate = stringResource(R.string.share_product_message)
-    val addingToCartText = stringResource(R.string.adding_to_cart_toast)
     val loadProductErrorFallback = stringResource(R.string.error_failed_to_load_product_details)
     val addToCartErrorFallback = stringResource(R.string.error_failed_to_add_to_cart)
 
@@ -70,11 +70,12 @@ fun ProductDetailScreen(
     val addToWishlistDesc = stringResource(R.string.add_to_wishlist)
     val removeFromWishlistDesc = stringResource(R.string.remove_from_wishlist)
 
-    val snackbarHostState = remember { SnackbarHostState() }
     val wishlistErrorFallback = stringResource(R.string.error_something_went_wrong)
+    val wishlistAddedTemplate = stringResource(R.string.wishlist_item_added)
     val wishlistNotLoggedInMessage = stringResource(R.string.error_login_to_manage_wishlist)
     val cartNotLoggedInMessage = stringResource(R.string.error_login_to_add_to_cart)
-    val decodedId = android.net.Uri.decode(productId)
+    val addToCartSuccessMessage = stringResource(R.string.added_to_cart_success)
+    val decodedId = Uri.decode(productId)
 
     LaunchedEffect(decodedId) {
         viewModel.loadProduct(decodedId, loadProductErrorFallback)
@@ -83,15 +84,14 @@ fun ProductDetailScreen(
     LaunchedEffect(Unit) {
         viewModel.events.collect { event ->
             when (event) {
-                is ProductDetailEvent.ShowSnackbar -> {
-                    snackbarHostState.showSnackbar(message = event.message)
+                is ProductDetailEvent.ShowToast -> {
+                    Toast.makeText(context, event.message, Toast.LENGTH_SHORT).show()
                 }
             }
         }
     }
 
     Scaffold(
-        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         modifier = modifier
     ) { paddingValues ->
         when (val state = uiState) {
@@ -214,10 +214,10 @@ fun ProductDetailScreen(
                                     ).show()
                                 },
                                 onFavoriteToggle = {
-
                                     viewModel.toggleFavorite(
                                         notLoggedInMessage = wishlistNotLoggedInMessage,
-                                        fallbackErrorMessage = wishlistErrorFallback
+                                        fallbackErrorMessage = wishlistErrorFallback,
+                                        addedToWishlistTemplate = wishlistAddedTemplate
                                     )
                                 },
                                 backContentDescription = backDesc,
@@ -303,16 +303,21 @@ fun ProductDetailScreen(
                     StickyBottomBar(
                         price = state.displayPrice,
                         totalPriceLabel = stringResource(R.string.product_total_price_label),
-                        addToCartLabel = stringResource(R.string.product_add_to_cart_label),
+                        addToCartLabel = if (inStock) stringResource(R.string.product_add_to_cart_label) else outOfStockText,
                         addToCartContentDescription = stringResource(R.string.product_add_to_cart_cd),
                         isLoading = isAddingToCart,
                         onAddToCartClick = {
-
-                            viewModel.addToCart(
-                                variantId = selectedVariant.id,
-                                fallbackErrorMessage = addToCartErrorFallback,
-                                notLoggedInMessage = cartNotLoggedInMessage
-                            )
+                            if (inStock) {
+                                viewModel.addToCart(
+                                    variantId = selectedVariant.id,
+                                    fallbackErrorMessage = addToCartErrorFallback,
+                                    notLoggedInMessage = cartNotLoggedInMessage,
+                                    quantity = 1,
+                                    successMessage = addToCartSuccessMessage
+                                )
+                            } else {
+                                Toast.makeText(context, outOfStockText, Toast.LENGTH_SHORT).show()
+                            }
                         }
                     )
                 }

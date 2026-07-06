@@ -1,5 +1,6 @@
 package com.example.qafilah.features.home.presentation.ui
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -13,16 +14,14 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.example.qafilah.R
@@ -40,6 +39,9 @@ import com.example.ui_kit.components.shared.WelcomeHeader
 import org.koin.androidx.compose.koinViewModel
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.runtime.remember
 import androidx.compose.ui.res.painterResource
 
 @Composable
@@ -54,9 +56,11 @@ fun HomeScreen(
     modifier: Modifier = Modifier,
     viewModel: HomeViewModel = koinViewModel(),
 ) {
+    val context = LocalContext.current
     val uiState by viewModel.uiState.collectAsState()
 
     val snackbarHostState = remember { SnackbarHostState() }
+
     val homeErrorFallback = stringResource(R.string.error_something_went_wrong)
     val wishlistAddedTemplate = stringResource(R.string.wishlist_item_added)
     val wishlistErrorFallback = stringResource(R.string.error_failed_to_update_wishlist)
@@ -66,15 +70,16 @@ fun HomeScreen(
         viewModel.loadHome(homeErrorFallback)
         viewModel.events.collect { event ->
             when (event) {
-                is HomeEvent.ShowSnackbar -> {
-                    snackbarHostState.showSnackbar(message = event.message)
+                is HomeEvent.ShowToast -> {
+                    Toast.makeText(context, event.message, Toast.LENGTH_SHORT).show()
                 }
             }
         }
     }
     Scaffold(
+        modifier = modifier,
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
-                floatingActionButton = {
+        floatingActionButton = {
             FloatingActionButton(
                 onClick = onChatFabClick,
                 containerColor = MaterialTheme.colorScheme.primary,

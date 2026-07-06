@@ -16,7 +16,7 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 sealed interface ProductDetailEvent {
-    data class ShowSnackbar(val message: String) : ProductDetailEvent
+    data class ShowToast(val message: String) : ProductDetailEvent
 }
 
 class ProductDetailViewModel(
@@ -101,9 +101,9 @@ class ProductDetailViewModel(
         }
     }
 
-    fun toggleFavorite(notLoggedInMessage: String, fallbackErrorMessage: String) {
+    fun toggleFavorite(notLoggedInMessage: String, fallbackErrorMessage: String, addedToWishlistTemplate: String) {
         if (com.google.firebase.auth.FirebaseAuth.getInstance().currentUser == null) {
-            _events.trySend(ProductDetailEvent.ShowSnackbar(notLoggedInMessage))
+            _events.trySend(ProductDetailEvent.ShowToast(notLoggedInMessage))
             return
         }
 
@@ -125,17 +125,17 @@ class ProductDetailViewModel(
                         price = product.variants.firstOrNull()?.price?.toDoubleOrNull() ?: 0.0,
                         currencyCode = "USD"
                     )
+                    _events.trySend(ProductDetailEvent.ShowToast(String.format(addedToWishlistTemplate, product.title)))
                 }
             } catch (e: Exception) {
-                // Replaced the empty catch block to actually show an error
-                _events.trySend(ProductDetailEvent.ShowSnackbar(e.message ?: fallbackErrorMessage))
+                _events.trySend(ProductDetailEvent.ShowToast(e.message ?: fallbackErrorMessage))
             }
         }
     }
 
-    fun addToCart(variantId: String, quantity: Int = 1, fallbackErrorMessage: String, notLoggedInMessage: String) {
+    fun addToCart(variantId: String, quantity: Int = 1, fallbackErrorMessage: String, notLoggedInMessage: String, successMessage: String) {
         if (com.google.firebase.auth.FirebaseAuth.getInstance().currentUser == null) {
-            _events.trySend(ProductDetailEvent.ShowSnackbar(notLoggedInMessage))
+            _events.trySend(ProductDetailEvent.ShowToast(notLoggedInMessage))
             return
         }
 
@@ -147,6 +147,7 @@ class ProductDetailViewModel(
             try {
                 addCartItemUseCase(variantId, quantity)
                 _uiState.value = currentState.copy(isAddingToCart = false)
+                _events.trySend(ProductDetailEvent.ShowToast(successMessage))
             } catch (e: Exception) {
                 _uiState.value = currentState.copy(
                     isAddingToCart = false,

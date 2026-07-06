@@ -11,6 +11,7 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun DeliveryOptionsRadioGroup(
     modifier: Modifier = Modifier,
+    title: String,
     options: List<Triple<String, String, String>>,
     selectedOptionHandle: String?,
     enabled: Boolean = true,
@@ -18,7 +19,7 @@ fun DeliveryOptionsRadioGroup(
 ) {
     Column(modifier = modifier.fillMaxWidth()) {
         Text(
-            text = "Shipping Method",
+            text = title,
             style = MaterialTheme.typography.headlineMedium,
             color = MaterialTheme.colorScheme.onBackground,
             modifier = Modifier.padding(bottom = 12.dp)

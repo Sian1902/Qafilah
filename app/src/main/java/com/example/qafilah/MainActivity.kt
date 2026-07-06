@@ -19,6 +19,7 @@ import com.example.qafilah.core.navigation.AppNavHost
 import com.example.qafilah.core.navigation.NavItem
 import com.example.qafilah.core.navigation.Screen
 import com.example.qafilah.core.preferences.ThemeMode
+import com.example.qafilah.core.util.LocalRealActivity
 import com.example.qafilah.core.util.LocaleHelper
 import com.example.ui_kit.components.bottomnav.BottomNavBar
 import com.example.ui_kit.components.bottomnav.BottomNavBarItem
@@ -35,9 +36,14 @@ class MainActivity : ComponentActivity() {
             val mainViewModel: MainViewModel = koinViewModel()
             val appState by mainViewModel.appState.collectAsState()
 
-            val context = LocaleHelper.wrapContext(LocalContext.current, appState.languageCode)
+            val realActivityContext = LocalContext.current
+            val localizedContext = LocaleHelper.wrapContext(realActivityContext, appState.languageCode)
 
-            CompositionLocalProvider(LocalContext provides context,LocalActivityResultRegistryOwner provides this@MainActivity) {
+                CompositionLocalProvider(
+            LocalRealActivity provides this@MainActivity,
+            LocalContext provides localizedContext,
+            LocalActivityResultRegistryOwner provides this@MainActivity
+        ) {
                 val darkTheme = when (appState.themeMode) {
                     ThemeMode.LIGHT -> false
                     ThemeMode.DARK -> true

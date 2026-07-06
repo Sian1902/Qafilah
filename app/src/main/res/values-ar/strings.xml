@@ -37,6 +37,7 @@
     <string name="stock_out_of_stock">غير متوفر</string>
     <string name="share_product_message">تمت مشاركة المنتج: %s</string>
     <string name="adding_to_cart_toast">جارٍ الإضافة إلى السلة…</string>
+    <string name="added_to_cart_success">تمت إضافة العنصر إلى السلة</string>
     <string name="error_failed_to_load_product_details">فشل تحميل تفاصيل المنتج</string>
     <string name="error_failed_to_add_to_cart">فشل إضافة العنصر إلى السلة</string>
     <string name="error_not_authenticated">غير مصادق عليه</string>
@@ -153,6 +154,25 @@
     <string name="error_login_to_manage_wishlist">تحتاج إلى تسجيل الدخول للوصول إلى المفضله</string>
     <string name="error_login_to_add_to_cart">تحتاج إلى تسجيل الدخول للوصول إلى السله</string>
 
+    <!-- Checkout -->
+    <string name="checkout_shipping_address_title">عنوان الشحن</string>
+    <string name="checkout_manage_addresses">إضافة أو تعديل العناوين</string>
+    <string name="checkout_continue_to_summary">المتابعة إلى الملخص</string>
+    <string name="checkout_auth_error">حدث خطأ في المصادقة. يرجى تسجيل الدخول مرة أخرى.</string>
+    <string name="checkout_order_summary_title">ملخص الطلب</string>
+    <string name="checkout_proceed_to_payment">المتابعة إلى الدفع</string>
+    <string name="checkout_step_payment_title">الخطوة 3: الدفع</string>
+    <string name="checkout_amount_to_charge">المبلغ المطلوب تحصيله: %1$s</string>
+    <string name="checkout_submit_payment">تأكيد الدفع</string>
+    <string name="checkout_currency_amount">$%1$s</string>
+    <string name="checkout_quantity_label">الكمية: %1$d</string>
+    <string name="checkout_shipping_method_title">طريقة الشحن</string>
+    <string name="checkout_subtotal_label">المجموع الفرعي</string>
+    <string name="checkout_discount_label">الخصم</string>
+    <string name="checkout_shipping_label">الشحن</string>
+    <string name="checkout_tax_label">الضرائب</string>
+    <string name="checkout_total_label">الإجمالي</string>
+
     <string name="ui_common_or">أو</string>
     <string name="first_name">الاسم الأول</string>
     <string name="last_name">اسم العائلة</string>
@@ -254,5 +274,27 @@
     <string name="ai_subtitle">الدليل الحكيم</string>
     <string name="ask_ai_placeholder">اسأل الحكيم...</string>
     <string name="you">انت</string>
+
+
+    <string name="my_orders">طلباتي</string>
+    <string name="orders_count">%d طلب</string>
+    <string name="orders_icon_cd">سجل الطلبات</string>
+    <string name="order_history_title">سجل الطلبات</string>
+    <string name="orders_empty_title">لا توجد طلبات بعد</string>
+    <string name="orders_empty_subtitle">لم تبدأ رحلاتك بعد. ابدأ الاستكشاف الآن.</string>
+    <string name="order_number_label">طلب رقم %s</string>
+    <string name="order_date_label">تم الطلب في %s</string>
+    <string name="order_total_items">%d عناصر</string>
+    <string name="order_status_paid">مدفوع</string>
+    <string name="order_status_fulfilled">تم التوصيل</string>
+    <string name="order_status_processing">قيد المعالجة</string>
+    <string name="order_view_details">عرض التفاصيل</string>
+    <string name="order_details_title">تفاصيل الطلب</string>
+    <string name="order_items_label">عناصر الطلب</string>
+    <string name="order_summary_label">ملخص الطلب</string>
+    <string name="order_total_label">المبلغ الإجمالي</string>
+    <string name="error_order_not_found">الطلب غير موجود</string>
+    <string name="currency_format">%1$s %2$s</string>
+    <string name="quantity_format">%d×</string>
 
 </resources>

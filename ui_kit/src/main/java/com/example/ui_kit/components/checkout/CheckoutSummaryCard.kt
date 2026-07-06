@@ -15,8 +15,13 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun CheckoutSummaryCard(
     modifier: Modifier = Modifier,
+    subtotalLabel: String,
     subtotal: String,
-    discountAmount: String? = null, // NEW: Optional discount parameter
+    discountLabel: String,
+    discountAmount: String? = null,
+    shippingLabel: String,
+    taxLabel: String,
+    totalLabel: String,
     tax: String,
     shippingAmount: String,
     total: String,
@@ -38,22 +43,21 @@ fun CheckoutSummaryCard(
                 CircularProgressIndicator(color = colorScheme.primary)
             }
         } else {
-            SummaryRow(label = "Subtotal", amount = subtotal)
+            SummaryRow(label = subtotalLabel, amount = subtotal)
 
-            // NEW: Conditionally render the discount row
-            if (!discountAmount.isNullOrBlank() && discountAmount != "$0.00") {
+            if (!discountAmount.isNullOrBlank()) {
                 Spacer(modifier = Modifier.height(12.dp))
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Text(
-                        text = "Discount",
+                        text = discountLabel,
                         style = MaterialTheme.typography.bodyLarge,
-                        color = colorScheme.primary // Highlights the savings
+                        color = colorScheme.primary
                     )
                     Text(
-                        text = "-$discountAmount",
+                        text = discountAmount,
                         style = MaterialTheme.typography.bodyLarge,
                         color = colorScheme.primary
                     )
@@ -61,11 +65,11 @@ fun CheckoutSummaryCard(
             }
 
             Spacer(modifier = Modifier.height(12.dp))
-            SummaryRow(label = "Shipping", amount = shippingAmount)
+            SummaryRow(label = shippingLabel, amount = shippingAmount)
             Spacer(modifier = Modifier.height(12.dp))
-            SummaryRow(label = "Taxes", amount = tax)
+            SummaryRow(label = taxLabel, amount = tax)
 
-            Divider(
+            HorizontalDivider(
                 modifier = Modifier.padding(vertical = 16.dp),
                 color = colorScheme.onSurface.copy(alpha = 0.12f)
             )
@@ -76,14 +80,14 @@ fun CheckoutSummaryCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "Total",
+                    text = totalLabel,
                     style = MaterialTheme.typography.headlineMedium,
                     color = colorScheme.onBackground
                 )
                 Text(
                     text = total,
-                    style = MaterialTheme.typography.displayMedium,
-                    color = colorScheme.primary
+                    style = MaterialTheme.typography.headlineMedium,
+                    color = colorScheme.primary,
                 )
             }
         }

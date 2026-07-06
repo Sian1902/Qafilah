@@ -3,9 +3,9 @@ package com.example.qafilah.features.profile.data.mapper
 import com.example.qafilah.features.auth.data.mapper.toDomain
 import com.example.qafilah.features.profile.domain.model.Address
 import com.example.qafilah.features.profile.domain.model.CustomerProfile
-import com.example.qafilah.features.profile.domain.model.Money
-import com.example.qafilah.features.profile.domain.model.Order
-import com.example.qafilah.features.profile.domain.model.OrderLineItem
+import com.example.qafilah.features.orders.domain.model.Money
+import com.example.qafilah.features.orders.domain.model.Order
+import com.example.qafilah.features.orders.domain.model.OrderLineItem
 import com.example.qafilah.graphql.storefront.GetCustomerQuery
 
 fun GetCustomerQuery.Customer.toDomain(firebaseUid: String): CustomerProfile {
@@ -49,7 +49,7 @@ fun GetCustomerQuery.Customer.toDomain(firebaseUid: String): CustomerProfile {
             Order(
                 id = it.id,
                 orderNumber = it.orderNumber,
-                processedAt = (it.processedAt as? String) ?: "",
+                processedAt = it.processedAt.toString(),
                 financialStatus = it.financialStatus?.toString() ?: "",
                 fulfillmentStatus = it.fulfillmentStatus?.toString() ?: "",
                 totalPrice = Money(
