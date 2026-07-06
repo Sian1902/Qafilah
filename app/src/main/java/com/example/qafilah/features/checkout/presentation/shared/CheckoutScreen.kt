@@ -9,13 +9,14 @@ import androidx.compose.ui.Modifier
 import kotlinx.coroutines.launch
 import com.example.qafilah.features.checkout.presentation.address.CheckoutAddressScreen
 import com.example.qafilah.features.checkout.presentation.summary.CheckoutSummaryScreen
-import com.example.qafilah.features.checkout.presentation.payment.CheckoutPaymentScreen
+import com.example.qafilah.features.checkout.presentation.payment.ui.CheckoutPaymentScreen
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun CheckoutScreen(
     sharedViewModel: CheckoutSharedViewModel = koinViewModel(),
     onNavigateToAddress: () -> Unit,
+    onNavigateToHome: () -> Unit
 ) {
     val pagerState = rememberPagerState(pageCount = { 3 })
     val coroutineScope = rememberCoroutineScope()
@@ -47,7 +48,7 @@ fun CheckoutScreen(
             )
             2 -> CheckoutPaymentScreen(
                 sharedViewModel = sharedViewModel,
-                onCheckoutComplete = { /* Handle success */ }
+                onNavigateToHome = onNavigateToHome
             )
         }
     }

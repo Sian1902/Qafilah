@@ -1,5 +1,6 @@
 package com.example.qafilah.features.checkout.presentation.shared
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.qafilah.core.currency.ConvertPriceUseCase

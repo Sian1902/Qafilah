@@ -28,16 +28,34 @@ fun CheckoutSummaryScreen(
     summaryViewModel: CheckoutSummaryViewModel = koinViewModel(),
     onNavigateToPayment: () -> Unit
 ) {
+
     val cart by sharedViewModel.cartState.collectAsState()
     val displayCart by sharedViewModel.displayCartState.collectAsState()
-
     val localUiState by summaryViewModel.uiState.collectAsState()
+
+    val selectedDeliveryHandle by sharedViewModel.selectedDeliveryHandle.collectAsState()
+
+    LaunchedEffect(cart, selectedDeliveryHandle) {
+        val safeCart = cart ?: return@LaunchedEffect
+
+        if (selectedDeliveryHandle == null) {
+            val firstGroup = safeCart.deliveryGroups.firstOrNull()
+            val defaultOption = safeCart.defaultShippingOption ?: firstGroup?.deliveryOptions?.firstOrNull()
+
+            if (firstGroup != null && defaultOption != null) {
+                summaryViewModel.selectShippingOption(safeCart.id, firstGroup.id, defaultOption.handle) { updatedCart ->
+                    sharedViewModel.updateCartStateWithSelectedShipping(updatedCart, defaultOption.handle)
+                }
+            }
+        }
+    }
 
     val finalUiState = buildSummaryUiState(
         cart = cart,
         isRecalculating = localUiState.isRecalculating,
         localSelectedHandle = localUiState.selectedDeliveryHandle
     )
+
 
     CheckoutSummaryContent(
         modifier = modifier,

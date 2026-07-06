@@ -74,7 +74,6 @@ class CheckoutPaymentViewModel(
             }
             _uiState.update { it.copy(isProcessing = true, error = null) }
             viewModelScope.launch {
-                delay(1000)
                 _uiState.update { it.copy(isProcessing = false) }
                 onCodSuccess()
             }
@@ -93,7 +92,6 @@ class CheckoutPaymentViewModel(
                     )
                 }
             } catch (e: Exception) {
-                Log.e("paymob", e.toString())
                 _uiState.update {
                     it.copy(
                         isProcessing = false,
@@ -104,11 +102,11 @@ class CheckoutPaymentViewModel(
         }
     }
 
-    fun onPaymentComplete(success: Boolean) {
+    fun onPaymentComplete(success: Boolean, errorMessage: String? = null) {
         _uiState.update { state ->
             state.copy(
                 isProcessing = false,
-                error = if (!success) "Payment failed. Please try again." else null
+                error = if (!success) (errorMessage ?: "Payment failed. Please try again.") else null
             )
         }
     }
