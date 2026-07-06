@@ -16,4 +16,5 @@ val currencyModule = module {
     single<CurrencyRepository> { CurrencyRepositoryImpl(get(), get()) }
 
     factory { ConvertPriceUseCase(get()) }
+    factory { ConvertRawPriceUseCase(get()) }
 }

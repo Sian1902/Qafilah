@@ -70,5 +70,5 @@ val checkoutModule = module {
     viewModel { CheckoutSharedViewModel(get(), get<ConvertPriceUseCase>()) }
     viewModel { CheckoutSummaryViewModel(get()) }
     viewModel { CheckoutAddressViewModel(get(), get(), get(), get()) }
-    viewModel { CheckoutPaymentViewModel(get(), get(), get()) }
+    viewModel { CheckoutPaymentViewModel(get(), get(), get(), get()) }
 }

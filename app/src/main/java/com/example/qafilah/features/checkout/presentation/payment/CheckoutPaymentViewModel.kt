@@ -3,6 +3,7 @@ package com.example.qafilah.features.checkout.presentation.payment
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.qafilah.core.currency.ConvertRawPriceUseCase
 import com.example.qafilah.features.address.domain.model.ShippingAddress
 import com.example.qafilah.features.auth.domain.model.AppUser
 import com.example.qafilah.features.cart.domain.usecase.ClearCartUseCase
@@ -38,7 +39,8 @@ data class CheckoutPaymentUiState(
 class CheckoutPaymentViewModel(
     private val completeOrderUseCase: CompleteOrderUseCase,
     private val createCardPaymentIntentionUseCase: CreateCardPaymentIntentionUseCase,
-    private val clearCartUseCase: ClearCartUseCase
+    private val clearCartUseCase: ClearCartUseCase,
+    private val convertRawPriceUseCase: ConvertRawPriceUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(CheckoutPaymentUiState())
@@ -86,7 +88,10 @@ class CheckoutPaymentViewModel(
 
         viewModelScope.launch {
             try {
-                val intention = createCardPaymentIntentionUseCase(cart)
+                val totalUsd = cart.cost.totalAmount.amount.toDouble()
+                val totalEgp = convertRawPriceUseCase(amountUsd = totalUsd, targetCurrency = "EGP")
+
+                val intention = createCardPaymentIntentionUseCase(cart, totalEgp)
                 _uiState.update {
                     it.copy(
                         isProcessing = false,

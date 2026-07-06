@@ -31,6 +31,7 @@ fun CheckoutPaymentScreen(
     val uiState by paymentViewModel.uiState.collectAsState()
 
     val cart by sharedViewModel.cartState.collectAsState()
+    val displayCart by sharedViewModel.displayCartState.collectAsState()
     val user by sharedViewModel.appUser.collectAsState()
     val address by sharedViewModel.selectedAddress.collectAsState()
     val deliveryHandle by sharedViewModel.selectedDeliveryHandle.collectAsState()
@@ -89,10 +90,9 @@ fun CheckoutPaymentScreen(
 
         Spacer(modifier = Modifier.height(4.dp))
 
-        val formattedTotal = NumberFormat.getCurrencyInstance(Locale.US)
-            .format(currentCart.cost.totalAmount.amount)
+        val displayTotal = displayCart?.displayTotal ?: ""
         Text(
-            text = "Total due $formattedTotal",
+            text = "Total due $displayTotal",
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
