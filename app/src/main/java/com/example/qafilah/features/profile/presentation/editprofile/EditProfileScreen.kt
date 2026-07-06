@@ -26,18 +26,17 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.qafilah.R
 import com.example.ui_kit.components.profile.ChangePhotoAvatar
 import com.example.ui_kit.components.profile.DetailTopBar
@@ -56,20 +55,20 @@ fun EditProfileScreen(
     onCancelClick: () -> Unit = {},
     viewModel: EditProfileViewModel = koinViewModel()
 ) {
-    val state by viewModel.state.collectAsState()
+    val state by viewModel.state.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
-    val context = LocalContext.current
 
-    val sessionExpired = stringResource(R.string.error_session_expired)
     val updateFailed = stringResource(R.string.error_update_failed)
     val phoneFormat = stringResource(R.string.error_phone_format_full)
     val firstNameEmpty = stringResource(R.string.error_first_name_empty)
     val invalidEmail = stringResource(R.string.login_email_error_message)
     val phoneEmpty = stringResource(R.string.error_phone_empty)
 
+    val emailConfirmMessage = stringResource(R.string.edit_profile_email_confirm_message)
+    val dismissCancelAction = stringResource(R.string.dialog_dismiss_cancel)
+
     LaunchedEffect(Unit) {
         viewModel.setLocalizedStrings(
-            sessionExpired,
             updateFailed,
             phoneFormat,
             firstNameEmpty,
@@ -82,9 +81,9 @@ fun EditProfileScreen(
         if (state.saveSuccess) {
             if (state.emailChanged) {
                 snackbarHostState.showSnackbar(
-                    message = context.getString(R.string.edit_profile_email_confirm_message),
+                    message = emailConfirmMessage,
                     duration = SnackbarDuration.Indefinite,
-                    actionLabel = context.getString(R.string.dialog_dismiss_cancel)
+                    actionLabel = dismissCancelAction
                 )
             } else {
                 onBackClick()

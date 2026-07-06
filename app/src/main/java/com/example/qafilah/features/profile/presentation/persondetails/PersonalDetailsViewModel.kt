@@ -2,7 +2,6 @@ package com.example.qafilah.features.profile.presentation.persondetails
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.qafilah.core.token.TokenProvider
 import com.example.qafilah.features.auth.domain.model.AppUser
 import com.example.qafilah.features.profile.domain.usecase.GetPersonalDetailsUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -17,18 +16,15 @@ sealed class PersonalDetailsUiState {
 }
 
 class PersonalDetailsViewModel(
-    private val getPersonalDetailsUseCase: GetPersonalDetailsUseCase,
-    private val tokenProvider: TokenProvider
+    private val getPersonalDetailsUseCase: GetPersonalDetailsUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<PersonalDetailsUiState>(PersonalDetailsUiState.Loading)
     val uiState: StateFlow<PersonalDetailsUiState> = _uiState.asStateFlow()
 
-    private var sessionExpiredMessage: String = ""
     private var unknownErrorMessage: String = ""
 
-    fun setLocalizedStrings(sessionExpired: String, unknownError: String) {
-        sessionExpiredMessage = sessionExpired
+    fun setLocalizedStrings(unknownError: String) {
         unknownErrorMessage = unknownError
     }
 
@@ -39,14 +35,8 @@ class PersonalDetailsViewModel(
     fun loadPersonalDetails() {
         viewModelScope.launch {
             _uiState.value = PersonalDetailsUiState.Loading
-            val token = tokenProvider.getToken()
-            if (token == null) {
-                _uiState.value =
-                    PersonalDetailsUiState.Error(sessionExpiredMessage)
-                return@launch
-            }
-
-            getPersonalDetailsUseCase(token).fold(
+            
+            getPersonalDetailsUseCase().fold(
                 onSuccess = { user ->
                     _uiState.value = PersonalDetailsUiState.Success(user)
                 },

@@ -32,7 +32,8 @@ val profileModule = module {
     single<ProfileRepository> {
         ProfileRepositoryImpl(
             remoteDataSource = get(),
-            authRepository = get<AuthRepository>()
+            authRepository = get<AuthRepository>(),
+            tokenProvider = get()
         )
     }
 
@@ -45,7 +46,6 @@ val profileModule = module {
         ProfileViewModel(
             getCustomerProfile = get(),
             signOutUseCase = get(),
-            tokenProvider = get(),
             currencyRepository = get(),
             clearCartUseCase = get()
         )
@@ -53,16 +53,14 @@ val profileModule = module {
 
     viewModel {
         PersonalDetailsViewModel(
-            getPersonalDetailsUseCase = get(),
-            tokenProvider = get()
+            getPersonalDetailsUseCase = get()
         )
     }
 
     viewModel {
         EditProfileViewModel(
             getPersonalDetailsUseCase = get(),
-            updateProfileUseCase = get(),
-            tokenProvider = get()
+            updateProfileUseCase = get()
         )
     }
 }

@@ -10,34 +10,39 @@ sealed class UpdateProfileError : Throwable() {
     object InvalidPhoneFormat : UpdateProfileError()
 }
 
+data class UpdateProfileParams(
+    val firstName: String,
+    val lastName: String,
+    val email: String,
+    val phone: String,
+    val originalEmail: String?
+)
+
 class UpdateProfileUseCase(
     private val repository: ProfileRepository
 ) {
-    suspend operator fun invoke(
-        accessToken: String,
-        firstName: String,
-        lastName: String,
-        email: String,
-        phone: String,
-        originalEmail: String?
-    ): Result<Pair<AppUser, Boolean>> {
-        if (firstName.isBlank()) {
+    suspend operator fun invoke(params: UpdateProfileParams): Result<Pair<AppUser, Boolean>> {
+        if (params.firstName.isBlank()) {
             return Result.failure(UpdateProfileError.FirstNameEmpty)
         }
-        if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+        if (!android.util.Patterns.EMAIL_ADDRESS.matcher(params.email).matches()) {
             return Result.failure(UpdateProfileError.InvalidEmail)
         }
-        if (phone.isBlank()) {
+        if (params.phone.isBlank()) {
             return Result.failure(UpdateProfileError.PhoneEmpty)
         }
-        if (!phone.startsWith("+")) {
+        if (!params.phone.startsWith("+")) {
             return Result.failure(UpdateProfileError.InvalidPhoneFormat)
         }
 
-        return repository.updateProfile(accessToken, firstName, lastName, email, phone)
-            .map { updatedUser ->
-                val emailChanged = originalEmail != null && email != originalEmail
-                Pair(updatedUser, emailChanged)
-            }
+        return repository.updateProfile(
+            firstName = params.firstName,
+            lastName = params.lastName,
+            email = params.email,
+            phone = params.phone
+        ).map { updatedUser ->
+            val emailChanged = params.originalEmail != null && params.email != params.originalEmail
+            Pair(updatedUser, emailChanged)
+        }
     }
 }

@@ -2,34 +2,26 @@ package com.example.qafilah.features.profile.presentation.profile
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.qafilah.core.token.TokenProvider
-import com.example.qafilah.core.currency.domain.model.CurrencyMetadata
+
 import com.example.qafilah.core.currency.domain.repo.CurrencyRepository
+import com.example.qafilah.features.auth.domain.usecase.SignOutUseCase
+import com.example.qafilah.features.cart.domain.usecase.ClearCartUseCase
 import com.example.qafilah.features.profile.domain.usecase.GetCustomerProfileUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-
-import com.example.qafilah.features.auth.domain.usecase.SignOutUseCase
-import com.example.qafilah.features.cart.domain.usecase.ClearCartUseCase
 
 class ProfileViewModel(
     private val getCustomerProfile: GetCustomerProfileUseCase,
     private val signOutUseCase: SignOutUseCase,
     private val clearCartUseCase: ClearCartUseCase,
-    private val tokenProvider: TokenProvider,
     private val currencyRepository: CurrencyRepository
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow<ProfileUiState>(ProfileUiState.Loading)
+    private val _state = MutableStateFlow(ProfileUiState())
     val state: StateFlow<ProfileUiState> = _state.asStateFlow()
-
-    private val _selectedCurrency = MutableStateFlow("USD")
-    val selectedCurrency: StateFlow<String> = _selectedCurrency.asStateFlow()
-
-    private val _availableCurrencies = MutableStateFlow<List<CurrencyMetadata>>(emptyList())
-    val availableCurrencies: StateFlow<List<CurrencyMetadata>> = _availableCurrencies.asStateFlow()
 
     init {
         observeCurrency()
@@ -38,15 +30,16 @@ class ProfileViewModel(
 
     private fun observeCurrency() {
         viewModelScope.launch {
-            currencyRepository.getSelectedCurrency().collect {
-                _selectedCurrency.value = it
+            currencyRepository.getSelectedCurrency().collect { code ->
+                _state.update { it.copy(selectedCurrency = code) }
             }
         }
     }
 
     private fun loadAvailableCurrencies() {
         viewModelScope.launch {
-            _availableCurrencies.value = currencyRepository.getSupportedCurrencies()
+            val currencies = currencyRepository.getSupportedCurrencies()
+            _state.update { it.copy(availableCurrencies = currencies) }
         }
     }
 
@@ -56,24 +49,25 @@ class ProfileViewModel(
         }
     }
 
-    fun loadProfile(notAuthenticatedMessage: String, unknownErrorMessage: String) {
+    fun loadProfile(unknownErrorMessage: String) {
         viewModelScope.launch {
-            _state.value = ProfileUiState.Loading
-            val token = tokenProvider.getToken()
-            if (token == null) {
-                _state.value = ProfileUiState.Error(notAuthenticatedMessage, isAuthError = true)
-                return@launch
-            }
+            _state.update { it.copy(isLoading = true, error = null) }
 
-            getCustomerProfile(token)
+            getCustomerProfile()
                 .onSuccess { profile ->
-                    _state.value = ProfileUiState.Success(profile)
+                    _state.update { it.copy(isLoading = false, profile = profile) }
                 }
                 .onFailure { error ->
-                    _state.value = ProfileUiState.Error(
-                        error.message ?: unknownErrorMessage,
-                        isAuthError = false
-                    )
+                    _state.update {
+                        it.copy(
+                            isLoading = false,
+                            error = error.message ?: unknownErrorMessage,
+                            isAuthError = error.message?.contains(
+                                "authenticated",
+                                ignoreCase = true
+                            ) == true
+                        )
+                    }
                 }
         }
     }

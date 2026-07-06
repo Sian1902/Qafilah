@@ -1,7 +1,7 @@
 package com.example.qafilah.features.profile.data.mapper
 
+import com.example.qafilah.features.address.domain.model.CustomerAddress
 import com.example.qafilah.features.auth.data.mapper.toDomain
-import com.example.qafilah.features.profile.domain.model.Address
 import com.example.qafilah.features.profile.domain.model.CustomerProfile
 import com.example.qafilah.features.orders.domain.model.Money
 import com.example.qafilah.features.orders.domain.model.Order
@@ -13,7 +13,7 @@ fun GetCustomerQuery.Customer.toDomain(firebaseUid: String): CustomerProfile {
 
     val defaultAddressData = this.defaultAddress
     val defaultAddress = defaultAddressData?.let {
-        Address(
+        CustomerAddress(
             id = it.id,
             firstName = it.firstName ?: "",
             lastName = it.lastName ?: "",
@@ -29,7 +29,7 @@ fun GetCustomerQuery.Customer.toDomain(firebaseUid: String): CustomerProfile {
 
     val addresses = this.addresses.edges.mapNotNull { edge ->
         edge.node?.let {
-            Address(
+            CustomerAddress(
                 id = it.id,
                 firstName = it.firstName ?: "",
                 lastName = it.lastName ?: "",

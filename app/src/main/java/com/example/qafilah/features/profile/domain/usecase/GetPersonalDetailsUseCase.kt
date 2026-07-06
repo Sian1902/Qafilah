@@ -6,7 +6,7 @@ import com.example.qafilah.features.profile.domain.repository.ProfileRepository
 class GetPersonalDetailsUseCase(
     private val repository: ProfileRepository
 ) {
-    suspend operator fun invoke(accessToken: String): Result<AppUser> {
-        return repository.getPersonalDetails(accessToken)
+    suspend operator fun invoke(): Result<AppUser> {
+        return repository.getPersonalDetails()
     }
 }

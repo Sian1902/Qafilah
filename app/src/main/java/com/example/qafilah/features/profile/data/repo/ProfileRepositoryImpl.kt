@@ -1,6 +1,7 @@
 package com.example.qafilah.features.profile.data.repo
 
 import com.apollographql.apollo.api.Optional
+import com.example.qafilah.core.token.TokenProvider
 import com.example.qafilah.features.auth.domain.model.AppUser
 import com.example.qafilah.features.auth.domain.repository.AuthRepository
 import com.example.qafilah.features.profile.data.datasource.ProfileRemoteDataSource
@@ -13,13 +14,15 @@ import kotlinx.coroutines.withContext
 
 class ProfileRepositoryImpl(
     private val remoteDataSource: ProfileRemoteDataSource,
-    private val authRepository: AuthRepository
+    private val authRepository: AuthRepository,
+    private val tokenProvider: TokenProvider
 ) : ProfileRepository {
 
-    override suspend fun getCustomerProfile(accessToken: String): Result<CustomerProfile> =
+    override suspend fun getCustomerProfile(): Result<CustomerProfile> =
         withContext(Dispatchers.IO) {
             try {
-                val customer = remoteDataSource.getCustomerProfile(accessToken)
+                val token = tokenProvider.getToken() ?: return@withContext Result.failure(Exception("Not authenticated"))
+                val customer = remoteDataSource.getCustomerProfile(token)
                     ?: return@withContext Result.failure(Exception("Customer not found"))
 
                 val firebaseUid = authRepository.getCurrentUser()?.id ?: ""
@@ -29,10 +32,11 @@ class ProfileRepositoryImpl(
             }
         }
 
-    override suspend fun getPersonalDetails(accessToken: String): Result<AppUser> =
+    override suspend fun getPersonalDetails(): Result<AppUser> =
         withContext(Dispatchers.IO) {
             try {
-                val customer = remoteDataSource.getPersonalDetails(accessToken)
+                val token = tokenProvider.getToken() ?: return@withContext Result.failure(Exception("Not authenticated"))
+                val customer = remoteDataSource.getPersonalDetails(token)
                     ?: return@withContext Result.failure(Exception("Customer not found"))
 
                 Result.success(
@@ -50,20 +54,20 @@ class ProfileRepositoryImpl(
         }
 
     override suspend fun updateProfile(
-        accessToken: String,
         firstName: String,
         lastName: String,
         email: String,
         phone: String
     ): Result<AppUser> = withContext(Dispatchers.IO) {
         try {
+            val token = tokenProvider.getToken() ?: return@withContext Result.failure(Exception("Not authenticated"))
             val input = CustomerUpdateInput(
                 firstName = Optional.present(firstName),
                 lastName = Optional.present(lastName),
                 email = Optional.present(email),
                 phone = Optional.present(phone)
             )
-            val updateResult = remoteDataSource.updateCustomer(accessToken, input)
+            val updateResult = remoteDataSource.updateCustomer(token, input)
                 ?: return@withContext Result.failure(Exception("Update failed: empty response"))
 
             if (!updateResult.customerUserErrors.isNullOrEmpty()) {
