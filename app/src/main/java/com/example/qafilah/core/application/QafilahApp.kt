@@ -7,6 +7,7 @@ import com.example.qafilah.core.di.databaseModule
 import com.example.qafilah.core.di.networkModule
 import com.example.qafilah.di.searchModule
 import com.example.qafilah.features.address.di.addressModule
+import com.example.qafilah.features.assistant.di.assistantModule
 import com.example.qafilah.features.auth.di.authModule
 import com.example.qafilah.features.cart.di.cartModule
 import com.example.qafilah.features.catalog.di.catalogModule
@@ -37,7 +38,8 @@ class QafilahApp : Application() {
         cartModule,
         searchModule,
         checkoutModule,
-        currencyModule
+        currencyModule,
+        assistantModule
     )
 
     override fun onCreate() {

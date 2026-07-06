@@ -25,6 +25,7 @@ import com.example.ui_kit.components.bottomnav.BottomNavBar
 import com.example.ui_kit.components.bottomnav.BottomNavBarItem
 import com.example.ui_kit.theme.QafilahTheme
 import org.koin.androidx.compose.koinViewModel
+import androidx.activity.compose.LocalActivityResultRegistryOwner
 
 class MainActivity : ComponentActivity() {
 
@@ -35,21 +36,14 @@ class MainActivity : ComponentActivity() {
             val mainViewModel: MainViewModel = koinViewModel()
             val appState by mainViewModel.appState.collectAsState()
 
-            // Capture the real Activity context BEFORE any wrapping happens.
-            // LocaleHelper.wrapContext() below calls createConfigurationContext(),
-            // which returns a brand new ContextImpl that is NOT chained back to
-            // this Activity via baseContext — so anything downstream reading
-            // LocalContext.current can never resolve back to an Activity.
-            // We provide LocalRealActivity separately so the rest of the app
-            // (Paymob SDK launch, permission requests, etc.) has a reliable way
-            // to get a real Activity regardless of locale/context wrapping.
             val realActivityContext = LocalContext.current
             val localizedContext = LocaleHelper.wrapContext(realActivityContext, appState.languageCode)
 
-            CompositionLocalProvider(
-                LocalRealActivity provides this,
-                LocalContext provides localizedContext
-            ) {
+                CompositionLocalProvider(
+            LocalRealActivity provides this@MainActivity,
+            LocalContext provides localizedContext,
+            LocalActivityResultRegistryOwner provides this@MainActivity
+        ) {
                 val darkTheme = when (appState.themeMode) {
                     ThemeMode.LIGHT -> false
                     ThemeMode.DARK -> true

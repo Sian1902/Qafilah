@@ -37,6 +37,12 @@ import com.example.ui_kit.components.shared.SearchField
 import com.example.ui_kit.components.shared.SectionHeader
 import com.example.ui_kit.components.shared.WelcomeHeader
 import org.koin.androidx.compose.koinViewModel
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.runtime.remember
+import androidx.compose.ui.res.painterResource
 
 @Composable
 fun HomeScreen(
@@ -46,11 +52,14 @@ fun HomeScreen(
     onViewAllCategoriesClick: () -> Unit,
     onBrandClick: (String) -> Unit,
     onProductClick: (ProductUiModel) -> Unit,
+    onChatFabClick: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: HomeViewModel = koinViewModel(),
 ) {
     val context = LocalContext.current
     val uiState by viewModel.uiState.collectAsState()
+
+    val snackbarHostState = remember { SnackbarHostState() }
 
     val homeErrorFallback = stringResource(R.string.error_something_went_wrong)
     val wishlistAddedTemplate = stringResource(R.string.wishlist_item_added)
@@ -68,7 +77,20 @@ fun HomeScreen(
         }
     }
     Scaffold(
-        modifier = modifier
+        modifier = modifier,
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = onChatFabClick,
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary
+            ) {
+                Icon(
+                    painter = painterResource(android.R.drawable.ic_menu_compass),
+                    contentDescription = ""
+                )
+            }
+        }
     ) { paddingValues ->
         Box(modifier = Modifier.padding(paddingValues)) {
             when {
