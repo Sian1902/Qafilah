@@ -11,7 +11,6 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -22,10 +21,9 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.example.qafilah.R
-import com.example.qafilah.features.orders.domain.model.Order
-import com.example.qafilah.features.orders.domain.model.OrderLineItem
 import com.example.ui_kit.components.orders.OrderStatusBadge
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -36,10 +34,17 @@ fun OrderDetailsScreen(
     orderNotFoundMessage: String,
     onBackClick: () -> Unit
 ) {
-    val state by viewModel.state.collectAsState()
+    val state by viewModel.state.collectAsStateWithLifecycle()
+    val labels = OrderDetailLabels(
+        orderNumberPrefix = stringResource(R.string.order_number_label, ""),
+        datePrefix = stringResource(R.string.order_date_label, ""),
+        fulfilledLabel = stringResource(R.string.order_status_fulfilled),
+        processingLabel = stringResource(R.string.order_status_processing),
+        quantityFormat = stringResource(R.string.quantity_format, 0).replace("0", "%d")
+    )
 
     LaunchedEffect(orderId) {
-        viewModel.loadOrderDetails(orderId, orderNotFoundMessage)
+        viewModel.loadOrderDetails(orderId, orderNotFoundMessage, labels)
     }
 
     Scaffold(
@@ -93,7 +98,7 @@ fun OrderDetailsScreen(
 }
 
 @Composable
-private fun OrderDetailsContent(order: Order) {
+private fun OrderDetailsContent(order: OrderDetailUiModel) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(16.dp),
@@ -118,7 +123,7 @@ private fun OrderDetailsContent(order: Order) {
 }
 
 @Composable
-private fun OrderHeaderSection(order: Order) {
+private fun OrderHeaderSection(order: OrderDetailUiModel) {
     GlassSection(
         modifier = Modifier.fillMaxWidth()
     ) {
@@ -129,28 +134,23 @@ private fun OrderHeaderSection(order: Order) {
         ) {
             Column {
                 Text(
-                    text = stringResource(R.string.order_number_label, order.orderNumber),
+                    text = order.orderNumber,
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold
                 )
                 Text(
-                    text = stringResource(R.string.order_date_label, order.processedAt.substringBefore("T")),
+                    text = order.date,
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                 )
             }
-            val statusLabel = when (order.fulfillmentStatus) {
-                "FULFILLED" -> stringResource(R.string.order_status_fulfilled)
-                "UNFULFILLED" -> stringResource(R.string.order_status_processing)
-                else -> order.fulfillmentStatus
-            }
-            OrderStatusBadge(status = order.fulfillmentStatus, label = statusLabel)
+            OrderStatusBadge(status = order.status, label = order.statusLabel)
         }
     }
 }
 
 @Composable
-private fun OrderLineItemCard(item: OrderLineItem) {
+private fun OrderLineItemCard(item: OrderLineItemUiModel) {
     GlassSection(
         modifier = Modifier.fillMaxWidth()
     ) {
@@ -193,12 +193,12 @@ private fun OrderLineItemCard(item: OrderLineItem) {
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Text(
-                        text = stringResource(R.string.quantity_format, item.quantity),
+                        text = item.quantity,
                         style = MaterialTheme.typography.bodyMedium,
                         fontWeight = FontWeight.Bold
                     )
                     Text(
-                        text = stringResource(R.string.currency_format, item.price.amount, item.price.currencyCode),
+                        text = item.price,
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.primary,
                         fontWeight = FontWeight.Bold
@@ -210,7 +210,7 @@ private fun OrderLineItemCard(item: OrderLineItem) {
 }
 
 @Composable
-private fun OrderSummarySection(order: Order) {
+private fun OrderSummarySection(order: OrderDetailUiModel) {
     GlassSection(
         modifier = Modifier.fillMaxWidth()
     ) {
@@ -219,7 +219,7 @@ private fun OrderSummarySection(order: Order) {
             Spacer(modifier = Modifier.height(4.dp))
             SummaryRow(
                 label = stringResource(R.string.order_total_label),
-                value = stringResource(R.string.currency_format, order.totalPrice.amount, order.totalPrice.currencyCode),
+                value = order.totalPrice,
                 isTotal = true
             )
         }

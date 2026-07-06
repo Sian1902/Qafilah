@@ -7,15 +7,16 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.qafilah.R
 import com.example.ui_kit.components.orders.OrderCard
+import com.example.ui_kit.components.orders.OrderCardUiModel
 import com.example.ui_kit.components.orders.OrdersEmptyView
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -25,7 +26,7 @@ fun OrdersScreen(
     onBackClick: () -> Unit,
     onOrderClick: (String) -> Unit
 ) {
-    val state by viewModel.state.collectAsState()
+    val state by viewModel.state.collectAsStateWithLifecycle()
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
@@ -69,18 +70,37 @@ fun OrdersScreen(
                         verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
                         val unknownErrorMessage = stringResource(R.string.error_unknown)
-                        val notAuthenticatedMessage = stringResource(R.string.error_not_authenticated)
+                        val labels = OrderLabels(
+                            orderNumberPrefix = stringResource(R.string.order_number_label, ""),
+                            datePrefix = stringResource(R.string.order_date_label, ""),
+                            fulfilledLabel = stringResource(R.string.order_status_fulfilled),
+                            processingLabel = stringResource(R.string.order_status_processing)
+                        )
 
                         Text(text = state.error!!, color = MaterialTheme.colorScheme.error)
-                        Button(onClick = { viewModel.loadOrders(
-                            notAuthenticatedMessage = notAuthenticatedMessage,
-                            unknownErrorMessage = unknownErrorMessage
-                        ) }) {
+                        Button(onClick = {
+                            viewModel.loadOrders(
+                                unknownErrorMessage = unknownErrorMessage,
+                                labels = labels
+                            )
+                        }) {
                             Text(stringResource(R.string.retry))
                         }
                     }
                 }
                 state.orders.isEmpty() -> {
+                    val unknownErrorMessage = stringResource(R.string.error_unknown)
+                    val labels = OrderLabels(
+                        orderNumberPrefix = stringResource(R.string.order_number_label, "").trim(),
+                        datePrefix = stringResource(R.string.order_date_label, "").trim(),
+                        fulfilledLabel = stringResource(R.string.order_status_fulfilled),
+                        processingLabel = stringResource(R.string.order_status_processing)
+                    )
+                    
+                    androidx.compose.runtime.LaunchedEffect(Unit) {
+                        viewModel.loadOrders(unknownErrorMessage, labels)
+                    }
+
                     OrdersEmptyView(
                         title = stringResource(R.string.orders_empty_title),
                         subtitle = stringResource(R.string.orders_empty_subtitle),
@@ -94,18 +114,14 @@ fun OrdersScreen(
                         verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
                         items(state.orders) { order ->
-                            val statusLabel = when (order.fulfillmentStatus) {
-                                "FULFILLED" -> stringResource(R.string.order_status_fulfilled)
-                                "UNFULFILLED" -> stringResource(R.string.order_status_processing)
-                                else -> order.fulfillmentStatus
-                            }
-
                             OrderCard(
-                                orderNumber = stringResource(R.string.order_number_label, order.orderNumber),
-                                date = stringResource(R.string.order_date_label, order.processedAt.substringBefore("T")),
-                                totalPrice = stringResource(R.string.currency_format, order.totalPrice.amount, order.totalPrice.currencyCode),
-                                status = order.fulfillmentStatus,
-                                statusLabel = statusLabel,
+                                order = OrderCardUiModel(
+                                    orderNumber = order.orderNumber,
+                                    date = order.date,
+                                    totalPrice = order.totalPrice,
+                                    status = order.status,
+                                    statusLabel = order.statusLabel
+                                ),
                                 viewDetailsLabel = stringResource(R.string.order_view_details),
                                 onClick = { onOrderClick(order.id) }
                             )

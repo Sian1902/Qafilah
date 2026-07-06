@@ -16,13 +16,17 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 
+data class OrderCardUiModel(
+    val orderNumber: String,
+    val date: String,
+    val totalPrice: String,
+    val status: String,
+    val statusLabel: String
+)
+
 @Composable
 fun OrderCard(
-    orderNumber: String,
-    date: String,
-    totalPrice: String,
-    status: String,
-    statusLabel: String,
+    order: OrderCardUiModel,
     viewDetailsLabel: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
@@ -53,19 +57,19 @@ fun OrderCard(
             ) {
                 Column {
                     Text(
-                        text = orderNumber,
+                        text = order.orderNumber,
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onBackground
                     )
                     Spacer(modifier = Modifier.height(2.dp))
                     Text(
-                        text = date,
+                        text = order.date,
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
                     )
                 }
-                OrderStatusBadge(status = status, label = statusLabel)
+                OrderStatusBadge(status = order.status, label = order.statusLabel)
             }
 
             HorizontalDivider(
@@ -79,7 +83,7 @@ fun OrderCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = totalPrice,
+                    text = order.totalPrice,
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.primary,
                     fontWeight = FontWeight.Bold

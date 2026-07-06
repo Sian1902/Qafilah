@@ -18,7 +18,8 @@ val ordersModule = module {
     single<OrdersRepository> {
         OrdersRepositoryImpl(
             profileRemoteDataSource = get(),
-            localDataSource = get()
+            localDataSource = get(),
+            tokenProvider = get()
         )
     }
 
@@ -30,7 +31,6 @@ val ordersModule = module {
         OrdersViewModel(
             getOrdersUseCase = get(),
             refreshOrdersUseCase = get(),
-            tokenProvider = get(),
             convertPriceUseCase = get()
         )
     }
