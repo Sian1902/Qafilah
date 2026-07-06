@@ -20,6 +20,7 @@ import com.example.qafilah.MainViewModel
 import com.example.qafilah.R
 import com.example.qafilah.features.address.presentation.AddressViewModel
 import com.example.qafilah.features.address.presentation.ShippingAddressesScreen
+import com.example.qafilah.features.assistant.presentation.ChatScreen
 import com.example.qafilah.features.auth.domain.model.AppUser
 import com.example.qafilah.features.auth.presentation.screens.LoginScreen
 import com.example.qafilah.features.auth.presentation.screens.SignUpScreen
@@ -167,7 +168,13 @@ fun AppNavHost(
                 },
                 onProductClick = { product ->
                     navController.navigate(Screen.ProductDetail.createRoute(product.id))
-                }
+                },
+                onChatFabClick = { navController.navigate(Screen.Chat.route) }
+            )
+        }
+        composable(Screen.Chat.route) {
+            ChatScreen(
+                onNavigateBack = { navController.popBackStack() }
             )
         }
         composable(Screen.Catalog.route) {

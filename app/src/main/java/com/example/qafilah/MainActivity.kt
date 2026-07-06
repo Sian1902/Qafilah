@@ -24,6 +24,7 @@ import com.example.ui_kit.components.bottomnav.BottomNavBar
 import com.example.ui_kit.components.bottomnav.BottomNavBarItem
 import com.example.ui_kit.theme.QafilahTheme
 import org.koin.androidx.compose.koinViewModel
+import androidx.activity.compose.LocalActivityResultRegistryOwner
 
 class MainActivity : ComponentActivity() {
 
@@ -36,7 +37,7 @@ class MainActivity : ComponentActivity() {
 
             val context = LocaleHelper.wrapContext(LocalContext.current, appState.languageCode)
 
-            CompositionLocalProvider(LocalContext provides context) {
+            CompositionLocalProvider(LocalContext provides context,LocalActivityResultRegistryOwner provides this@MainActivity) {
                 val darkTheme = when (appState.themeMode) {
                     ThemeMode.LIGHT -> false
                     ThemeMode.DARK -> true

@@ -38,6 +38,9 @@ import com.example.ui_kit.components.shared.SearchField
 import com.example.ui_kit.components.shared.SectionHeader
 import com.example.ui_kit.components.shared.WelcomeHeader
 import org.koin.androidx.compose.koinViewModel
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.ui.res.painterResource
 
 @Composable
 fun HomeScreen(
@@ -47,6 +50,7 @@ fun HomeScreen(
     onViewAllCategoriesClick: () -> Unit,
     onBrandClick: (String) -> Unit,
     onProductClick: (ProductUiModel) -> Unit,
+    onChatFabClick: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: HomeViewModel = koinViewModel(),
 ) {
@@ -69,7 +73,19 @@ fun HomeScreen(
         }
     }
     Scaffold(
-        snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
+                floatingActionButton = {
+            FloatingActionButton(
+                onClick = onChatFabClick,
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary
+            ) {
+                Icon(
+                    painter = painterResource(android.R.drawable.ic_menu_compass),
+                    contentDescription = ""
+                )
+            }
+        }
     ) { paddingValues ->
         Box(modifier = Modifier.padding(paddingValues)) {
             when {
