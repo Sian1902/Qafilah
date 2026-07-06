@@ -1,4 +1,4 @@
-package com.example.qafilah.core.currency
+package com.example.qafilah.core.currency.domain.model
 
 import com.google.gson.annotations.SerializedName
 
