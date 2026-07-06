@@ -31,6 +31,7 @@ data class DeliveryGroup(
 
 data class CheckoutLineItem(
     val id: String,
+    val variantId: String,
     val productTitle: String,
     val variantTitle: String,
     val quantity: Int,

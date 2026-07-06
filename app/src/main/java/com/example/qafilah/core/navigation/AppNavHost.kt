@@ -131,6 +131,11 @@ fun AppNavHost(
                 CheckoutScreen(
                     onNavigateToAddress = {
                         navController.navigate(Screen.ShippingAddresses.route)
+                    },
+                    onNavigateToHome = {
+                        navController.navigate(NavItem.Home.route) {
+                            popUpTo(0) { inclusive = true }
+                        }
                     }
                 )
             }

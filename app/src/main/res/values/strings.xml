@@ -289,4 +289,25 @@
     <string name="currency_format">%1$s %2$s</string>
     <string name="quantity_format">x%d</string>
 
+    <!-- Checkout Success Screen -->
+    <string name="checkout_order_placed_success">Order Placed Successfully!</string>
+    <string name="checkout_order_success_message">Thank you for your purchase. We have received your order and are currently processing it.</string>
+    <string name="checkout_return_to_home">Return to Home</string>
+
+    <!-- Checkout Payment Screen -->
+    <string name="checkout_total_due">Total due %1$s</string>
+    <string name="checkout_payment_method">Payment method</string>
+    <string name="checkout_credit_debit_card">Credit / Debit Card</string>
+    <string name="checkout_pay_securely_via_paymob">Pay securely via Paymob</string>
+    <string name="checkout_cash_on_delivery">Cash on Delivery</string>
+    <string name="checkout_pay_on_arrival">Pay when your order arrives</string>
+    <string name="checkout_cod_limit_warning">Only available for orders under %1$d EGP</string>
+    <string name="checkout_place_order">Place order</string>
+    <string name="checkout_pay_now">Pay now</string>
+
+    <!-- Paymob Payment Messages -->
+    <string name="payment_pending_confirmation">Payment is pending confirmation.</string>
+    <string name="payment_sdk_launch_failed">SDK Launch Failed: %1$s</string>
+    <string name="payment_error_prefix">Paymob Error: %1$s</string>
+
 </resources>

@@ -8,6 +8,8 @@ import com.example.qafilah.features.address.domain.model.ShippingAddress
 import com.example.qafilah.features.address.domain.usecase.GetAddressesUseCase
 import com.example.qafilah.features.checkout.domain.model.CheckoutCart
 import com.example.qafilah.features.checkout.domain.usecase.UpdateBuyerIdentityUseCase
+import com.example.qafilah.features.profile.domain.usecase.GetPersonalDetailsUseCase
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -15,6 +17,7 @@ import kotlinx.coroutines.launch
 
 class CheckoutAddressViewModel(
     private val getAddressesUseCase: GetAddressesUseCase,
+    private val getPersonalDetailsUseCase: GetPersonalDetailsUseCase,
     private val updateBuyerIdentityUseCase: UpdateBuyerIdentityUseCase,
     private val tokenProvider: TokenProvider
 ) : ViewModel() {
@@ -30,21 +33,22 @@ class CheckoutAddressViewModel(
             val token = tokenProvider.getToken()
             if (token == null) {
                 _uiState.update {
-                    it.copy(
-                        isLoadingAddresses = false,
-                        errorMessageResId = R.string.checkout_auth_error
-                    )
+                    it.copy(isLoadingAddresses = false, errorMessageResId = R.string.checkout_auth_error)
                 }
                 return@launch
             }
 
-            val result = getAddressesUseCase(token)
+            val addressesDeferred = async { getAddressesUseCase(token) }
+            val profileDeferred = async { getPersonalDetailsUseCase(token) }
 
-            result.onSuccess { addressList ->
+            val addressesResult = addressesDeferred.await()
+            val profileResult = profileDeferred.await()
+
+            val fetchedAppUser = profileResult.getOrNull()
+
+            addressesResult.onSuccess { addressList ->
                 val currentState = _uiState.value
-
                 val selectionStillExists = addressList.any { it.id == currentState.selectedAddressId }
-
                 val newSelectionId = if (selectionStillExists) {
                     currentState.selectedAddressId
                 } else {
@@ -55,7 +59,8 @@ class CheckoutAddressViewModel(
                     it.copy(
                         isLoadingAddresses = false,
                         addresses = addressList,
-                        selectedAddressId = newSelectionId
+                        selectedAddressId = newSelectionId,
+                        appUser = fetchedAppUser
                     )
                 }
             }.onFailure { error ->

@@ -15,4 +15,14 @@ interface CheckoutRepository{
         deliveryGroupId: String,
         optionHandle: String
     ): Result<CheckoutCart>
+
+    suspend fun createAndCompleteOrder(
+        cart: CheckoutCart,
+        customerId: String,
+        customerFirstName: String,
+        customerLastName: String,
+        customerPhone: String?,
+        address: ShippingAddress,
+        selectedDeliveryHandle: String
+    ): Result<String>
 }

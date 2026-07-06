@@ -28,6 +28,9 @@ android {
     namespace = "com.example.qafilah"
     compileSdk = 36
 
+    buildFeatures {
+        buildConfig = true
+    }
     defaultConfig {
         applicationId = "com.example.qafilah"
         minSdk = 24
@@ -90,6 +93,12 @@ dependencies {
     // Dependency Injection (Koin)
     implementation(libs.koin.android.ext)
     implementation(libs.koin.core.ext)
+    implementation("androidx.core:core-ktx:1.15.0")
+    implementation("androidx.core:core:1.15.0")
+
+    implementation(libs.logging.interceptor)
+
+    // Koin
     implementation(libs.koin.androidx.compose)
     implementation("com.paymob.sdk:Paymob-SDK:1.9.2")
     // Local Storage (Room & DataStore)
@@ -128,6 +137,8 @@ dependencies {
     androidTestImplementation(libs.androidx.junit)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
     debugImplementation(libs.androidx.compose.ui.tooling)
+
+    implementation(libs.lottie.compose)
 }
 
 apollo {

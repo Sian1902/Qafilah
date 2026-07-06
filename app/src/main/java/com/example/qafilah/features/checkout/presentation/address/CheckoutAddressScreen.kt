@@ -18,6 +18,7 @@ import com.example.qafilah.features.address.domain.model.ShippingAddress
 import com.example.qafilah.features.address.domain.model.toUiModel
 import com.example.qafilah.features.checkout.presentation.shared.CheckoutSharedViewModel
 import com.example.ui_kit.components.checkout.CheckoutAddressCard
+import com.example.ui_kit.components.shared.PrimaryButton
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
@@ -52,7 +53,11 @@ fun CheckoutAddressScreen(
             cart?.let { safeCart ->
                 addressViewModel.submitAddress(safeCart.id) { updatedCart, selectedAddress ->
                     sharedViewModel.updateCartState(updatedCart)
+
                     sharedViewModel.setShippingAddress(selectedAddress)
+
+                    uiState.appUser?.let { sharedViewModel.setCustomerProfile(it) }
+
                     onNavigateToSummary()
                 }
             }
@@ -120,33 +125,12 @@ private fun CheckoutAddressContent(
             }
         }
 
-        Button(
-            onClick = {
-                onContinueToSummary()
-            },
-            enabled = !uiState.isSubmitting && uiState.selectedAddressId != null && isCartLoaded,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 16.dp)
-                .height(60.dp),
-            shape = RoundedCornerShape(30.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = MaterialTheme.colorScheme.onPrimary
-            )
-        ) {
-            if (uiState.isSubmitting) {
-                CircularProgressIndicator(
-                    modifier = Modifier.size(24.dp),
-                    color = MaterialTheme.colorScheme.onPrimary,
-                    strokeWidth = 2.dp
-                )
-            } else {
-                Text(
-                    text = stringResource(R.string.checkout_continue_to_summary),
-                    style = MaterialTheme.typography.bodyLarge
-                )
-            }
-        }
+        PrimaryButton(
+            text = stringResource(R.string.checkout_continue_to_summary),
+            onClick = onContinueToSummary,
+            enabled = uiState.selectedAddressId != null && isCartLoaded,
+            isLoading = uiState.isSubmitting,
+            modifier = Modifier.padding(top = 16.dp)
+        )
     }
 }
