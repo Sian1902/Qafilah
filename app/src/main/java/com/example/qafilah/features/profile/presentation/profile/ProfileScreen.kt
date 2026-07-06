@@ -46,7 +46,7 @@ import androidx.compose.ui.unit.dp
 import com.example.qafilah.MainViewModel
 import com.example.qafilah.R
 import com.example.qafilah.core.preferences.ThemeMode
-import com.example.qafilah.core.currency.CurrencyMetadata
+import com.example.qafilah.core.currency.domain.model.CurrencyMetadata
 import com.example.qafilah.features.profile.domain.model.CustomerProfile
 import com.example.ui_kit.components.profile.AccountMenuItem
 import com.example.ui_kit.components.profile.ProfileHeaderCard

@@ -5,7 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.qafilah.features.cart.domain.usecase.AddCartItemUseCase
 import com.example.qafilah.features.catalog.domain.model.ProductVariant
 import com.example.qafilah.features.catalog.domain.usecases.GetSingleProductUseCase
-import com.example.qafilah.core.currency.ConvertPriceUseCase
+import com.example.qafilah.core.currency.domain.usecase.ConvertPriceUseCase
 import com.example.qafilah.features.wishlist.domain.usecase.AddToWishlistUseCase
 import com.example.qafilah.features.wishlist.domain.usecase.IsProductWishlistedUseCase
 import com.example.qafilah.features.wishlist.domain.usecase.RemoveFromWishlistUseCase

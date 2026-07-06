@@ -21,7 +21,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 
 
@@ -86,11 +89,18 @@ fun AccountMenuItem(
             Spacer(modifier = Modifier.width(6.dp))
         }
 
+        val layoutDirection = LocalLayoutDirection.current
         Icon(
             imageVector = Icons.Filled.ChevronRight,
             contentDescription = null,
             tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
-            modifier = Modifier.size(20.dp)
+            modifier = Modifier
+                .size(20.dp)
+                .graphicsLayer {
+                    if (layoutDirection == LayoutDirection.Rtl) {
+                        rotationY = 180f
+                    }
+                }
         )
     }
 }

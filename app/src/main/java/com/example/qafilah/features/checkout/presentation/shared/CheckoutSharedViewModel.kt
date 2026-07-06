@@ -2,7 +2,7 @@ package com.example.qafilah.features.checkout.presentation.shared
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.qafilah.core.currency.ConvertPriceUseCase
+import com.example.qafilah.core.currency.domain.usecase.ConvertPriceUseCase
 import com.example.qafilah.features.address.domain.model.ShippingAddress
 import com.example.qafilah.features.cart.domain.usecase.ObserveCartStateUseCase
 import com.example.qafilah.features.checkout.data.mapper.toCheckoutCart

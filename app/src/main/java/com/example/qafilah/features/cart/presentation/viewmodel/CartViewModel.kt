@@ -2,7 +2,7 @@ package com.example.qafilah.features.cart.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.qafilah.core.currency.ConvertPriceUseCase
+import com.example.qafilah.core.currency.domain.usecase.ConvertPriceUseCase
 import com.example.qafilah.features.auth.domain.util.RequireAuth
 import com.example.qafilah.features.cart.domain.model.CartItemCommand
 import com.example.qafilah.features.cart.domain.model.StoreCart

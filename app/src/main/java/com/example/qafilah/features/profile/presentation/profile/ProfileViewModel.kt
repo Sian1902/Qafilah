@@ -3,8 +3,8 @@ package com.example.qafilah.features.profile.presentation.profile
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.qafilah.core.token.TokenProvider
-import com.example.qafilah.core.currency.CurrencyMetadata
-import com.example.qafilah.core.currency.CurrencyRepository
+import com.example.qafilah.core.currency.domain.model.CurrencyMetadata
+import com.example.qafilah.core.currency.domain.repo.CurrencyRepository
 import com.example.qafilah.features.profile.domain.usecase.GetCustomerProfileUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

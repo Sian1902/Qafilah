@@ -25,7 +25,8 @@ import com.example.ui_kit.components.bottomnav.BottomNavBar
 import com.example.ui_kit.components.bottomnav.BottomNavBarItem
 import com.example.ui_kit.theme.QafilahTheme
 import org.koin.androidx.compose.koinViewModel
-
+import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.unit.LayoutDirection
 class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -46,9 +47,15 @@ class MainActivity : ComponentActivity() {
             val realActivityContext = LocalContext.current
             val localizedContext = LocaleHelper.wrapContext(realActivityContext, appState.languageCode)
 
+            val layoutDirection = if (appState.languageCode == "ar") {
+                LayoutDirection.Rtl
+            } else {
+                LayoutDirection.Ltr
+            }
             CompositionLocalProvider(
                 LocalRealActivity provides this,
-                LocalContext provides localizedContext
+                LocalContext provides localizedContext,
+                LocalLayoutDirection provides layoutDirection
             ) {
                 val darkTheme = when (appState.themeMode) {
                     ThemeMode.LIGHT -> false

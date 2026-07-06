@@ -2,7 +2,7 @@ package com.example.qafilah.features.orders.presentation.order
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.qafilah.core.currency.ConvertPriceUseCase
+import com.example.qafilah.core.currency.domain.usecase.ConvertPriceUseCase
 import com.example.qafilah.core.token.TokenProvider
 import com.example.qafilah.features.orders.domain.model.Money
 import com.example.qafilah.features.orders.domain.usecase.GetOrdersUseCase

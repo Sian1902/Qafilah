@@ -2,7 +2,7 @@ package com.example.qafilah.features.orders.presentation.order_details
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.qafilah.core.currency.ConvertPriceUseCase
+import com.example.qafilah.core.currency.domain.usecase.ConvertPriceUseCase
 import com.example.qafilah.features.orders.domain.model.Money
 import com.example.qafilah.features.orders.domain.usecase.GetOrderByIdUseCase
 import kotlinx.coroutines.flow.MutableStateFlow

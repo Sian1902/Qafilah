@@ -21,6 +21,7 @@ val exchangeRateApiKey = localProperties.getProperty("EXCHANGE_RATE_API_KEY") ?:
 val adminApiKey = localProperties.getProperty("ADMIN_API_KEY") ?: ""
 val storefrontEndpoint = localProperties.getProperty("STOREFRONT_ENDPOINT") ?: ""
 val adminEndpoint = localProperties.getProperty("ADMIN_ENDPOINT") ?: ""
+val currencyEndpoint = localProperties.getProperty("CURRENCY_ENDPOINT") ?: ""
 val paymobPublicKey = localProperties.getProperty("PAYMOB_PUBLIC_KEY") ?: ""
 val paymobSecretKey = localProperties.getProperty("PAYMOB_SECRET_KEY")?:""
 
@@ -42,6 +43,7 @@ android {
         buildConfigField("String", "ADMIN_API_KEY", "\"$adminApiKey\"")
         buildConfigField("String", "STOREFRONT_ENDPOINT", "\"$storefrontEndpoint\"")
         buildConfigField("String", "ADMIN_ENDPOINT", "\"$adminEndpoint\"")
+        buildConfigField("String", "CURRENCY_ENDPOINT", "\"$currencyEndpoint\"")
         buildConfigField("String", "PAYMOB_PUBLIC_KEY", "\"$paymobPublicKey\"")
         buildConfigField("String",  "PAYMOB_SECRET_KEY", "\"$paymobSecretKey\"" )
     }

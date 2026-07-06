@@ -1,7 +1,7 @@
 package com.example.qafilah.core.application
 
 import android.app.Application
-import com.example.qafilah.core.currency.currencyModule
+import com.example.qafilah.core.currency.di.currencyModule
 import com.example.qafilah.core.di.coreModule
 import com.example.qafilah.core.di.databaseModule
 import com.example.qafilah.core.di.networkModule

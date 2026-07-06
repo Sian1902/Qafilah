@@ -9,7 +9,7 @@ import com.example.qafilah.features.catalog.domain.usecases.GetCollectionsUseCas
 import com.example.qafilah.features.catalog.domain.usecases.GetProductTypesUseCase
 import com.example.qafilah.features.catalog.domain.usecases.GetProductsByTypeUseCase
 import com.example.qafilah.features.catalog.domain.usecases.SearchProductsUseCase
-import com.example.qafilah.core.currency.ConvertPriceUseCase
+import com.example.qafilah.core.currency.domain.usecase.ConvertPriceUseCase
 import com.example.qafilah.features.search.data.datasource.SearchLocalDataSource
 import com.example.qafilah.features.search.domain.model.ChipState
 import com.example.qafilah.features.wishlist.domain.usecase.AddToWishlistUseCase
