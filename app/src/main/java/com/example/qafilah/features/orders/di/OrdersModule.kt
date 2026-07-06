@@ -1,5 +1,6 @@
 package com.example.qafilah.features.orders.di
 
+import com.example.qafilah.core.data.AppDatabase
 import com.example.qafilah.features.orders.data.datasource.OrderLocalDataSource
 import com.example.qafilah.features.orders.data.repo.OrdersRepositoryImpl
 import com.example.qafilah.features.orders.domain.repository.OrdersRepository
@@ -12,7 +13,7 @@ import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
 
 val ordersModule = module {
-    single { get<com.example.qafilah.core.data.AppDatabase>().orderDao() }
+    single { get<AppDatabase.AppDatabase>().orderDao() }
     single { OrderLocalDataSource(orderDao = get()) }
 
     single<OrdersRepository> {
