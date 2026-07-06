@@ -10,7 +10,7 @@ import com.example.qafilah.features.address.domain.usecase.GetAddressesUseCase
 import com.example.qafilah.features.address.domain.usecase.UpdateAddressUseCase
 import com.example.qafilah.features.address.domain.usecase.SetDefaultAddressUseCase
 import com.example.qafilah.features.address.presentation.AddressViewModel
-import org.koin.androidx.viewmodel.dsl.viewModel
+import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
 
 val addressModule = module {

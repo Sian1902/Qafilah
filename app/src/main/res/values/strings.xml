@@ -160,7 +160,7 @@
     <string name="checkout_auth_error">Authentication error. Please log in again.</string>
     <string name="checkout_order_summary_title">Order Summary</string>
     <string name="checkout_proceed_to_payment">Proceed to Payment</string>
-    <string name="checkout_step_payment_title">Step 3: Payment</string>
+    <string name="checkout_step_payment_title">Payment</string>
     <string name="checkout_amount_to_charge">Amount to charge: %1$s</string>
     <string name="checkout_submit_payment">Submit Payment</string>
     <string name="checkout_currency_amount">$%1$s</string>

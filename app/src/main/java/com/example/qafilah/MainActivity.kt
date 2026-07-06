@@ -5,7 +5,6 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.CompositionLocalProvider
@@ -13,8 +12,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalLayoutDirection
-import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
@@ -22,6 +19,7 @@ import com.example.qafilah.core.navigation.AppNavHost
 import com.example.qafilah.core.navigation.NavItem
 import com.example.qafilah.core.navigation.Screen
 import com.example.qafilah.core.preferences.ThemeMode
+import com.example.qafilah.core.util.LocalRealActivity
 import com.example.qafilah.core.util.LocaleHelper
 import com.example.ui_kit.components.bottomnav.BottomNavBar
 import com.example.ui_kit.components.bottomnav.BottomNavBarItem
@@ -37,16 +35,20 @@ class MainActivity : ComponentActivity() {
             val mainViewModel: MainViewModel = koinViewModel()
             val appState by mainViewModel.appState.collectAsState()
 
-            val context = LocaleHelper.wrapContext(LocalContext.current, appState.languageCode)
-            val layoutDirection = if (appState.languageCode == "ar") {
-                LayoutDirection.Rtl
-            } else {
-                LayoutDirection.Ltr
-            }
+            // Capture the real Activity context BEFORE any wrapping happens.
+            // LocaleHelper.wrapContext() below calls createConfigurationContext(),
+            // which returns a brand new ContextImpl that is NOT chained back to
+            // this Activity via baseContext — so anything downstream reading
+            // LocalContext.current can never resolve back to an Activity.
+            // We provide LocalRealActivity separately so the rest of the app
+            // (Paymob SDK launch, permission requests, etc.) has a reliable way
+            // to get a real Activity regardless of locale/context wrapping.
+            val realActivityContext = LocalContext.current
+            val localizedContext = LocaleHelper.wrapContext(realActivityContext, appState.languageCode)
 
             CompositionLocalProvider(
-                LocalContext provides context,
-                LocalLayoutDirection provides layoutDirection
+                LocalRealActivity provides this,
+                LocalContext provides localizedContext
             ) {
                 val darkTheme = when (appState.themeMode) {
                     ThemeMode.LIGHT -> false
@@ -99,7 +101,6 @@ class MainActivity : ComponentActivity() {
                             navController = navController,
                             startDestination = startRoute,
                             modifier = Modifier.padding(innerPadding)
-                                .consumeWindowInsets(innerPadding)
                         )
                     }
                 }
