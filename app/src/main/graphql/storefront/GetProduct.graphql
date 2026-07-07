@@ -39,12 +39,29 @@ query GetProduct($id: ID!) {
         }
         metafields(identifiers: [
             { namespace: "reviews", key: "rating" },
-            { namespace: "reviews", key: "rating_count" }
+            { namespace: "reviews", key: "rating_count" },
+            { namespace: "reviews", key: "items" }
         ]) {
             key
             namespace
             value
             type
+
+            references(first: 20) {
+                edges {
+                    node {
+                        ... on Metaobject {
+                            id
+                            customerName: field(key: "customer_name") { value }
+                            rating: field(key: "rating") { value }
+                            title: field(key: "title") { value }
+                            body: field(key: "body") { value }
+                            createdAt: field(key: "created_at") { value }
+                            approved: field(key: "approved") { value }
+                        }
+                    }
+                }
+            }
         }
     }
 }
