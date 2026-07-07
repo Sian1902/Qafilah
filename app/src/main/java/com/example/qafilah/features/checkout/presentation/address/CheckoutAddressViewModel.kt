@@ -39,7 +39,7 @@ class CheckoutAddressViewModel(
             }
 
             val addressesDeferred = async { getAddressesUseCase(token) }
-            val profileDeferred = async { getPersonalDetailsUseCase(token) }
+            val profileDeferred = async { getPersonalDetailsUseCase() }
 
             val addressesResult = addressesDeferred.await()
             val profileResult = profileDeferred.await()

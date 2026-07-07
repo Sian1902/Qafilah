@@ -1,5 +1,7 @@
-package com.example.qafilah.core.currency
+package com.example.qafilah.core.currency.data.remote
 
+import com.example.qafilah.core.currency.data.dto.CurrencyCodesResponse
+import com.example.qafilah.core.currency.data.dto.CurrencyRateResponse
 import retrofit2.http.GET
 import retrofit2.http.Path
 

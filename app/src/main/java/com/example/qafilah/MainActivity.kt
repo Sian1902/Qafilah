@@ -2,6 +2,7 @@ package com.example.qafilah
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.LocalActivityResultRegistryOwner
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -12,7 +13,9 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.qafilah.core.navigation.AppNavHost
@@ -25,7 +28,6 @@ import com.example.ui_kit.components.bottomnav.BottomNavBar
 import com.example.ui_kit.components.bottomnav.BottomNavBarItem
 import com.example.ui_kit.theme.QafilahTheme
 import org.koin.androidx.compose.koinViewModel
-import androidx.activity.compose.LocalActivityResultRegistryOwner
 
 class MainActivity : ComponentActivity() {
 
@@ -37,13 +39,21 @@ class MainActivity : ComponentActivity() {
             val appState by mainViewModel.appState.collectAsState()
 
             val realActivityContext = LocalContext.current
-            val localizedContext = LocaleHelper.wrapContext(realActivityContext, appState.languageCode)
+            val localizedContext =
+                LocaleHelper.wrapContext(realActivityContext, appState.languageCode)
 
-                CompositionLocalProvider(
-            LocalRealActivity provides this@MainActivity,
-            LocalContext provides localizedContext,
-            LocalActivityResultRegistryOwner provides this@MainActivity
-        ) {
+            val layoutDirection = if (appState.languageCode == "ar") {
+                LayoutDirection.Rtl
+            } else {
+                LayoutDirection.Ltr
+            }
+
+            CompositionLocalProvider(
+                LocalRealActivity provides this@MainActivity,
+                LocalContext provides localizedContext,
+                LocalActivityResultRegistryOwner provides this@MainActivity,
+                LocalLayoutDirection provides layoutDirection
+            ) {
                 val darkTheme = when (appState.themeMode) {
                     ThemeMode.LIGHT -> false
                     ThemeMode.DARK -> true

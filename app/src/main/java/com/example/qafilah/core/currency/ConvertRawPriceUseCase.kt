@@ -1,5 +1,7 @@
 package com.example.qafilah.core.currency
 
+import com.example.qafilah.core.currency.domain.repo.CurrencyRepository
+
 class ConvertRawPriceUseCase(
     private val repository: CurrencyRepository
 ) {

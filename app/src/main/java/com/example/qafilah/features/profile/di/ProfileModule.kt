@@ -26,7 +26,10 @@ val profileModule = module {
     }
 
     single<ProfileRemoteDataSource> {
-        ProfileRemoteDataSourceImpl(apolloClient = get(named(ShopifyClient.QUALIFIER_STOREFRONT)))
+        ProfileRemoteDataSourceImpl(
+            apolloClient = get(named(ShopifyClient.QUALIFIER_STOREFRONT)),
+            tokenProvider = get()
+        )
     }
 
     single<ProfileRepository> {
@@ -45,7 +48,6 @@ val profileModule = module {
         ProfileViewModel(
             getCustomerProfile = get(),
             signOutUseCase = get(),
-            tokenProvider = get(),
             currencyRepository = get(),
             clearCartUseCase = get()
         )
@@ -53,16 +55,14 @@ val profileModule = module {
 
     viewModel {
         PersonalDetailsViewModel(
-            getPersonalDetailsUseCase = get(),
-            tokenProvider = get()
+            getPersonalDetailsUseCase = get()
         )
     }
 
     viewModel {
         EditProfileViewModel(
             getPersonalDetailsUseCase = get(),
-            updateProfileUseCase = get(),
-            tokenProvider = get()
+            updateProfileUseCase = get()
         )
     }
 }

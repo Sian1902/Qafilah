@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.qafilah.core.model.Product
 import com.example.qafilah.features.catalog.domain.model.StoreCollection
 import com.example.qafilah.features.catalog.domain.usecases.*
+import com.example.qafilah.features.wishlist.domain.usecase.AddToWishlistParams
 import com.example.qafilah.features.wishlist.domain.usecase.AddToWishlistUseCase
 import com.example.qafilah.features.wishlist.domain.usecase.IsProductWishlistedUseCase
 import com.example.qafilah.features.wishlist.domain.usecase.RemoveFromWishlistUseCase
@@ -84,13 +85,15 @@ class CatalogViewModel(
                     removeFromWishlistUseCase(product.id)
                 } else {
                     addToWishlistUseCase(
-                        productId = product.id,
-                        handle = product.id,
-                        title = product.title,
-                        imageUrl = product.imageUrl,
-                        vendor = product.vendor,
-                        price = product.priceAmount.toDoubleOrNull() ?: 0.0,
-                        currencyCode = product.currencyCode
+                        AddToWishlistParams(
+                            productId = product.id,
+                            handle = product.id,
+                            title = product.title,
+                            imageUrl = product.imageUrl,
+                            vendor = product.vendor,
+                            price = product.priceAmount.toDoubleOrNull() ?: 0.0,
+                            currencyCode = product.currencyCode
+                        )
                     )
                 }
             } catch (e: Exception) { }

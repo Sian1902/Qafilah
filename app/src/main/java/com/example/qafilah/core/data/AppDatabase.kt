@@ -10,19 +10,18 @@ import com.example.qafilah.features.orders.data.OrderDao
 import com.example.qafilah.features.orders.data.OrderEntity
 import com.example.qafilah.features.orders.data.OrderLineItemEntity
 
-@Database(entities = [WishlistItemEntity::class,
-    AssistantMessageEntity::class], version = 3, exportSchema = false)
+@Database(
+    entities = [
+        WishlistItemEntity::class,
+        AssistantMessageEntity::class,
+        OrderEntity::class,
+        OrderLineItemEntity::class
+    ],
+    version = 5,
+    exportSchema = false
+)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun wishlistDao(): WishlistDao
     abstract fun assistantDao(): AssistantDao
-
-    @Database(
-        entities = [WishlistItemEntity::class, OrderEntity::class, OrderLineItemEntity::class],
-        version = 5,
-        exportSchema = false
-    )
-    abstract class AppDatabase : RoomDatabase() {
-        abstract fun wishlistDao(): WishlistDao
-        abstract fun orderDao(): OrderDao
-    }
+    abstract fun orderDao(): OrderDao
 }

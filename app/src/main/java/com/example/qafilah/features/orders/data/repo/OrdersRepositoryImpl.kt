@@ -23,10 +23,10 @@ class OrdersRepositoryImpl(
         }
     }
 
-    override suspend fun refreshOrders(accessToken: String): Result<Unit> =
+    override suspend fun refreshOrders(): Result<Unit> =
         withContext(Dispatchers.IO) {
             try {
-                val customer = profileRemoteDataSource.getCustomerProfile(accessToken)
+                val customer = profileRemoteDataSource.getCustomerProfile()
                     ?: return@withContext Result.failure(Exception("Customer not found"))
 
                 val orders = customer.toOrdersDomain()
@@ -36,6 +36,8 @@ class OrdersRepositoryImpl(
                     order.lineItems.map { it.toEntity(order.id) }
                 }
 
+
+                localDataSource.clearCache()
                 localDataSource.saveOrders(orderEntities, lineItemEntities)
                 Result.success(Unit)
             } catch (e: Exception) {

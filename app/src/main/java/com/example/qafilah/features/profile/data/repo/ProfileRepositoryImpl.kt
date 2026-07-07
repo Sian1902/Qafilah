@@ -7,6 +7,7 @@ import com.example.qafilah.features.profile.data.datasource.ProfileRemoteDataSou
 import com.example.qafilah.features.profile.data.mapper.toDomain
 import com.example.qafilah.features.profile.domain.model.CustomerProfile
 import com.example.qafilah.features.profile.domain.repository.ProfileRepository
+import com.example.qafilah.features.profile.domain.repository.UpdateProfileRepositoryParams
 import com.example.qafilah.graphql.storefront.type.CustomerUpdateInput
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -16,10 +17,10 @@ class ProfileRepositoryImpl(
     private val authRepository: AuthRepository
 ) : ProfileRepository {
 
-    override suspend fun getCustomerProfile(accessToken: String): Result<CustomerProfile> =
+    override suspend fun getCustomerProfile(): Result<CustomerProfile> =
         withContext(Dispatchers.IO) {
             try {
-                val customer = remoteDataSource.getCustomerProfile(accessToken)
+                val customer = remoteDataSource.getCustomerProfile()
                     ?: return@withContext Result.failure(Exception("Customer not found"))
 
                 val firebaseUid = authRepository.getCurrentUser()?.id ?: ""
@@ -29,10 +30,10 @@ class ProfileRepositoryImpl(
             }
         }
 
-    override suspend fun getPersonalDetails(accessToken: String): Result<AppUser> =
+    override suspend fun getPersonalDetails(): Result<AppUser> =
         withContext(Dispatchers.IO) {
             try {
-                val customer = remoteDataSource.getPersonalDetails(accessToken)
+                val customer = remoteDataSource.getPersonalDetails()
                     ?: return@withContext Result.failure(Exception("Customer not found"))
 
                 Result.success(
@@ -50,20 +51,16 @@ class ProfileRepositoryImpl(
         }
 
     override suspend fun updateProfile(
-        accessToken: String,
-        firstName: String,
-        lastName: String,
-        email: String,
-        phone: String
+        params: UpdateProfileRepositoryParams
     ): Result<AppUser> = withContext(Dispatchers.IO) {
         try {
             val input = CustomerUpdateInput(
-                firstName = Optional.present(firstName),
-                lastName = Optional.present(lastName),
-                email = Optional.present(email),
-                phone = Optional.present(phone)
+                firstName = Optional.present(params.firstName),
+                lastName = Optional.present(params.lastName),
+                email = Optional.present(params.email),
+                phone = Optional.present(params.phone)
             )
-            val updateResult = remoteDataSource.updateCustomer(accessToken, input)
+            val updateResult = remoteDataSource.updateCustomer(input)
                 ?: return@withContext Result.failure(Exception("Update failed: empty response"))
 
             if (!updateResult.customerUserErrors.isNullOrEmpty()) {

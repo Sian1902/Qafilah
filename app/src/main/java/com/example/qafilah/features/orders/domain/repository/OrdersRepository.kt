@@ -5,6 +5,6 @@ import kotlinx.coroutines.flow.Flow
 
 interface OrdersRepository {
     fun getOrders(): Flow<List<Order>>
-    suspend fun refreshOrders(accessToken: String): Result<Unit>
+    suspend fun refreshOrders(): Result<Unit>
     suspend fun getOrderById(orderId: String): Order?
 }

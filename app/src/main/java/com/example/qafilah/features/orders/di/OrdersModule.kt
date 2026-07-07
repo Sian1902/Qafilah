@@ -13,7 +13,7 @@ import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
 
 val ordersModule = module {
-    single { get<AppDatabase.AppDatabase>().orderDao() }
+    single { get<AppDatabase>().orderDao() }
     single { OrderLocalDataSource(orderDao = get()) }
 
     single<OrdersRepository> {
@@ -31,7 +31,6 @@ val ordersModule = module {
         OrdersViewModel(
             getOrdersUseCase = get(),
             refreshOrdersUseCase = get(),
-            tokenProvider = get(),
             convertPriceUseCase = get()
         )
     }

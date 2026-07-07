@@ -1,5 +1,6 @@
-package com.example.qafilah.core.currency
+package com.example.qafilah.core.currency.domain.usecase
 
+import com.example.qafilah.core.currency.domain.repo.CurrencyRepository
 import kotlinx.coroutines.flow.first
 import java.util.Locale
 

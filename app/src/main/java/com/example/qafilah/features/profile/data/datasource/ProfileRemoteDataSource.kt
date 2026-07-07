@@ -6,10 +6,9 @@ import com.example.qafilah.graphql.storefront.GetPersonalDetailsQuery
 import com.example.qafilah.graphql.storefront.type.CustomerUpdateInput
 
 interface ProfileRemoteDataSource {
-    suspend fun getCustomerProfile(customerAccessToken: String): GetCustomerQuery.Customer?
-    suspend fun getPersonalDetails(customerAccessToken: String): GetPersonalDetailsQuery.Customer?
+    suspend fun getCustomerProfile(): GetCustomerQuery.Customer?
+    suspend fun getPersonalDetails(): GetPersonalDetailsQuery.Customer?
     suspend fun updateCustomer(
-        customerAccessToken: String,
         customerInput: CustomerUpdateInput
     ): CustomerUpdateMutation.CustomerUpdate?
 }

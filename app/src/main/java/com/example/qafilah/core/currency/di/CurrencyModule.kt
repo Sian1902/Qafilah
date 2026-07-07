@@ -1,5 +1,6 @@
-package com.example.qafilah.core.currency
+package com.example.qafilah.core.currency.di
 
+import com.example.qafilah.BuildConfig
 import com.example.qafilah.core.currency.data.remote.CurrencyService
 import com.example.qafilah.core.currency.domain.repo.CurrencyRepository
 import com.example.qafilah.core.currency.domain.repo.CurrencyRepositoryImpl
@@ -9,9 +10,9 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
 val currencyModule = module {
-    single {
+    single<CurrencyService> {
         Retrofit.Builder()
-            .baseUrl("https://v6.exchangerate-api.com/")
+            .baseUrl(BuildConfig.CURRENCY_ENDPOINT)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
             .create(CurrencyService::class.java)
@@ -20,5 +21,4 @@ val currencyModule = module {
     single<CurrencyRepository> { CurrencyRepositoryImpl(get(), get()) }
 
     factory { ConvertPriceUseCase(get()) }
-    factory { ConvertRawPriceUseCase(get()) }
 }

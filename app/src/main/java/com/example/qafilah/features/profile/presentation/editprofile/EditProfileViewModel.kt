@@ -2,9 +2,9 @@ package com.example.qafilah.features.profile.presentation.editprofile
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.qafilah.core.token.TokenProvider
 import com.example.qafilah.features.auth.domain.model.AppUser
 import com.example.qafilah.features.profile.domain.usecase.GetPersonalDetailsUseCase
+import com.example.qafilah.features.profile.domain.usecase.UpdateProfileParams
 import com.example.qafilah.features.profile.domain.usecase.UpdateProfileUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -29,8 +29,7 @@ data class EditProfileFormState(
 
 class EditProfileViewModel(
     private val getPersonalDetailsUseCase: GetPersonalDetailsUseCase,
-    private val updateProfileUseCase: UpdateProfileUseCase,
-    private val tokenProvider: TokenProvider
+    private val updateProfileUseCase: UpdateProfileUseCase
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(EditProfileFormState())
@@ -38,7 +37,6 @@ class EditProfileViewModel(
 
     private var originalUser: AppUser? = null
 
-    private var sessionExpiredMessage: String = ""
     private var updateFailedMessage: String = ""
     private var phoneFormatHint: String = ""
     private var firstNameEmptyMessage: String = ""
@@ -46,14 +44,12 @@ class EditProfileViewModel(
     private var phoneEmptyMessage: String = ""
 
     fun setLocalizedStrings(
-        sessionExpired: String,
         updateFailed: String,
         phoneFormat: String,
         firstNameEmpty: String,
         invalidEmail: String,
         phoneEmpty: String
     ) {
-        sessionExpiredMessage = sessionExpired
         updateFailedMessage = updateFailed
         phoneFormatHint = phoneFormat
         firstNameEmptyMessage = firstNameEmpty
@@ -68,13 +64,8 @@ class EditProfileViewModel(
     private fun loadUserProfile() {
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true) }
-            val token = tokenProvider.getToken()
-            if (token == null) {
-                _state.update { it.copy(isLoading = false, generalError = sessionExpiredMessage) }
-                return@launch
-            }
-
-            getPersonalDetailsUseCase(token).fold(
+            
+            getPersonalDetailsUseCase().fold(
                 onSuccess = { user ->
                     originalUser = user
                     _state.update {
@@ -114,19 +105,15 @@ class EditProfileViewModel(
         val currentState = _state.value
         viewModelScope.launch {
             _state.update { it.copy(isSaving = true, generalError = null) }
-            val token = tokenProvider.getToken()
-            if (token == null) {
-                _state.update { it.copy(isSaving = false, generalError = sessionExpiredMessage) }
-                return@launch
-            }
-
+            
             updateProfileUseCase(
-                accessToken = token,
-                firstName = currentState.firstName,
-                lastName = currentState.lastName,
-                email = currentState.email,
-                phone = currentState.phone,
-                originalEmail = originalUser?.email
+                UpdateProfileParams(
+                    firstName = currentState.firstName,
+                    lastName = currentState.lastName,
+                    email = currentState.email,
+                    phone = currentState.phone,
+                    originalEmail = originalUser?.email
+                )
             ).fold(
                 onSuccess = { (updatedUser, emailChanged) ->
                     originalUser = updatedUser

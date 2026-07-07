@@ -32,7 +32,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -43,10 +42,11 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.qafilah.MainViewModel
 import com.example.qafilah.R
 import com.example.qafilah.core.preferences.ThemeMode
-import com.example.qafilah.core.currency.CurrencyMetadata
+import com.example.qafilah.core.currency.domain.model.CurrencyMetadata
 import com.example.qafilah.features.profile.domain.model.CustomerProfile
 import com.example.ui_kit.components.profile.AccountMenuItem
 import com.example.ui_kit.components.profile.ProfileHeaderCard
@@ -68,27 +68,24 @@ fun ProfileScreen(
     onSignOutClick: () -> Unit = {},
     onNavigateToLogin: () -> Unit = {}
 ) {
-    val state by viewModel.state.collectAsState()
-    val appState by mainViewModel.appState.collectAsState()
-    val selectedCurrency by viewModel.selectedCurrency.collectAsState()
-    val availableCurrencies by viewModel.availableCurrencies.collectAsState()
+    val uiState by viewModel.state.collectAsStateWithLifecycle()
+    val appState by mainViewModel.appState.collectAsStateWithLifecycle()
 
     var showCurrencyPicker by remember { mutableStateOf(false) }
     var showLanguagePicker by remember { mutableStateOf(false) }
     var showThemePicker by remember { mutableStateOf(false) }
 
-    val notAuthenticatedMessage = stringResource(R.string.error_not_authenticated)
     val unknownErrorMessage = stringResource(R.string.error_unknown)
     val genericErrorFallback = stringResource(R.string.error_occurred)
 
     LaunchedEffect(Unit) {
-        viewModel.loadProfile(notAuthenticatedMessage, unknownErrorMessage)
+        viewModel.loadProfile(unknownErrorMessage)
     }
 
     if (showCurrencyPicker) {
         CurrencyPicker(
-            selectedCurrency = selectedCurrency,
-            availableCurrencies = availableCurrencies,
+            selectedCurrency = uiState.selectedCurrency,
+            availableCurrencies = uiState.availableCurrencies,
             onCurrencySelected = {
                 viewModel.onCurrencySelected(it)
                 showCurrencyPicker = false
@@ -119,8 +116,8 @@ fun ProfileScreen(
         )
     }
 
-    when (val currentState = state) {
-        is ProfileUiState.Loading -> {
+    when {
+        uiState.isLoading -> {
             Box(
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center
@@ -129,7 +126,7 @@ fun ProfileScreen(
             }
         }
 
-        is ProfileUiState.Error -> {
+        uiState.error != null -> {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -141,19 +138,16 @@ fun ProfileScreen(
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
                     Text(
-                        text = currentState.message ?: genericErrorFallback,
+                        text = uiState.error ?: genericErrorFallback,
                         style = MaterialTheme.typography.bodyMedium
                     )
-                    if (currentState.isAuthError) {
+                    if (uiState.isAuthError) {
                         Button(onClick = onNavigateToLogin) {
                             Text(stringResource(R.string.go_to_login))
                         }
                     } else {
                         Button(onClick = {
-                            viewModel.loadProfile(
-                                notAuthenticatedMessage,
-                                unknownErrorMessage
-                            )
+                            viewModel.loadProfile(unknownErrorMessage)
                         }) {
                             Text(stringResource(R.string.retry))
                         }
@@ -162,10 +156,10 @@ fun ProfileScreen(
             }
         }
 
-        is ProfileUiState.Success -> {
+        uiState.profile != null -> {
             ProfileScreenContent(
-                profile = currentState.profile,
-                selectedCurrency = selectedCurrency,
+                profile = uiState.profile!!,
+                selectedCurrency = uiState.selectedCurrency,
                 selectedLanguage = if (appState.languageCode == "ar") stringResource(R.string.language_arabic) else stringResource(R.string.language_english),
                 selectedTheme = when (appState.themeMode) {
                     ThemeMode.LIGHT -> stringResource(R.string.theme_light)

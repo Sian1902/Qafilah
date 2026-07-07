@@ -1,11 +1,6 @@
-package com.example.qafilah.core.currency
+package com.example.qafilah.core.currency.data.dto
 
 import com.google.gson.annotations.SerializedName
-
-data class CurrencyMetadata(
-    val code: String,
-    val fullName: String
-)
 
 data class CurrencyRateResponse(
     @SerializedName("result") val result: String,

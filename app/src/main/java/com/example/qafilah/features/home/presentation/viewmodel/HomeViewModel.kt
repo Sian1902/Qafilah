@@ -3,13 +3,14 @@ package com.example.qafilah.features.home.presentation.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.qafilah.R
-import com.example.qafilah.core.currency.ConvertPriceUseCase
+import com.example.qafilah.core.currency.domain.usecase.ConvertPriceUseCase
 import com.example.qafilah.core.model.Product
 import com.example.qafilah.features.catalog.domain.model.StoreCollection
 import com.example.qafilah.features.catalog.domain.usecases.GetBestSellingUseCase
 import com.example.qafilah.features.catalog.domain.usecases.GetCollectionsUseCase
 import com.example.qafilah.features.catalog.domain.usecases.GetProductTypesUseCase
 import com.example.qafilah.features.catalog.domain.usecases.SaveAdCouponUseCase
+import com.example.qafilah.features.wishlist.domain.usecase.AddToWishlistParams
 import com.example.qafilah.features.wishlist.domain.usecase.AddToWishlistUseCase
 import com.example.qafilah.features.wishlist.domain.usecase.IsProductWishlistedUseCase
 import com.example.qafilah.features.wishlist.domain.usecase.RemoveFromWishlistUseCase
@@ -130,13 +131,15 @@ class HomeViewModel(
                     removeFromWishlistUseCase(productId)
                 } else {
                     addToWishlistUseCase(
-                        productId = domainProduct.id,
-                        handle = domainProduct.id,
-                        title = domainProduct.title,
-                        imageUrl = domainProduct.imageUrl,
-                        vendor = domainProduct.vendor,
-                        price = domainProduct.priceAmount.toDoubleOrNull() ?: 0.0,
-                        currencyCode = "USD"
+                        AddToWishlistParams(
+                            productId = domainProduct.id,
+                            handle = domainProduct.id,
+                            title = domainProduct.title,
+                            imageUrl = domainProduct.imageUrl,
+                            vendor = domainProduct.vendor,
+                            price = domainProduct.priceAmount.toDoubleOrNull() ?: 0.0,
+                            currencyCode = "USD"
+                        )
                     )
                     _events.trySend(
                         HomeEvent.ShowToast(
