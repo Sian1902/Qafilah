@@ -63,7 +63,6 @@ fun ProfileScreen(
     onEditProfileClick: () -> Unit = {},
     onPersonalDetailsClick: () -> Unit = {},
     onOrdersClick: () -> Unit = {},
-    onSavedPaymentsClick: () -> Unit = {},
     onShippingAddressesClick: () -> Unit = {},
     onSignOutClick: () -> Unit = {},
     onNavigateToLogin: () -> Unit = {}
@@ -169,7 +168,6 @@ fun ProfileScreen(
                 onEditProfileClick = onEditProfileClick,
                 onPersonalDetailsClick = onPersonalDetailsClick,
                 onOrdersClick = onOrdersClick,
-                onSavedPaymentsClick = onSavedPaymentsClick,
                 onShippingAddressesClick = onShippingAddressesClick,
                 onLanguageClick = { showLanguagePicker = true },
                 onThemeClick = { showThemePicker = true },
@@ -190,7 +188,6 @@ private fun ProfileScreenContent(
     onNotificationsClick: () -> Unit = {},
     onPersonalDetailsClick: () -> Unit = {},
     onOrdersClick: () -> Unit = {},
-    onSavedPaymentsClick: () -> Unit = {},
     onShippingAddressesClick: () -> Unit = {},
     onLanguageClick: () -> Unit = {},
     onThemeClick: () -> Unit = {},
@@ -285,13 +282,6 @@ private fun ProfileScreenContent(
                         ),
                         iconContentDescription = stringResource(R.string.orders_icon_cd),
                         onClick = onOrdersClick
-                    )
-                    AccountMenuItem(
-                        icon = Icons.Filled.CreditCard,
-                        title = stringResource(R.string.saved_payments),
-                        subtitle = stringResource(R.string.preference_online_payment),
-                        iconContentDescription = stringResource(R.string.payments_icon_cd),
-                        onClick = onSavedPaymentsClick
                     )
                     AccountMenuItem(
                         icon = Icons.Filled.LocationOn,
