@@ -1,15 +1,19 @@
 package com.example.qafilah.features.address.data.repo
 
 import com.example.qafilah.features.address.data.datasource.AddressRemoteDataSource
+import com.example.qafilah.features.address.data.datasource.OsmApi
 import com.example.qafilah.features.address.data.mapper.toData
 import com.example.qafilah.features.address.data.mapper.toDomain
+import com.example.qafilah.features.address.data.toDomainModel
 import com.example.qafilah.features.address.domain.model.ShippingAddress
 import com.example.qafilah.features.address.domain.repository.AddressRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import com.example.qafilah.features.address.domain.model.AddressSuggestion
 
 class AddressRepositoryImpl(
-    private val remoteDataSource: AddressRemoteDataSource
+    private val remoteDataSource: AddressRemoteDataSource,
+    private val osmApi: OsmApi
 ) : AddressRepository {
 
     override suspend fun getAddresses(accessToken: String): Result<List<ShippingAddress>> =
@@ -61,4 +65,13 @@ class AddressRepositoryImpl(
                 Result.failure(e)
             }
         }
+
+    override suspend fun getAddressSuggestions(query: String): Result<List<AddressSuggestion>> {
+        return try {
+            val response = osmApi.searchAddress(query)
+            Result.success(response.map { it.toDomainModel() })
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
 }
