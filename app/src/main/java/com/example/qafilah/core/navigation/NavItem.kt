@@ -40,6 +40,7 @@ sealed class NavItem(
         icon = R.drawable.ic_person
     )
 
+
     companion object {
         val all = listOf(Home, Search, Cart, Wishlist, Profile)
 

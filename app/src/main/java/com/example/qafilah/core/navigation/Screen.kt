@@ -6,6 +6,7 @@ sealed class Screen(val route: String) {
     object Onboarding : Screen("onboarding")
     object Login : Screen("login")
     object Register : Screen("register")
+    object Chat : Screen("chat")
     object ProductDetail : Screen("product_detail?productId={productId}") {
         fun createRoute(productId: String) =
             "product_detail?productId=${android.net.Uri.encode(productId)}"
@@ -51,7 +52,8 @@ sealed class Screen(val route: String) {
             ShippingAddresses.route,
             Orders.route,
             AddAddress.route,
-            "edit_address/{addressId}"
+            "edit_address/{addressId}",
+            Chat.route
         )
     }
 }

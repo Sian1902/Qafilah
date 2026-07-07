@@ -12,6 +12,7 @@ import com.example.qafilah.features.checkout.data.repo.CheckoutRepositoryImpl
 import com.example.qafilah.features.checkout.data.repo.PaymentRepositoryImpl
 import com.example.qafilah.features.checkout.domain.repo.CheckoutRepository
 import com.example.qafilah.features.checkout.domain.repo.PaymentRepository
+import com.example.qafilah.features.checkout.domain.usecase.CompleteOrderUseCase
 import com.example.qafilah.features.checkout.domain.usecase.CreateCardPaymentIntentionUseCase
 import com.example.qafilah.features.checkout.domain.usecase.UpdateBuyerIdentityUseCase
 import com.example.qafilah.features.checkout.domain.usecase.UpdateDeliveryOptionUseCase
@@ -19,7 +20,7 @@ import com.example.qafilah.features.checkout.presentation.address.CheckoutAddres
 import com.example.qafilah.features.checkout.presentation.payment.CheckoutPaymentViewModel
 import com.example.qafilah.features.checkout.presentation.shared.CheckoutSharedViewModel
 import com.example.qafilah.features.checkout.presentation.summary.CheckoutSummaryViewModel
-import org.koin.androidx.viewmodel.dsl.viewModel
+import org.koin.core.module.dsl.viewModel
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
 import retrofit2.Retrofit
@@ -29,13 +30,17 @@ private const val PAYMOB_PAYMENT_METHOD_ID = 5353308
 
 val checkoutModule = module {
     single<CheckoutRemoteDataSource> {
-        CheckoutRemoteDataSourceImpl(get(named(ShopifyClient.QUALIFIER_STOREFRONT)))
+        CheckoutRemoteDataSourceImpl(
+            get(named(ShopifyClient.QUALIFIER_STOREFRONT)),
+                get(named(ShopifyClient.QUALIFIER_ADMIN))
+        )
     }
 
     single<CheckoutRepository> { CheckoutRepositoryImpl(get()) }
 
     factory<UpdateBuyerIdentityUseCase> { UpdateBuyerIdentityUseCase(get()) }
     factory<UpdateDeliveryOptionUseCase> { UpdateDeliveryOptionUseCase(get()) }
+    factory<CompleteOrderUseCase> { CompleteOrderUseCase(get()) }
 
     single<PaymobApi> {
         Retrofit.Builder()
@@ -64,6 +69,6 @@ val checkoutModule = module {
 
     viewModel { CheckoutSharedViewModel(get(), get<ConvertPriceUseCase>()) }
     viewModel { CheckoutSummaryViewModel(get()) }
-    viewModel { CheckoutAddressViewModel(get(), get(), get()) }
-    viewModel { CheckoutPaymentViewModel(get()) }
+    viewModel { CheckoutAddressViewModel(get(), get(), get(), get()) }
+    viewModel { CheckoutPaymentViewModel(get(), get(), get(), get()) }
 }

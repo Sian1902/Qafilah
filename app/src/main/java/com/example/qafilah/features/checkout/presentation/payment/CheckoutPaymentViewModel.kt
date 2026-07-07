@@ -3,7 +3,12 @@ package com.example.qafilah.features.checkout.presentation.payment
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.qafilah.core.currency.ConvertRawPriceUseCase
+import com.example.qafilah.features.address.domain.model.ShippingAddress
+import com.example.qafilah.features.auth.domain.model.AppUser
+import com.example.qafilah.features.cart.domain.usecase.ClearCartUseCase
 import com.example.qafilah.features.checkout.domain.model.CheckoutCart
+import com.example.qafilah.features.checkout.domain.usecase.CompleteOrderUseCase
 import com.example.qafilah.features.checkout.domain.usecase.CreateCardPaymentIntentionUseCase
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -16,25 +21,29 @@ enum class PaymentMethod {
     COD
 }
 
-data class PaymentUiState(
-    val isProcessing: Boolean = false,
-    val selectedMethod: PaymentMethod = PaymentMethod.CARD,
-    val isCodAvailable: Boolean = true,
-    val codLimit: Double = 1000.0,
-    val error: String? = null,
-    val cardPaymentData: CardPaymentData? = null
-)
-
 data class CardPaymentData(
     val publicKey: String,
     val clientSecret: String
 )
 
+data class CheckoutPaymentUiState(
+    val isProcessing: Boolean = false,
+    val selectedMethod: PaymentMethod = PaymentMethod.CARD,
+    val isCodAvailable: Boolean = true,
+    val codLimit: Double = 1000.0,
+    val successOrderId: String? = null,
+    val error: String? = null,
+    val cardPaymentData: CardPaymentData? = null
+)
+
 class CheckoutPaymentViewModel(
-    private val createCardPaymentIntentionUseCase: CreateCardPaymentIntentionUseCase
+    private val completeOrderUseCase: CompleteOrderUseCase,
+    private val createCardPaymentIntentionUseCase: CreateCardPaymentIntentionUseCase,
+    private val clearCartUseCase: ClearCartUseCase,
+    private val convertRawPriceUseCase: ConvertRawPriceUseCase
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(PaymentUiState())
+    private val _uiState = MutableStateFlow(CheckoutPaymentUiState())
     val uiState = _uiState.asStateFlow()
 
     fun updateCart(cart: CheckoutCart?) {
@@ -69,7 +78,6 @@ class CheckoutPaymentViewModel(
             }
             _uiState.update { it.copy(isProcessing = true, error = null) }
             viewModelScope.launch {
-                delay(1000)
                 _uiState.update { it.copy(isProcessing = false) }
                 onCodSuccess()
             }
@@ -80,7 +88,10 @@ class CheckoutPaymentViewModel(
 
         viewModelScope.launch {
             try {
-                val intention = createCardPaymentIntentionUseCase(cart)
+                val totalUsd = cart.cost.totalAmount.amount.toDouble()
+                val totalEgp = convertRawPriceUseCase(amountUsd = totalUsd, targetCurrency = "EGP")
+
+                val intention = createCardPaymentIntentionUseCase(cart, totalEgp)
                 _uiState.update {
                     it.copy(
                         isProcessing = false,
@@ -88,7 +99,6 @@ class CheckoutPaymentViewModel(
                     )
                 }
             } catch (e: Exception) {
-                Log.e("paymob", e.toString())
                 _uiState.update {
                     it.copy(
                         isProcessing = false,
@@ -99,16 +109,39 @@ class CheckoutPaymentViewModel(
         }
     }
 
-    fun onPaymentComplete(success: Boolean) {
+    fun onPaymentComplete(success: Boolean, errorMessage: String? = null) {
         _uiState.update { state ->
             state.copy(
                 isProcessing = false,
-                error = if (!success) "Payment failed. Please try again." else null
+                error = if (!success) (errorMessage ?: "Payment failed. Please try again.") else null
             )
         }
     }
 
     fun clearCardPaymentData() {
         _uiState.update { it.copy(cardPaymentData = null) }
+    }
+
+    fun finalizeOrder(
+        cart: CheckoutCart,
+        user: AppUser,
+        address: ShippingAddress,
+        selectedDeliveryHandle: String
+    ) {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isProcessing = true, error = null) }
+
+            val result = completeOrderUseCase(cart, user, address, selectedDeliveryHandle)
+
+            result.onSuccess { orderId ->
+
+                clearCartUseCase()
+
+
+                _uiState.update { it.copy(isProcessing = false, successOrderId = orderId) }
+            }.onFailure { error ->
+                _uiState.update { it.copy(isProcessing = false, error = error.message) }
+            }
+        }
     }
 }

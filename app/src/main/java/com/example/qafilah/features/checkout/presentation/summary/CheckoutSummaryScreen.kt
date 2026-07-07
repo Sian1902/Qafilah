@@ -4,14 +4,10 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.example.qafilah.R
 import com.example.qafilah.features.checkout.presentation.shared.CheckoutDisplayCart
@@ -19,6 +15,7 @@ import com.example.qafilah.features.checkout.presentation.shared.CheckoutSharedV
 import com.example.ui_kit.components.checkout.CheckoutProductCard
 import com.example.ui_kit.components.checkout.CheckoutSummaryCard
 import com.example.ui_kit.components.checkout.DeliveryOptionsRadioGroup
+import com.example.ui_kit.components.shared.PrimaryButton
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
@@ -28,15 +25,34 @@ fun CheckoutSummaryScreen(
     summaryViewModel: CheckoutSummaryViewModel = koinViewModel(),
     onNavigateToPayment: () -> Unit
 ) {
+
     val cart by sharedViewModel.cartState.collectAsState()
     val displayCart by sharedViewModel.displayCartState.collectAsState()
-
     val localUiState by summaryViewModel.uiState.collectAsState()
+
+    val selectedDeliveryHandle by sharedViewModel.selectedDeliveryHandle.collectAsState()
+
+    LaunchedEffect(cart, selectedDeliveryHandle) {
+        val safeCart = cart ?: return@LaunchedEffect
+
+        if (selectedDeliveryHandle == null) {
+            val firstGroup = safeCart.deliveryGroups.firstOrNull()
+            val defaultOption = safeCart.defaultShippingOption ?: firstGroup?.deliveryOptions?.firstOrNull()
+
+            if (firstGroup != null && defaultOption != null) {
+                summaryViewModel.selectShippingOption(safeCart.id, firstGroup.id, defaultOption.handle) { updatedCart ->
+                    sharedViewModel.updateCartStateWithSelectedShipping(updatedCart, defaultOption.handle)
+                }
+            } else {
+                sharedViewModel.updateCartStateWithSelectedShipping(safeCart, "standard")
+            }
+        }
+    }
 
     val finalUiState = buildSummaryUiState(
         cart = cart,
         isRecalculating = localUiState.isRecalculating,
-        localSelectedHandle = localUiState.selectedDeliveryHandle
+        localSelectedHandle = selectedDeliveryHandle ?: localUiState.selectedDeliveryHandle
     )
 
     CheckoutSummaryContent(
@@ -44,10 +60,13 @@ fun CheckoutSummaryScreen(
         uiState = finalUiState,
         displayCart = displayCart,
         onShippingOptionSelected = { handle ->
-            val groupId = cart!!.deliveryGroups.firstOrNull()?.id ?: return@CheckoutSummaryContent
-
-            summaryViewModel.selectShippingOption(cart!!.id, groupId, handle) { updatedCart ->
-                sharedViewModel.updateCartStateWithSelectedShipping(updatedCart, handle)
+            if (handle == "standard") {
+                sharedViewModel.updateCartStateWithSelectedShipping(cart!!, handle)
+            } else {
+                val groupId = cart!!.deliveryGroups.firstOrNull()?.id ?: return@CheckoutSummaryContent
+                summaryViewModel.selectShippingOption(cart!!.id, groupId, handle) { updatedCart ->
+                    sharedViewModel.updateCartStateWithSelectedShipping(updatedCart, handle)
+                }
             }
         },
         onProceedToPayment = onNavigateToPayment
@@ -65,8 +84,12 @@ fun CheckoutSummaryContent(
     val cart = uiState.cart ?: return
     val displayedCart = displayCart ?: return
 
-    val uiKitDeliveryOptions = displayedCart.deliveryOptions.map { option ->
-        Triple(option.handle, option.title, option.displayCost)
+    val uiKitDeliveryOptions = if (displayedCart.deliveryOptions.isNotEmpty()) {
+        displayedCart.deliveryOptions.map { option ->
+            Triple(option.handle, option.title, option.displayCost)
+        }
+    } else {
+        listOf(Triple("standard", "Standard", "Free"))
     }
 
     Column(
@@ -143,46 +166,18 @@ fun CheckoutSummaryContent(
             }
         }
 
-        Button(
+        PrimaryButton(
+            text = stringResource(R.string.checkout_proceed_to_payment),
             onClick = onProceedToPayment,
-            enabled = !uiState.isRecalculating && uiState.selectedDeliveryHandle != null,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 16.dp)
-                .height(60.dp),
-            shape = RoundedCornerShape(30.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = MaterialTheme.colorScheme.onPrimary
-            ),
-            contentPadding = PaddingValues(horizontal = 24.dp)
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
+            enabled = uiState.selectedDeliveryHandle != null,
+            isLoading = uiState.isRecalculating,
+            modifier = Modifier.padding(top = 16.dp),
+            trailingContent = {
                 Text(
-                    text = stringResource(R.string.checkout_proceed_to_payment),
-                    style = MaterialTheme.typography.bodyLarge
+                    text = displayedCart.displayTotal,
+                    style = MaterialTheme.typography.bodyMedium
                 )
-
-                if (uiState.isRecalculating) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(24.dp),
-                        color = MaterialTheme.colorScheme.onPrimary,
-                        strokeWidth = 2.dp
-                    )
-                } else {
-                    Text(
-                        text = displayedCart.displayTotal,
-                        style = MaterialTheme.typography.bodyMedium,
-                        textAlign = TextAlign.End
-                    )
-                }
             }
-        }
+        )
     }
 }
-
-

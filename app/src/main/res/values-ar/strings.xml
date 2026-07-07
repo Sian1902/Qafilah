@@ -268,6 +268,14 @@
     <string name="signup_password_error_message">كلمة المرور قصيرة جداً</string>
     <string name="signup_confirm_password_placeholder">••••••••</string>
     <string name="signup_confirm_password_error_message">كلمتا المرور غير متطابقتين</string>
+
+    <!--AI Assistant-->
+    <string name="ai_name">الحكيم</string>
+    <string name="ai_subtitle">الدليل الحكيم</string>
+    <string name="ask_ai_placeholder">اسأل الحكيم...</string>
+    <string name="you">انت</string>
+
+
     <string name="my_orders">طلباتي</string>
     <string name="orders_count">%d طلب</string>
     <string name="orders_icon_cd">سجل الطلبات</string>
@@ -288,5 +296,26 @@
     <string name="error_order_not_found">الطلب غير موجود</string>
     <string name="currency_format">%1$s %2$s</string>
     <string name="quantity_format">%d×</string>
+
+    <!-- Checkout Success Screen -->
+    <string name="checkout_order_placed_success">تم تقديم الطلب بنجاح!</string>
+    <string name="checkout_order_success_message">شكراً لشرائك. لقد تلقينا طلبك ونحن نعمل على معالجته حالياً.</string>
+    <string name="checkout_return_to_home">العودة إلى الرئيسية</string>
+
+    <!-- Checkout Payment Screen -->
+    <string name="checkout_total_due">إجمالي المستحق %1$s</string>
+    <string name="checkout_payment_method">طريقة الدفع</string>
+    <string name="checkout_credit_debit_card">بطاقة ائتمان / خصم</string>
+    <string name="checkout_pay_securely_via_paymob">ادفع بأمان عبر Paymob</string>
+    <string name="checkout_cash_on_delivery">الدفع عند الاستلام</string>
+    <string name="checkout_pay_on_arrival">ادفع عند وصول طلبك</string>
+    <string name="checkout_cod_limit_warning">متاح فقط للطلبات الأقل من %1$d جنيه مصري</string>
+    <string name="checkout_place_order">تقديم الطلب</string>
+    <string name="checkout_pay_now">ادفع الآن</string>
+
+    <!-- Paymob Payment Messages -->
+    <string name="payment_pending_confirmation">الدفع معلق بانتظار التأكيد.</string>
+    <string name="payment_sdk_launch_failed">فشل بدء تشغيل SDK: %1$s</string>
+    <string name="payment_error_prefix">خطأ من Paymob: %1$s</string>
 
 </resources>

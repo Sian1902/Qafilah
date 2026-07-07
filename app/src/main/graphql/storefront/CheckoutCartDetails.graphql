@@ -24,6 +24,7 @@ fragment CheckoutCartDetails on Cart {
                 quantity
                 merchandise {
                     ... on ProductVariant {
+                        id
                         title
                         price { ...MoneyFields }
                         image {
