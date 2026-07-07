@@ -2,6 +2,7 @@ package com.example.qafilah.features.catalog.data.mapper
 
 import com.example.qafilah.core.model.Product
 import com.example.qafilah.features.catalog.domain.model.ProductDetails
+import com.example.qafilah.features.catalog.domain.model.ProductReview
 import com.example.qafilah.features.catalog.domain.model.ProductVariant
 import com.example.qafilah.features.catalog.domain.model.StoreCollection
 import com.example.qafilah.graphql.storefront.GetBestSellingProductsQuery
@@ -11,6 +12,20 @@ import com.example.qafilah.graphql.storefront.GetProductsByTypeQuery
 import com.example.qafilah.graphql.storefront.SearchProductsQuery
 
 fun GetProductQuery.Product.toDomain(): ProductDetails {
+    val mappedReviews = this.metafields.find { it?.key == "items" }
+        ?.references?.edges?.mapNotNull { it.node.onMetaobject }
+        ?.filter { it.approved?.value == "true" }
+        ?.map { metaobject ->
+            ProductReview(
+                id = metaobject.id,
+                customerName = metaobject.customerName?.value ?: "Anonymous",
+                rating = metaobject.rating?.value?.toIntOrNull() ?: 0,
+                title = metaobject.title?.value ?: "",
+                body = metaobject.body?.value ?: "",
+                createdAt = metaobject.createdAt?.value ?: ""
+            )
+        } ?: emptyList()
+
     return ProductDetails(
         id = this.id,
         title = this.title,
@@ -36,7 +51,9 @@ fun GetProductQuery.Product.toDomain(): ProductDetails {
                     option.name to option.value
                 }
             )
-        }
+        },
+
+        reviews = mappedReviews
     )
 }
 

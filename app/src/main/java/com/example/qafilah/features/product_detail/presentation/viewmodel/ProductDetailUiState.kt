@@ -1,4 +1,4 @@
-package com.example.qafilah.features.product_detail.presentation
+package com.example.qafilah.features.product_detail.presentation.viewmodel
 
 sealed interface ProductDetailUiState {
     object Loading : ProductDetailUiState

@@ -1,4 +1,4 @@
-package com.example.qafilah.features.product_detail.presentation
+package com.example.qafilah.features.product_detail.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -11,12 +11,14 @@ import com.example.qafilah.features.wishlist.domain.usecase.AddToWishlistParams
 import com.example.qafilah.features.wishlist.domain.usecase.AddToWishlistUseCase
 import com.example.qafilah.features.wishlist.domain.usecase.IsProductWishlistedUseCase
 import com.example.qafilah.features.wishlist.domain.usecase.RemoveFromWishlistUseCase
+import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlin.collections.iterator
 
 sealed interface ProductDetailEvent {
     data class ShowToast(val message: String) : ProductDetailEvent
@@ -64,7 +66,7 @@ class ProductDetailViewModel(
                     )
                     selectedVariant = initialVariant
                     selectedOptions = initialVariant.options
-                    
+
                     updateUiState()
                     observeWishlistState(productId)
                 }
@@ -124,7 +126,18 @@ class ProductDetailViewModel(
             optionGroups = optionGroups.mapValues { it.value.toList() },
             selectedOptions = selectedOptions,
             selectedVariantId = variant.id,
-            isFavorite = isFavorite
+            isFavorite = isFavorite,
+
+            reviews = product.reviews.map { domainReview ->
+                UiReviewItem(
+                    id = domainReview.id,
+                    customerName = domainReview.customerName,
+                    rating = domainReview.rating,
+                    title = domainReview.title,
+                    body = domainReview.body,
+                    createdAt = domainReview.createdAt.substringBefore("T")
+                )
+            }
         )
 
         val currentState = _uiState.value
@@ -149,7 +162,7 @@ class ProductDetailViewModel(
     }
 
     fun toggleFavorite(notLoggedInMessage: String, fallbackErrorMessage: String, addedToWishlistTemplate: String) {
-        if (com.google.firebase.auth.FirebaseAuth.getInstance().currentUser == null) {
+        if (FirebaseAuth.getInstance().currentUser == null) {
             _events.trySend(ProductDetailEvent.ShowToast(notLoggedInMessage))
             return
         }
@@ -182,7 +195,7 @@ class ProductDetailViewModel(
     }
 
     fun addToCart(variantId: String, quantity: Int = 1, fallbackErrorMessage: String, notLoggedInMessage: String, successMessage: String) {
-        if (com.google.firebase.auth.FirebaseAuth.getInstance().currentUser == null) {
+        if (FirebaseAuth.getInstance().currentUser == null) {
             _events.trySend(ProductDetailEvent.ShowToast(notLoggedInMessage))
             return
         }

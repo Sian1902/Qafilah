@@ -1,4 +1,4 @@
-package com.example.qafilah.features.product_detail.presentation
+package com.example.qafilah.features.product_detail.presentation.viewmodel
 
 data class ProductDetailUiModel(
     val id: String,
@@ -16,5 +16,15 @@ data class ProductDetailUiModel(
     val optionGroups: Map<String, List<String>>,
     val selectedOptions: Map<String, String>,
     val selectedVariantId: String,
-    val isFavorite: Boolean
+    val isFavorite: Boolean,
+    val reviews: List<UiReviewItem>
+)
+
+data class UiReviewItem(
+    val id: String,
+    val customerName: String,
+    val rating: Int,
+    val title: String,
+    val body: String,
+    val createdAt: String
 )

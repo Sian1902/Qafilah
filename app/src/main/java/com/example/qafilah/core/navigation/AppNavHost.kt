@@ -30,7 +30,7 @@ import com.example.qafilah.features.catalog.presentation.CatalogScreen
 import com.example.qafilah.features.checkout.presentation.shared.CheckoutScreen
 import com.example.qafilah.features.home.presentation.ui.HomeScreen
 import com.example.qafilah.features.onboarding.OnboardingScreen
-import com.example.qafilah.features.product_detail.presentation.ProductDetailScreen
+import com.example.qafilah.features.product_detail.presentation.ui.ProductDetailScreen
 import com.example.qafilah.features.profile.presentation.editprofile.EditProfileScreen
 import com.example.qafilah.features.orders.presentation.order_details.OrderDetailsScreen
 import com.example.qafilah.features.orders.presentation.order_details.OrderDetailsViewModel
