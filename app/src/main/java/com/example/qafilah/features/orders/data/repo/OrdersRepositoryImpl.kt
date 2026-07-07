@@ -1,6 +1,5 @@
 package com.example.qafilah.features.orders.data.repo
 
-import com.example.qafilah.core.token.TokenProvider
 import com.example.qafilah.features.orders.data.datasource.OrderLocalDataSource
 import com.example.qafilah.features.orders.data.mapper.toDomain
 import com.example.qafilah.features.orders.data.mapper.toEntity
@@ -15,8 +14,7 @@ import kotlinx.coroutines.withContext
 
 class OrdersRepositoryImpl(
     private val profileRemoteDataSource: ProfileRemoteDataSource,
-    private val localDataSource: OrderLocalDataSource,
-    private val tokenProvider: TokenProvider
+    private val localDataSource: OrderLocalDataSource
 ) : OrdersRepository {
 
     override fun getOrders(): Flow<List<Order>> {
@@ -28,8 +26,7 @@ class OrdersRepositoryImpl(
     override suspend fun refreshOrders(): Result<Unit> =
         withContext(Dispatchers.IO) {
             try {
-                val token = tokenProvider.getToken() ?: return@withContext Result.failure(Exception("Access token not found"))
-                val customer = profileRemoteDataSource.getCustomerProfile(token)
+                val customer = profileRemoteDataSource.getCustomerProfile()
                     ?: return@withContext Result.failure(Exception("Customer not found"))
 
                 val orders = customer.toOrdersDomain()

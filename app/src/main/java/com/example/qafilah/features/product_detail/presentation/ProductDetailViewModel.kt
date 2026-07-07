@@ -3,9 +3,11 @@ package com.example.qafilah.features.product_detail.presentation
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.qafilah.features.cart.domain.usecase.AddCartItemUseCase
+import com.example.qafilah.features.catalog.domain.model.ProductDetails
 import com.example.qafilah.features.catalog.domain.model.ProductVariant
 import com.example.qafilah.features.catalog.domain.usecases.GetSingleProductUseCase
 import com.example.qafilah.core.currency.domain.usecase.ConvertPriceUseCase
+import com.example.qafilah.features.wishlist.domain.usecase.AddToWishlistParams
 import com.example.qafilah.features.wishlist.domain.usecase.AddToWishlistUseCase
 import com.example.qafilah.features.wishlist.domain.usecase.IsProductWishlistedUseCase
 import com.example.qafilah.features.wishlist.domain.usecase.RemoveFromWishlistUseCase
@@ -15,6 +17,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+
 sealed interface ProductDetailEvent {
     data class ShowToast(val message: String) : ProductDetailEvent
 }
@@ -35,8 +38,14 @@ class ProductDetailViewModel(
     val uiState: StateFlow<ProductDetailUiState> = _uiState.asStateFlow()
 
     private var lastLoadedId: String? = null
+    private var currentProduct: ProductDetails? = null
+    private var selectedVariant: ProductVariant? = null
+    private var selectedOptions: Map<String, String> = emptyMap()
+    private var isFavorite: Boolean = false
+    private var labels: ProductDetailLabels? = null
 
-    fun loadProduct(productId: String, fallbackErrorMessage: String) {
+    fun loadProduct(productId: String, fallbackErrorMessage: String, labels: ProductDetailLabels) {
+        this.labels = labels
         if (productId == lastLoadedId && _uiState.value is ProductDetailUiState.Success) return
 
         lastLoadedId = productId
@@ -44,27 +53,19 @@ class ProductDetailViewModel(
             _uiState.value = ProductDetailUiState.Loading
             getProductDetailUseCase(productId)
                 .onSuccess { product ->
-                    val initialVariant = product.variants.firstOrNull()
-                    val initialOptions = initialVariant?.options ?: emptyMap()
-
-                    val convertedPrice =
-                        convertPriceUseCase(initialVariant?.price?.toDoubleOrNull() ?: 0.0)
-
-                    _uiState.value = ProductDetailUiState.Success(
-                        product = product,
-                        selectedVariant = initialVariant ?: ProductVariant(
-                            id = "",
-                            title = "Default",
-                            price = "0.00",
-                            compareAtPrice = null,
-                            inventoryQuantity = null,
-                            options = emptyMap()
-                        ),
-                        selectedOptions = initialOptions,
-                        isFavorite = false,
-                        displayPrice = convertedPrice
+                    currentProduct = product
+                    val initialVariant = product.variants.firstOrNull() ?: ProductVariant(
+                        id = "",
+                        title = "Default",
+                        price = "0.00",
+                        compareAtPrice = null,
+                        inventoryQuantity = null,
+                        options = emptyMap()
                     )
-
+                    selectedVariant = initialVariant
+                    selectedOptions = initialVariant.options
+                    
+                    updateUiState()
                     observeWishlistState(productId)
                 }
                 .onFailure { error ->
@@ -77,27 +78,73 @@ class ProductDetailViewModel(
 
     private fun observeWishlistState(productId: String) {
         viewModelScope.launch {
-            isProductWishlistedUseCase(productId).collect { isWishlisted ->
-                val current = _uiState.value as? ProductDetailUiState.Success ?: return@collect
-                _uiState.value = current.copy(isFavorite = isWishlisted)
+            isProductWishlistedUseCase(productId).collect { wishlisted ->
+                isFavorite = wishlisted
+                updateUiState()
             }
         }
     }
 
+    private suspend fun updateUiState() {
+        val product = currentProduct ?: return
+        val variant = selectedVariant ?: return
+        val labels = labels ?: return
+
+        val displayPrice = convertPriceUseCase(variant.price.toDoubleOrNull() ?: 0.0)
+        
+        val optionGroups = mutableMapOf<String, MutableList<String>>()
+        for (v in product.variants) {
+            for ((name, value) in v.options) {
+                if (name.equals("Title", ignoreCase = true) && value.equals("Default Title", ignoreCase = true)) continue
+                val list = optionGroups.getOrPut(name) { mutableListOf() }
+                if (!list.contains(value)) list.add(value)
+            }
+        }
+
+        val inStock = variant.inventoryQuantity != null && variant.inventoryQuantity > 0
+        val stockText = if (inStock) {
+            String.format(labels.inStockTemplate, variant.inventoryQuantity)
+        } else {
+            labels.outOfStockText
+        }
+
+        val uiModel = ProductDetailUiModel(
+            id = product.id,
+            title = product.title,
+            description = product.description ?: "",
+            images = product.images,
+            tag = product.tags.firstOrNull()?.uppercase() ?: labels.defaultCollectionLabel,
+            rating = product.rating,
+            reviewCount = product.ratingCount,
+            ratingLabel = String.format(labels.ratingLabelTemplate, product.rating ?: 0.0, product.ratingCount ?: 0),
+            displayPrice = displayPrice,
+            stockText = stockText,
+            stockColorInt = if (inStock) 0xFF4CAF50.toInt() else 0xFFF44336.toInt(),
+            isInStock = inStock,
+            optionGroups = optionGroups.mapValues { it.value.toList() },
+            selectedOptions = selectedOptions,
+            selectedVariantId = variant.id,
+            isFavorite = isFavorite
+        )
+
+        val currentState = _uiState.value
+        if (currentState is ProductDetailUiState.Success) {
+            _uiState.value = currentState.copy(product = uiModel)
+        } else {
+            _uiState.value = ProductDetailUiState.Success(product = uiModel)
+        }
+    }
+
     fun selectOption(name: String, value: String) {
-        val current = _uiState.value as? ProductDetailUiState.Success ?: return
-        val updatedOptions = current.selectedOptions.toMutableMap().apply { put(name, value) }
-        val matchingVariant = current.product.variants.find { variant ->
-            variant.options.all { (optName, optValue) -> updatedOptions[optName] == optValue }
-        } ?: current.selectedVariant
+        val product = currentProduct ?: return
+        selectedOptions = selectedOptions.toMutableMap().apply { put(name, value) }
+        
+        selectedVariant = product.variants.find { variant ->
+            variant.options.all { (optName, optValue) -> selectedOptions[optName] == optValue }
+        } ?: selectedVariant
 
         viewModelScope.launch {
-            val convertedPrice = convertPriceUseCase(matchingVariant.price.toDoubleOrNull() ?: 0.0)
-            _uiState.value = current.copy(
-                selectedVariant = matchingVariant,
-                selectedOptions = updatedOptions,
-                displayPrice = convertedPrice
-            )
+            updateUiState()
         }
     }
 
@@ -107,9 +154,8 @@ class ProductDetailViewModel(
             return
         }
 
-        val current = _uiState.value as? ProductDetailUiState.Success ?: return
-        val product = current.product
-        val wasFavorite = current.isFavorite
+        val product = currentProduct ?: return
+        val wasFavorite = isFavorite
 
         viewModelScope.launch {
             try {
@@ -117,13 +163,15 @@ class ProductDetailViewModel(
                     removeFromWishlistUseCase(product.id)
                 } else {
                     addToWishlistUseCase(
-                        productId = product.id,
-                        handle = product.id,
-                        title = product.title,
-                        imageUrl = product.images.firstOrNull(),
-                        vendor = product.vendor,
-                        price = product.variants.firstOrNull()?.price?.toDoubleOrNull() ?: 0.0,
-                        currencyCode = "USD"
+                        AddToWishlistParams(
+                            productId = product.id,
+                            handle = product.id,
+                            title = product.title,
+                            imageUrl = product.images.firstOrNull(),
+                            vendor = product.vendor,
+                            price = product.variants.firstOrNull()?.price?.toDoubleOrNull() ?: 0.0,
+                            currencyCode = "USD"
+                        )
                     )
                     _events.trySend(ProductDetailEvent.ShowToast(String.format(addedToWishlistTemplate, product.title)))
                 }
@@ -161,5 +209,4 @@ class ProductDetailViewModel(
         val currentState = _uiState.value as? ProductDetailUiState.Success ?: return
         _uiState.value = currentState.copy(addToCartError = null)
     }
-
 }

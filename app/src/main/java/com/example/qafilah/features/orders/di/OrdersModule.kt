@@ -18,8 +18,7 @@ val ordersModule = module {
     single<OrdersRepository> {
         OrdersRepositoryImpl(
             profileRemoteDataSource = get(),
-            localDataSource = get(),
-            tokenProvider = get()
+            localDataSource = get()
         )
     }
 

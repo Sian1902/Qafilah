@@ -26,14 +26,16 @@ val profileModule = module {
     }
 
     single<ProfileRemoteDataSource> {
-        ProfileRemoteDataSourceImpl(apolloClient = get(named(ShopifyClient.QUALIFIER_STOREFRONT)))
+        ProfileRemoteDataSourceImpl(
+            apolloClient = get(named(ShopifyClient.QUALIFIER_STOREFRONT)),
+            tokenProvider = get()
+        )
     }
 
     single<ProfileRepository> {
         ProfileRepositoryImpl(
             remoteDataSource = get(),
-            authRepository = get<AuthRepository>(),
-            tokenProvider = get()
+            authRepository = get<AuthRepository>()
         )
     }
 

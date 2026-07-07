@@ -33,15 +33,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.qafilah.R
-import com.example.ui_kit.components.product.ExpandableDescriptionBlock
-import com.example.ui_kit.components.product.ProductImageHeader
-import com.example.ui_kit.components.product.RatingBadge
-import com.example.ui_kit.components.product.SelectablePillGroup
-import com.example.ui_kit.components.product.SpecItem
-import com.example.ui_kit.components.product.SpecTagPairs
-import com.example.ui_kit.components.product.StickyBottomBar
-import com.example.ui_kit.components.product.TopIconBar
+import com.example.ui_kit.components.product.*
 import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -53,7 +47,7 @@ fun ProductDetailScreen(
     viewModel: ProductDetailViewModel = koinViewModel()
 ) {
     val context = LocalContext.current
-    val uiState by viewModel.uiState.collectAsState()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     val defaultCollectionLabel = stringResource(R.string.default_collection_label)
     val inStockTemplate = stringResource(R.string.stock_in_stock)
@@ -77,8 +71,15 @@ fun ProductDetailScreen(
     val addToCartSuccessMessage = stringResource(R.string.added_to_cart_success)
     val decodedId = Uri.decode(productId)
 
+    val labels = ProductDetailLabels(
+        defaultCollectionLabel = defaultCollectionLabel,
+        inStockTemplate = inStockTemplate,
+        outOfStockText = outOfStockText,
+        ratingLabelTemplate = stringResource(R.string.product_rating_label, 0.0, 0).replace("0.0", "%f").replace("0", "%d")
+    )
+
     LaunchedEffect(decodedId) {
-        viewModel.loadProduct(decodedId, loadProductErrorFallback)
+        viewModel.loadProduct(decodedId, loadProductErrorFallback, labels)
     }
 
     LaunchedEffect(Unit) {
@@ -131,9 +132,6 @@ fun ProductDetailScreen(
 
             is ProductDetailUiState.Success -> {
                 val product = state.product
-                val selectedVariant = state.selectedVariant
-                val selectedOptions = state.selectedOptions
-                val isFavorite = state.isFavorite
                 val isAddingToCart = state.isAddingToCart
                 val addToCartError = state.addToCartError
 
@@ -144,40 +142,7 @@ fun ProductDetailScreen(
                     }
                 }
 
-                val optionGroups = remember(product.variants) {
-                    val groups = mutableMapOf<String, MutableList<String>>()
-                    for (variant in product.variants) {
-                        for ((name, value) in variant.options) {
-                            if (name.equals("Title", ignoreCase = true) && value.equals(
-                                    "Default Title",
-                                    ignoreCase = true
-                                )
-                            ) {
-                                continue
-                            }
-                            val list = groups.getOrPut(name) { mutableListOf() }
-                            if (!list.contains(value)) {
-                                list.add(value)
-                            }
-                        }
-                    }
-                    groups.toMap()
-                }
-
                 val specs = remember { emptyList<SpecItem>() }
-
-                val inStock =
-                    selectedVariant.inventoryQuantity != null && selectedVariant.inventoryQuantity > 0
-                val stockText = if (inStock) {
-                    String.format(inStockTemplate, selectedVariant.inventoryQuantity)
-                } else {
-                    outOfStockText
-                }
-                val stockColor =
-                    if (inStock) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
-
-                val rating = product.rating
-                val reviewCount = product.ratingCount
 
                 Column(
                     modifier = Modifier
@@ -193,8 +158,7 @@ fun ProductDetailScreen(
                         Box(modifier = Modifier.fillMaxWidth()) {
                             ProductImageHeader(
                                 images = product.images,
-                                collectionName = product.tags.firstOrNull()?.uppercase()
-                                    ?: defaultCollectionLabel,
+                                collectionName = product.tag,
                                 imageContentDescription = { page ->
                                     stringResource(
                                         R.string.product_image_cd,
@@ -204,7 +168,7 @@ fun ProductDetailScreen(
                                 }
                             )
                             TopIconBar(
-                                isFavorite = isFavorite,
+                                isFavorite = product.isFavorite,
                                 onBackClick = onBackClick,
                                 onShareClick = {
                                     Toast.makeText(
@@ -243,13 +207,13 @@ fun ProductDetailScreen(
                                     modifier = Modifier
                                         .size(8.dp)
                                         .clip(CircleShape)
-                                        .background(stockColor)
+                                        .background(androidx.compose.ui.graphics.Color(product.stockColorInt))
                                 )
                                 Text(
-                                    text = stockText,
+                                    text = product.stockText,
                                     style = MaterialTheme.typography.bodyMedium.copy(
                                         fontSize = 14.sp,
-                                        color = stockColor
+                                        color = androidx.compose.ui.graphics.Color(product.stockColorInt)
                                     )
                                 )
                             }
@@ -264,22 +228,18 @@ fun ProductDetailScreen(
                             )
 
                             RatingBadge(
-                                rating = rating,
-                                reviewCount = reviewCount,
+                                rating = product.rating,
+                                reviewCount = product.reviewCount,
                                 starContentDescription = stringResource(R.string.product_rating_star_cd),
-                                ratingLabel = stringResource(
-                                    R.string.product_rating_label,
-                                    rating ?: 0.0,
-                                    reviewCount ?: 0
-                                )
+                                ratingLabel = product.ratingLabel
                             )
 
-                            if (optionGroups.isNotEmpty()) {
-                                optionGroups.forEach { (optionName, optionValues) ->
+                            if (product.optionGroups.isNotEmpty()) {
+                                product.optionGroups.forEach { (optionName, optionValues) ->
                                     SelectablePillGroup(
                                         selectionLabel = optionName,
                                         options = optionValues,
-                                        selectedOption = selectedOptions[optionName],
+                                        selectedOption = product.selectedOptions[optionName],
                                         onOptionSelected = { selectedVal ->
                                             viewModel.selectOption(optionName, selectedVal)
                                         }
@@ -289,7 +249,7 @@ fun ProductDetailScreen(
 
                             ExpandableDescriptionBlock(
                                 title = productDescriptionLabel,
-                                descriptionHtml = product.description ?: "",
+                                descriptionHtml = product.description,
                                 readMoreLabel = readMoreLabel,
                                 readLessLabel = readLessLabel
                             )
@@ -301,15 +261,15 @@ fun ProductDetailScreen(
                     }
 
                     StickyBottomBar(
-                        price = state.displayPrice,
+                        price = product.displayPrice,
                         totalPriceLabel = stringResource(R.string.product_total_price_label),
-                        addToCartLabel = if (inStock) stringResource(R.string.product_add_to_cart_label) else outOfStockText,
+                        addToCartLabel = if (product.isInStock) stringResource(R.string.product_add_to_cart_label) else outOfStockText,
                         addToCartContentDescription = stringResource(R.string.product_add_to_cart_cd),
                         isLoading = isAddingToCart,
                         onAddToCartClick = {
-                            if (inStock) {
+                            if (product.isInStock) {
                                 viewModel.addToCart(
-                                    variantId = selectedVariant.id,
+                                    variantId = product.selectedVariantId,
                                     fallbackErrorMessage = addToCartErrorFallback,
                                     notLoggedInMessage = cartNotLoggedInMessage,
                                     quantity = 1,
