@@ -141,6 +141,18 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.test.manifest)
     debugImplementation(libs.androidx.compose.ui.tooling)
 
+    // JUnit 4 for basic test execution
+    testImplementation("junit:junit:4.13.2")
+
+    // MockK for mocking the Dao and RemoteDataSource
+    testImplementation("io.mockk:mockk:1.13.8")
+
+    // Coroutines testing library (for runTest)
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
+
+    // Turbine for effortlessly testing Kotlin Flows
+    testImplementation("app.cash.turbine:turbine:1.0.0")
+
     implementation(libs.lottie.compose)
 }
 
