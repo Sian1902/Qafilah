@@ -19,7 +19,8 @@ fun QafilahTextField(
     value: String,
     onValueChange: (String) -> Unit,
     placeholder: String,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    textFieldModifier: Modifier = Modifier
 ) {
     val glassBackground = Color.White.copy(alpha = 0.08f)
     val glassBorder = Color.White.copy(alpha = 0.12f)
@@ -37,7 +38,8 @@ fun QafilahTextField(
             placeholder = {
                 Text(placeholder, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f))
             },
-            modifier = Modifier.fillMaxWidth(),
+            // 2. Chain the new modifier directly to the text field
+            modifier = Modifier.fillMaxWidth().then(textFieldModifier),
             shape = RoundedCornerShape(8.dp),
             colors = OutlinedTextFieldDefaults.colors(
                 focusedContainerColor = glassBackground,

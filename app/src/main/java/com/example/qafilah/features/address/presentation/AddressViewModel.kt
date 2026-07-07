@@ -8,11 +8,18 @@ import com.example.qafilah.features.address.domain.model.ShippingAddressesUiStat
 import com.example.qafilah.features.address.domain.usecase.CreateAddressUseCase
 import com.example.qafilah.features.address.domain.usecase.DeleteAddressUseCase
 import com.example.qafilah.features.address.domain.usecase.GetAddressesUseCase
+import com.example.qafilah.features.address.domain.usecase.SearchAddressUseCase
 import com.example.qafilah.features.address.domain.usecase.UpdateAddressUseCase
 import com.example.qafilah.features.address.domain.usecase.SetDefaultAddressUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import com.example.qafilah.features.address.domain.model.AddressSuggestion
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
 
 class AddressViewModel(
     private val getAddressesUseCase: GetAddressesUseCase,
@@ -20,11 +27,47 @@ class AddressViewModel(
     private val updateAddressUseCase: UpdateAddressUseCase,
     private val deleteAddressUseCase: DeleteAddressUseCase,
     private val tokenProvider: TokenProvider,
-    private val setDefaultAddressUseCase: SetDefaultAddressUseCase
+    private val setDefaultAddressUseCase: SetDefaultAddressUseCase,
+    private val searchAddressUseCase: SearchAddressUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ShippingAddressesUiState())
     val uiState: StateFlow<ShippingAddressesUiState> = _uiState
+
+    private val _addressQuery = MutableStateFlow("")
+
+    private val _suggestions = MutableStateFlow<List<AddressSuggestion>>(emptyList())
+    val suggestions: StateFlow<List<AddressSuggestion>> = _suggestions.asStateFlow()
+
+    init {
+        viewModelScope.launch {
+            @OptIn(FlowPreview::class)
+            _addressQuery
+                .debounce(600L)
+                .distinctUntilChanged()
+                .collectLatest { query ->
+                    if (query.trim().length >= 3) {
+                        searchAddressUseCase(query)
+                            .onSuccess { list ->
+                                _suggestions.value = list
+                            }
+                            .onFailure {
+                                _suggestions.value = emptyList()
+                            }
+                    } else {
+                        _suggestions.value = emptyList()
+                    }
+                }
+        }
+    }
+
+    fun onAddressQueryChanged(query: String) {
+        _addressQuery.value = query
+    }
+
+    fun clearSuggestions() {
+        _suggestions.value = emptyList()
+    }
 
     fun loadAddresses() {
         viewModelScope.launch {

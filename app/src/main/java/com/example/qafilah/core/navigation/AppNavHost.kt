@@ -379,6 +379,7 @@ fun AppNavHost(
         composable(Screen.ShippingAddresses.route) {
             val addressViewModel: AddressViewModel = koinViewModel()
             val uiState by addressViewModel.uiState.collectAsState()
+            val suggestions by addressViewModel.suggestions.collectAsState()
 
             LaunchedEffect(Unit) {
                 addressViewModel.loadAddresses()
@@ -386,6 +387,13 @@ fun AppNavHost(
 
             ShippingAddressesScreen(
                 uiState = uiState,
+                suggestions = suggestions,
+                onAddressQueryChanged = { query ->
+                    addressViewModel.onAddressQueryChanged(query)
+                },
+                onClearSuggestions = {
+                    addressViewModel.clearSuggestions()
+                },
                 onBackClick = { navController.popBackStack() },
                 onSaveNewAddress = { address ->
                     addressViewModel.createAddress(address)
