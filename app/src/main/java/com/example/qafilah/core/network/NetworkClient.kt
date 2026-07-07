@@ -11,7 +11,7 @@ object ShopifyClient {
     const val QUALIFIER_STOREFRONT = "storefront_client"
     const val QUALIFIER_ADMIN = "admin_client"
 
-    var currentLanguage: String = "ar"
+    var currentLanguage: String = "en"
 
     private val loggingInterceptor = HttpLoggingInterceptor().apply {
         level = HttpLoggingInterceptor.Level.BODY

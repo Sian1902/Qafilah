@@ -2,13 +2,13 @@ package com.example.qafilah
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.qafilah.core.network.ShopifyClient
 import com.example.qafilah.core.preferences.AppPreferences
 import com.example.qafilah.core.preferences.ThemeMode
 import com.example.qafilah.core.token.TokenProvider
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -32,19 +32,27 @@ class MainViewModel(
     private val tokenProvider: TokenProvider
 ) : ViewModel() {
 
+    init {
+        viewModelScope.launch {
+            appPreferences.languageCode.collectLatest { lang ->
+                ShopifyClient.currentLanguage = lang
+            }
+        }
+    }
+
     val appState: StateFlow<AppState> = combine(
         appPreferences.themeMode,
         appPreferences.languageCode,
         appPreferences.isOnboardingCompleted
     ) { theme, lang, onboarding ->
         val isLoggedIn = tokenProvider.getToken() != null
-        
+
         val destination = when {
             !onboarding -> InitialDestination.Onboarding
             !isLoggedIn -> InitialDestination.Login
             else -> InitialDestination.Home
         }
-        
+
         AppState(
             themeMode = theme,
             languageCode = lang,
