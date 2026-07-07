@@ -28,6 +28,18 @@ fun OrdersScreen(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
+    val unknownErrorMessage = stringResource(R.string.error_unknown)
+    val labels = OrderLabels(
+        orderNumberPrefix = stringResource(R.string.order_number_label, "").trim(),
+        datePrefix = stringResource(R.string.order_date_label, "").trim(),
+        fulfilledLabel = stringResource(R.string.order_status_fulfilled),
+        processingLabel = stringResource(R.string.order_status_processing)
+    )
+
+    androidx.compose.runtime.LaunchedEffect(Unit) {
+        viewModel.loadOrders(unknownErrorMessage, labels)
+    }
+
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
@@ -69,14 +81,6 @@ fun OrdersScreen(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
-                        val unknownErrorMessage = stringResource(R.string.error_unknown)
-                        val labels = OrderLabels(
-                            orderNumberPrefix = stringResource(R.string.order_number_label, ""),
-                            datePrefix = stringResource(R.string.order_date_label, ""),
-                            fulfilledLabel = stringResource(R.string.order_status_fulfilled),
-                            processingLabel = stringResource(R.string.order_status_processing)
-                        )
-
                         Text(text = state.error!!, color = MaterialTheme.colorScheme.error)
                         Button(onClick = {
                             viewModel.loadOrders(
@@ -89,18 +93,6 @@ fun OrdersScreen(
                     }
                 }
                 state.orders.isEmpty() -> {
-                    val unknownErrorMessage = stringResource(R.string.error_unknown)
-                    val labels = OrderLabels(
-                        orderNumberPrefix = stringResource(R.string.order_number_label, "").trim(),
-                        datePrefix = stringResource(R.string.order_date_label, "").trim(),
-                        fulfilledLabel = stringResource(R.string.order_status_fulfilled),
-                        processingLabel = stringResource(R.string.order_status_processing)
-                    )
-                    
-                    androidx.compose.runtime.LaunchedEffect(Unit) {
-                        viewModel.loadOrders(unknownErrorMessage, labels)
-                    }
-
                     OrdersEmptyView(
                         title = stringResource(R.string.orders_empty_title),
                         subtitle = stringResource(R.string.orders_empty_subtitle),

@@ -3,12 +3,16 @@ package com.example.qafilah.features.orders.presentation.order
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.qafilah.core.currency.domain.usecase.ConvertPriceUseCase
+import com.example.qafilah.features.orders.domain.model.Order
 import com.example.qafilah.features.orders.domain.usecase.GetOrdersUseCase
 import com.example.qafilah.features.orders.domain.usecase.RefreshOrdersUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
 class OrdersViewModel(
@@ -26,14 +30,19 @@ class OrdersViewModel(
 
     private fun observeOrders() {
         viewModelScope.launch {
-            getOrdersUseCase().collectLatest { orders ->
-                updateUiModels(orders)
+            getOrdersUseCase().combine(
+                state.map { it.labels }.distinctUntilChanged()
+            ) { orders, labels ->
+                orders to labels
+            }.collectLatest { (orders, labels) ->
+                if (labels != null) {
+                    updateUiModels(orders, labels)
+                }
             }
         }
     }
 
-    private suspend fun updateUiModels(orders: List<com.example.qafilah.features.orders.domain.model.Order>) {
-        val labels = _state.value.labels ?: return
+    private suspend fun updateUiModels(orders: List<Order>, labels: OrderLabels) {
         val uiModels = orders.map { order ->
             val formattedPrice = try {
                 val cleanAmountStr = order.totalPrice.amount.replace(",", ".")
@@ -65,13 +74,9 @@ class OrdersViewModel(
         unknownErrorMessage: String,
         labels: OrderLabels
     ) {
+        _state.value = _state.value.copy(isLoading = true, error = null, labels = labels)
+
         viewModelScope.launch {
-            _state.value = _state.value.copy(isLoading = true, error = null, labels = labels)
-
-            viewModelScope.launch {
-                getOrdersUseCase().collectLatest { updateUiModels(it) }
-            }
-
             refreshOrdersUseCase()
                 .onSuccess {
                     _state.value = _state.value.copy(isLoading = false)

@@ -315,8 +315,6 @@ fun AppNavHost(
                 onOrdersClick = {
                     navController.navigate(Screen.Orders.route)
                 },
-                onSavedPaymentsClick = {
-                },
                 onShippingAddressesClick = {
                     navController.navigate(Screen.ShippingAddresses.route)
                 },
