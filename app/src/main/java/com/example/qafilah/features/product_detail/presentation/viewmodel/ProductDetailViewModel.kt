@@ -147,7 +147,7 @@ class ProductDetailViewModel(
             tag = product.tags.firstOrNull()?.uppercase() ?: labels.defaultCollectionLabel,
             rating = calculatedAverageRating,
             reviewCount = calculatedReviewCount,
-            ratingLabel = String.format(labels.ratingLabelTemplate, product.rating ?: 0.0, product.ratingCount ?: 0),
+            ratingLabel = String.format(labels.ratingLabelTemplate, calculatedAverageRating, calculatedReviewCount),
             displayPrice = displayPrice,
             stockText = stockText,
             stockColorInt = if (inStock) 0xFF4CAF50.toInt() else 0xFFF44336.toInt(),
@@ -258,9 +258,15 @@ class ProductDetailViewModel(
         body: String,
         rating: Int,
         successMessage: String,
-        errorMessage: String
+        errorMessage: String,
+        notLoggedInMessage: String
     ) {
         val product = currentProduct ?: return
+
+        if (FirebaseAuth.getInstance().currentUser == null) {
+            _events.trySend(ProductDetailEvent.ShowToast(notLoggedInMessage))
+            return
+        }
 
         viewModelScope.launch {
             _isSubmittingReview.value = true

@@ -61,7 +61,8 @@ fun ProductDetailScreen(
             defaultCollectionLabel = strings.defaultCollectionLabel,
             inStockTemplate = strings.inStockTemplate,
             outOfStockText = strings.outOfStockText,
-            ratingLabelTemplate = "%f (%d)"
+
+            ratingLabelTemplate = "%.1f (%d)"
         )
         viewModel.loadProduct(decodedId, strings.loadProductErrorFallback, labels)
     }
@@ -228,14 +229,36 @@ private fun ProductDetailContent(
 
                 if (product.optionGroups.isNotEmpty()) {
                     product.optionGroups.forEach { (optionName, optionValues) ->
-                        SelectablePillGroup(
-                            selectionLabel = optionName,
-                            options = optionValues,
-                            selectedOption = product.selectedOptions[optionName],
-                            onOptionSelected = { selectedVal ->
-                                viewModel.selectOption(optionName, selectedVal)
-                            }
-                        )
+
+                        val isColorGroup = optionName.equals("Color", ignoreCase = true) ||
+                                optionName.equals("Colour", ignoreCase = true)
+
+                        val localizedLabel = when (optionName.lowercase()) {
+                            "color", "colour" -> strings.optionColor
+                            "size" -> strings.optionSize
+                            "material" -> strings.optionMaterial
+                            else -> optionName
+                        }
+
+                        if (isColorGroup) {
+                            SelectableColorGroup(
+                                selectionLabel = localizedLabel,
+                                options = optionValues,
+                                selectedOption = product.selectedOptions[optionName],
+                                onOptionSelected = { selectedVal ->
+                                    viewModel.selectOption(optionName, selectedVal)
+                                }
+                            )
+                        } else {
+                            SelectablePillGroup(
+                                selectionLabel = localizedLabel,
+                                options = optionValues,
+                                selectedOption = product.selectedOptions[optionName],
+                                onOptionSelected = { selectedVal ->
+                                    viewModel.selectOption(optionName, selectedVal)
+                                }
+                            )
+                        }
                     }
                 }
 
@@ -283,7 +306,8 @@ private fun ProductDetailContent(
                                 body = reviewBody,
                                 rating = reviewRating,
                                 successMessage = strings.submitReviewSuccessMessage,
-                                errorMessage = strings.submitReviewErrorMessage
+                                errorMessage = strings.submitReviewErrorMessage,
+                                notLoggedInMessage = strings.addReviewNotLoggedInMessage
                             )
                         },
                         cardTitle = strings.addReviewCardTitle,

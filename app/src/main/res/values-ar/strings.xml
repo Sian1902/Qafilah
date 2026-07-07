@@ -317,5 +317,18 @@
     <string name="payment_pending_confirmation">الدفع معلق بانتظار التأكيد.</string>
     <string name="payment_sdk_launch_failed">فشل بدء تشغيل SDK: %1$s</string>
     <string name="payment_error_prefix">خطأ من Paymob: %1$s</string>
+    <string name="reviews_section_header">تقييمات العملاء</string>
+    <string name="empty_reviews_placeholder">لا توجد تقييمات بعد.</string>
+    <string name="add_review_card_title">كتابة تقييم</string>
+    <string name="add_review_name_label">اسمك</string>
+    <string name="add_review_title_label">عنوان التقييم</string>
+    <string name="add_review_body_label">رأيك</string>
+    <string name="add_review_submit_text">إرسال التقييم</string>
+    <string name="submit_review_success_message">تم إرسال التقييم</string>
+    <string name="submit_review_error_message">حدث خطأ ما</string>
+    <string name="add_review_not_logged_in_message">يرجى تسجيل الدخول لكتابة تقييم</string>
+    <string name="option_color">اللون</string>
+    <string name="option_size">الحجم</string>
+    <string name="option_material">الخامة</string>
 
 </resources>

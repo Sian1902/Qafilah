@@ -8,6 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -52,6 +53,9 @@ fun AppNavHost(
     modifier: Modifier = Modifier,
     mainViewModel: MainViewModel = koinViewModel()
 ) {
+
+    val currentStartDestination by rememberUpdatedState(newValue = startDestination)
+
     NavHost(
         navController = navController,
         startDestination = Screen.Splash.route,
@@ -61,7 +65,13 @@ fun AppNavHost(
         composable(Screen.Splash.route) {
             SplashScreen(
                 onSplashFinished = {
-                    navController.navigate(startDestination) {
+                    val targetRoute = if (currentStartDestination == Screen.Splash.route) {
+                        Screen.Login.route
+                    } else {
+                        currentStartDestination
+                    }
+
+                    navController.navigate(targetRoute) {
                         popUpTo(Screen.Splash.route) { inclusive = true }
                     }
                 }
