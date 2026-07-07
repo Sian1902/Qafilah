@@ -25,7 +25,14 @@ fun rememberProductDetailStrings() = ProductDetailStrings(
     cartNotLoggedInMessage = stringResource(R.string.error_login_to_add_to_cart),
     addToCartSuccessMessage = stringResource(R.string.added_to_cart_success),
     reviewsSectionHeader = "Customer Reviews",
-    emptyReviewsPlaceholder = "No reviews yet."
+    emptyReviewsPlaceholder = "No reviews yet.",
+    addReviewCardTitle = "Write a Review",
+    addReviewNameLabel = "Your Name",
+    addReviewTitleLabel = "Review Title",
+    addReviewBodyLabel = "Your Feedback",
+    addReviewSubmitText = "Submit Review",
+    submitReviewSuccessMessage = "Review Submitted",
+    submitReviewErrorMessage = "Something went wrong",
 )
 
 data class ProductDetailStrings(
@@ -48,5 +55,12 @@ data class ProductDetailStrings(
     val cartNotLoggedInMessage: String,
     val addToCartSuccessMessage: String,
     val reviewsSectionHeader: String,
-    val emptyReviewsPlaceholder: String
+    val emptyReviewsPlaceholder: String,
+    val addReviewCardTitle: String,
+    val addReviewNameLabel: String,
+    val addReviewTitleLabel: String,
+    val addReviewBodyLabel: String,
+    val addReviewSubmitText: String,
+    val submitReviewSuccessMessage: String,
+    val submitReviewErrorMessage: String,
 )

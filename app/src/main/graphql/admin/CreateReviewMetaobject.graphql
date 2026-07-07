@@ -1,0 +1,11 @@
+mutation CreateReviewMetaobject($metaobject: MetaobjectCreateInput!) {
+    metaobjectCreate(metaobject: $metaobject) {
+        metaobject {
+            id
+        }
+        userErrors {
+            field
+            message
+        }
+    }
+}

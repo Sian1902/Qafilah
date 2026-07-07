@@ -4,6 +4,7 @@ import com.example.qafilah.core.model.Product
 import com.example.qafilah.features.catalog.domain.model.CollectionWithProducts
 import com.example.qafilah.features.catalog.domain.model.ProductDetails
 import com.example.qafilah.features.catalog.domain.model.StoreCollection
+import com.example.qafilah.features.catalog.domain.model.SubmitReviewParams
 
 interface CatalogRepository {
     suspend fun searchProducts(query: String, limit: Int): Result<List<Product>>
@@ -16,5 +17,5 @@ interface CatalogRepository {
 
     suspend fun getProductsByType(productType: String, limit: Int): List<Product>
 
-
+    suspend fun submitProductReview(params: SubmitReviewParams): Result<Unit>
 }

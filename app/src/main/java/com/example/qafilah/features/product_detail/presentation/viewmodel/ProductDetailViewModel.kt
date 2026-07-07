@@ -7,6 +7,8 @@ import com.example.qafilah.features.catalog.domain.model.ProductDetails
 import com.example.qafilah.features.catalog.domain.model.ProductVariant
 import com.example.qafilah.features.catalog.domain.usecases.GetSingleProductUseCase
 import com.example.qafilah.core.currency.domain.usecase.ConvertPriceUseCase
+import com.example.qafilah.features.catalog.domain.model.SubmitReviewParams
+import com.example.qafilah.features.catalog.domain.usecases.SubmitProductReviewUseCase
 import com.example.qafilah.features.wishlist.domain.usecase.AddToWishlistParams
 import com.example.qafilah.features.wishlist.domain.usecase.AddToWishlistUseCase
 import com.example.qafilah.features.wishlist.domain.usecase.IsProductWishlistedUseCase
@@ -22,6 +24,7 @@ import kotlin.collections.iterator
 
 sealed interface ProductDetailEvent {
     data class ShowToast(val message: String) : ProductDetailEvent
+    object ReviewSubmittedSuccessfully : ProductDetailEvent
 }
 
 class ProductDetailViewModel(
@@ -30,7 +33,8 @@ class ProductDetailViewModel(
     private val addToWishlistUseCase: AddToWishlistUseCase,
     private val removeFromWishlistUseCase: RemoveFromWishlistUseCase,
     private val addCartItemUseCase: AddCartItemUseCase,
-    private val convertPriceUseCase: ConvertPriceUseCase
+    private val convertPriceUseCase: ConvertPriceUseCase,
+    private val submitProductReviewUseCase: SubmitProductReviewUseCase,
 ) : ViewModel() {
 
     private val _events = Channel<ProductDetailEvent>(Channel.BUFFERED)
@@ -39,6 +43,9 @@ class ProductDetailViewModel(
     private val _uiState = MutableStateFlow<ProductDetailUiState>(ProductDetailUiState.Loading)
     val uiState: StateFlow<ProductDetailUiState> = _uiState.asStateFlow()
 
+    private val _isSubmittingReview = MutableStateFlow(false)
+    val isSubmittingReview: StateFlow<Boolean> = _isSubmittingReview.asStateFlow()
+
     private var lastLoadedId: String? = null
     private var currentProduct: ProductDetails? = null
     private var selectedVariant: ProductVariant? = null
@@ -46,9 +53,14 @@ class ProductDetailViewModel(
     private var isFavorite: Boolean = false
     private var labels: ProductDetailLabels? = null
 
-    fun loadProduct(productId: String, fallbackErrorMessage: String, labels: ProductDetailLabels) {
+    fun loadProduct(
+        productId: String, fallbackErrorMessage: String,
+        labels: ProductDetailLabels,
+        forceRefresh: Boolean = false
+    ) {
         this.labels = labels
-        if (productId == lastLoadedId && _uiState.value is ProductDetailUiState.Success) return
+
+        if (!forceRefresh && productId == lastLoadedId && _uiState.value is ProductDetailUiState.Success) return
 
         lastLoadedId = productId
         viewModelScope.launch {
@@ -221,5 +233,40 @@ class ProductDetailViewModel(
     fun dismissCartError() {
         val currentState = _uiState.value as? ProductDetailUiState.Success ?: return
         _uiState.value = currentState.copy(addToCartError = null)
+    }
+
+    fun submitReview(
+        title: String,
+        body: String,
+        rating: Int,
+        successMessage: String,
+        errorMessage: String
+    ) {
+        val product = currentProduct ?: return
+
+        viewModelScope.launch {
+            _isSubmittingReview.value = true
+
+            val formatter = java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", java.util.Locale.getDefault())
+            formatter.timeZone = java.util.TimeZone.getTimeZone("UTC")
+            val dateString = formatter.format(java.util.Date())
+
+            submitProductReviewUseCase(
+                productId = product.id,
+                rating = rating,
+                title = title,
+                body = body,
+                dateString = dateString
+            ).onSuccess {
+                _isSubmittingReview.value = false
+                _events.trySend(ProductDetailEvent.ShowToast(successMessage))
+                _events.trySend(ProductDetailEvent.ReviewSubmittedSuccessfully)
+
+                labels?.let { loadProduct(product.id, errorMessage, it, forceRefresh = true) }
+            }.onFailure { error ->
+                _isSubmittingReview.value = false
+                _events.trySend(ProductDetailEvent.ShowToast(error.message ?: errorMessage))
+            }
+        }
     }
 }

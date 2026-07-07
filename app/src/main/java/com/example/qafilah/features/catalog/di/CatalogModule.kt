@@ -5,6 +5,8 @@ import com.example.qafilah.features.catalog.data.datasource.AdsCouponDataStore
 import com.example.qafilah.features.catalog.data.datasource.AdsCouponDataStoreImpl
 import com.example.qafilah.features.catalog.data.datasource.CatalogRemoteDataSource
 import com.example.qafilah.features.catalog.data.datasource.CatalogRemoteDataSourceImpl
+import com.example.qafilah.features.catalog.data.datasource.ReviewsRemoteDataSource
+import com.example.qafilah.features.catalog.data.datasource.ReviewsRemoteDataSourceImpl
 import com.example.qafilah.features.catalog.data.repo.AdsRepositoryImpl
 import com.example.qafilah.features.catalog.data.repo.CatalogRepositoryImpl
 import com.example.qafilah.features.catalog.domain.repo.AdsRepository
@@ -19,6 +21,7 @@ import com.example.qafilah.features.catalog.domain.usecases.GetPendingAdCouponUs
 import com.example.qafilah.features.catalog.domain.usecases.GetSingleProductUseCase
 import com.example.qafilah.features.catalog.domain.usecases.SaveAdCouponUseCase
 import com.example.qafilah.features.catalog.domain.usecases.SearchProductsUseCase
+import com.example.qafilah.features.catalog.domain.usecases.SubmitProductReviewUseCase
 import com.example.qafilah.features.catalog.presentation.CatalogViewModel
 import org.koin.core.module.dsl.viewModel
 import org.koin.core.qualifier.named
@@ -27,10 +30,12 @@ import org.koin.dsl.module
 val catalogModule = module {
     single<CatalogRemoteDataSource> { CatalogRemoteDataSourceImpl(apolloClient = get(named(ShopifyClient.QUALIFIER_STOREFRONT))) }
     single<AdsCouponDataStore>{ AdsCouponDataStoreImpl(get()) }
+    single<ReviewsRemoteDataSource> { ReviewsRemoteDataSourceImpl(adminApolloClient = get(named(ShopifyClient.QUALIFIER_ADMIN))) }
 
     single<CatalogRepository> {
         CatalogRepositoryImpl(
-            remoteDataSource = get()
+            catalogRemoteDataSource = get(),
+            reviewsRemoteDataSource = get()
         )
     }
     single<AdsRepository> { AdsRepositoryImpl(get() ) }
@@ -45,6 +50,7 @@ val catalogModule = module {
     factory<GetPendingAdCouponUseCase> { GetPendingAdCouponUseCase(repository = get()) }
     factory<SaveAdCouponUseCase>{ SaveAdCouponUseCase(get()) }
     factory<ClearPendingAdCouponUseCase> { ClearPendingAdCouponUseCase(get()) }
+    factory<SubmitProductReviewUseCase> { SubmitProductReviewUseCase(get(), get()) }
 
 
     viewModel {

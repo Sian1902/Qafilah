@@ -2,17 +2,20 @@ package com.example.qafilah.features.catalog.data.repo
 
 import com.example.qafilah.core.model.Product
 import com.example.qafilah.features.catalog.data.datasource.CatalogRemoteDataSource
+import com.example.qafilah.features.catalog.data.datasource.ReviewsRemoteDataSource
 import com.example.qafilah.features.catalog.data.mapper.toDomain
 import com.example.qafilah.features.catalog.data.mapper.toStoreCollection
 import com.example.qafilah.features.catalog.domain.model.CollectionWithProducts
 import com.example.qafilah.features.catalog.domain.model.ProductDetails
 import com.example.qafilah.features.catalog.domain.model.StoreCollection
+import com.example.qafilah.features.catalog.domain.model.SubmitReviewParams
 import com.example.qafilah.features.catalog.domain.repo.CatalogRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 class CatalogRepositoryImpl(
-    private val remoteDataSource: CatalogRemoteDataSource
+    private val catalogRemoteDataSource: CatalogRemoteDataSource,
+    private val reviewsRemoteDataSource: ReviewsRemoteDataSource
 ) : CatalogRepository {
     override suspend fun searchProducts(
         query: String,
@@ -20,7 +23,7 @@ class CatalogRepositoryImpl(
     ): Result<List<Product>> {
         return withContext(Dispatchers.IO) {
             try {
-                val products = remoteDataSource.searchProducts(query, limit)
+                val products = catalogRemoteDataSource.searchProducts(query, limit)
 
                 Result.success(products.map { it.toDomain() })
             } catch (e: Exception) {
@@ -38,7 +41,7 @@ class CatalogRepositoryImpl(
                     "gid://shopify/Product/$productId"
                 }
 
-                val productData = remoteDataSource.getProduct(formattedId)
+                val productData = catalogRemoteDataSource.getProduct(formattedId)
                     ?: throw Exception("Product not found")
 
                 Result.success(productData.toDomain())
@@ -51,12 +54,12 @@ class CatalogRepositoryImpl(
 
 
     override suspend fun getBestSellingProducts(limit: Int, after: String?): List<Product> {
-        val networkResult = remoteDataSource.getBestSellingProducts(limit, after)
+        val networkResult = catalogRemoteDataSource.getBestSellingProducts(limit, after)
         return networkResult.map { it.toDomain() }
     }
 
     override suspend fun getCollections(limit: Int, after: String?): List<StoreCollection> {
-        val response = remoteDataSource.getCollections(limit, after)
+        val response = catalogRemoteDataSource.getCollections(limit, after)
         return response.collections.edges.map { edge ->
             edge.node.toDomain()
         }
@@ -64,7 +67,7 @@ class CatalogRepositoryImpl(
 
     override suspend fun getProductsByCollection(id: String): CollectionWithProducts {
 
-        val response = remoteDataSource.getProductsByCollection(id)
+        val response = catalogRemoteDataSource.getProductsByCollection(id)
 
         val collectionData = response.collection ?: throw Exception("Collection not found")
 
@@ -78,8 +81,56 @@ class CatalogRepositoryImpl(
     }
 
     override suspend fun getProductTypes(limit: Int): List<String> =
-        remoteDataSource.getProductTypes(limit)
+        catalogRemoteDataSource.getProductTypes(limit)
 
     override suspend fun getProductsByType(productType: String, limit: Int): List<Product> =
-        remoteDataSource.getProductsByType(productType, limit).map { it.toDomain() }
+        catalogRemoteDataSource.getProductsByType(productType, limit).map { it.toDomain() }
+
+    override suspend fun submitProductReview(params: SubmitReviewParams): Result<Unit> {
+        return withContext(Dispatchers.IO) {
+            try {
+                val formattedId = if (params.productId.startsWith("gid://")) {
+                    params.productId
+                } else {
+                    "gid://shopify/Product/${params.productId}"
+                }
+
+                val newMetaobjectId = reviewsRemoteDataSource.createReviewMetaobject(
+                    productId = formattedId,
+                    name = params.customerName,
+                    rating = params.rating,
+                    title = params.title,
+                    body = params.body,
+                    date = params.dateString
+                ) ?: throw Exception("Failed to generate review ID")
+
+                val currentJsonArrayStr = reviewsRemoteDataSource.getProductReviewMetafieldValue(formattedId)
+
+                val currentIds = if (currentJsonArrayStr.isNullOrBlank()) {
+                    emptyList<String>()
+                } else {
+                    currentJsonArrayStr
+                        .removePrefix("[")
+                        .removeSuffix("]")
+                        .split(",")
+                        .map { it.trim().removeSurrounding("\"") }
+                        .filter { it.isNotBlank() }
+                }
+
+                val updatedIds = currentIds + newMetaobjectId
+
+                val newJsonArrayStr = updatedIds.joinToString(
+                    separator = ",",
+                    prefix = "[",
+                    postfix = "]"
+                ) { "\"$it\"" }
+
+                reviewsRemoteDataSource.setProductReviewMetafield(formattedId, newJsonArrayStr)
+
+                Result.success(Unit)
+            } catch (e: Exception) {
+                Result.failure(e)
+            }
+        }
+    }
 }

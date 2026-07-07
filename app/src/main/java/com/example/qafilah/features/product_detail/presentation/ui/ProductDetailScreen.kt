@@ -24,6 +24,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -67,10 +68,8 @@ fun ProductDetailScreen(
 
     LaunchedEffect(Unit) {
         viewModel.events.collect { event ->
-            when (event) {
-                is ProductDetailEvent.ShowToast -> {
-                    Toast.makeText(context, event.message, Toast.LENGTH_SHORT).show()
-                }
+            if (event is ProductDetailEvent.ShowToast) {
+                Toast.makeText(context, event.message, Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -123,10 +122,26 @@ private fun ProductDetailContent(
     val product = state.product
     val specs = remember { emptyList<SpecItem>() }
 
+    val (reviewTitle, setReviewTitle) = remember { mutableStateOf("") }
+    val (reviewBody, setReviewBody) = remember { mutableStateOf("") }
+    val (reviewRating, setReviewRating) = remember { mutableStateOf(0) }
+
+    val isSubmittingReview by viewModel.isSubmittingReview.collectAsStateWithLifecycle()
+
     LaunchedEffect(state.addToCartError) {
         if (state.addToCartError != null) {
             Toast.makeText(context, state.addToCartError, Toast.LENGTH_LONG).show()
             viewModel.dismissCartError()
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        viewModel.events.collect { event ->
+            if (event is ProductDetailEvent.ReviewSubmittedSuccessfully) {
+                setReviewTitle("")
+                setReviewBody("")
+                setReviewRating(0)
+            }
         }
     }
 
@@ -241,6 +256,30 @@ private fun ProductDetailContent(
                         text = strings.reviewsSectionHeader,
                         style = MaterialTheme.typography.headlineMedium,
                         color = MaterialTheme.colorScheme.onBackground
+                    )
+
+                    AddReviewCard(
+                        title = reviewTitle,
+                        onTitleChange = setReviewTitle,
+                        body = reviewBody,
+                        onBodyChange = setReviewBody,
+                        rating = reviewRating,
+                        onRatingChange = setReviewRating,
+                        isSubmitting = isSubmittingReview,
+                        onSubmitClick = {
+                            viewModel.submitReview(
+                                title = reviewTitle,
+                                body = reviewBody,
+                                rating = reviewRating,
+                                successMessage = strings.submitReviewSuccessMessage,
+                                errorMessage = strings.submitReviewErrorMessage
+                            )
+                        },
+                        cardTitle = strings.addReviewCardTitle,
+                        nameLabel = strings.addReviewNameLabel,
+                        titleLabel = strings.addReviewTitleLabel,
+                        bodyLabel = strings.addReviewBodyLabel,
+                        submitButtonText = strings.addReviewSubmitText
                     )
 
                     if (product.reviews.isEmpty()) {
