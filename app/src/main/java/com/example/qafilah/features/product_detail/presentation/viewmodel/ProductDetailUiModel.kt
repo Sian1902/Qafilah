@@ -17,7 +17,8 @@ data class ProductDetailUiModel(
     val selectedOptions: Map<String, String>,
     val selectedVariantId: String,
     val isFavorite: Boolean,
-    val reviews: List<UiReviewItem>
+    val reviews: List<UiReviewItem>,
+    val ratingBreakdown: List<RatingHistogramBar>
 )
 
 data class UiReviewItem(
@@ -27,4 +28,10 @@ data class UiReviewItem(
     val title: String,
     val body: String,
     val createdAt: String
+)
+
+data class RatingHistogramBar(
+    val stars: Int,
+    val count: Int,
+    val percentage: Float
 )

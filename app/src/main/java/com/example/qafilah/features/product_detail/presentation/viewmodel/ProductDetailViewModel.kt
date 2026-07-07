@@ -122,14 +122,31 @@ class ProductDetailViewModel(
             labels.outOfStockText
         }
 
+        val calculatedReviewCount = product.reviews.size
+        val calculatedAverageRating = if (calculatedReviewCount > 0) {
+            product.reviews.sumOf { it.rating }.toDouble() / calculatedReviewCount
+        } else {
+            0.0
+        }
+
+        val histogram = (5 downTo 1).map { starLevel ->
+            val countForStar = product.reviews.count { it.rating == starLevel }
+            val percentage = if (calculatedReviewCount > 0) {
+                countForStar.toFloat() / calculatedReviewCount.toFloat()
+            } else {
+                0f
+            }
+            RatingHistogramBar(stars = starLevel, count = countForStar, percentage = percentage)
+        }
+
         val uiModel = ProductDetailUiModel(
             id = product.id,
             title = product.title,
             description = product.description ?: "",
             images = product.images,
             tag = product.tags.firstOrNull()?.uppercase() ?: labels.defaultCollectionLabel,
-            rating = product.rating,
-            reviewCount = product.ratingCount,
+            rating = calculatedAverageRating,
+            reviewCount = calculatedReviewCount,
             ratingLabel = String.format(labels.ratingLabelTemplate, product.rating ?: 0.0, product.ratingCount ?: 0),
             displayPrice = displayPrice,
             stockText = stockText,
@@ -147,9 +164,10 @@ class ProductDetailViewModel(
                     rating = domainReview.rating,
                     title = domainReview.title,
                     body = domainReview.body,
-                    createdAt = domainReview.createdAt.substringBefore("T")
+                    createdAt = domainReview.createdAt.substringBefore("T"),
                 )
-            }
+            },
+            ratingBreakdown = histogram
         )
 
         val currentState = _uiState.value

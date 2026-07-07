@@ -250,13 +250,24 @@ private fun ProductDetailContent(
 
                 Column(
                     modifier = Modifier.fillMaxWidth(),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
                     Text(
                         text = strings.reviewsSectionHeader,
                         style = MaterialTheme.typography.headlineMedium,
                         color = MaterialTheme.colorScheme.onBackground
                     )
+
+                    if (product.reviews.isNotEmpty()) {
+                        RatingHistogram(
+                            averageRating = product.rating ?: 0.0,
+                            totalReviews = product.reviewCount ?: 0,
+                            ratingLabel = "${product.reviewCount} Reviews",
+                            breakdown = product.ratingBreakdown.map { Pair(it.stars, it.percentage) }
+                        )
+
+                        Spacer(modifier = Modifier.height(8.dp))
+                    }
 
                     AddReviewCard(
                         title = reviewTitle,
