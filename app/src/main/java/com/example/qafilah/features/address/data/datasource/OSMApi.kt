@@ -12,6 +12,7 @@ interface OsmApi {
         @Query("format") format: String = "json",
         @Query("addressdetails") addressDetails: Int = 1,
         @Query("limit") limit: Int = 5,
+        @Query("accept-language") language: String = "en",
         @Header("User-Agent") userAgent: String = "QafilahApp/1.0 (mahmoudcr7m10@gmail.com)"
 
     ): List<NominatimResponse>

@@ -39,23 +39,30 @@ class AddressViewModel(
     private val _suggestions = MutableStateFlow<List<AddressSuggestion>>(emptyList())
     val suggestions: StateFlow<List<AddressSuggestion>> = _suggestions.asStateFlow()
 
+    private val _isSearching = MutableStateFlow(false)
+    val isSearching: StateFlow<Boolean> = _isSearching.asStateFlow()
+
     init {
         viewModelScope.launch {
             @OptIn(FlowPreview::class)
             _addressQuery
-                .debounce(600L)
+                .debounce(600L) // User stops typing for 600ms
                 .distinctUntilChanged()
                 .collectLatest { query ->
                     if (query.trim().length >= 3) {
+                        _isSearching.value = true // Start loading indicator
                         searchAddressUseCase(query)
                             .onSuccess { list ->
                                 _suggestions.value = list
+                                _isSearching.value = false // Stop loading
                             }
                             .onFailure {
                                 _suggestions.value = emptyList()
+                                _isSearching.value = false // Stop loading
                             }
                     } else {
                         _suggestions.value = emptyList()
+                        _isSearching.value = false
                     }
                 }
         }

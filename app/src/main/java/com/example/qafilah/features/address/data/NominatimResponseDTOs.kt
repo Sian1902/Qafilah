@@ -10,6 +10,7 @@ data class NominatimResponse(
 
 data class NominatimAddressDetails(
     val road: String?,
+    val suburb: String?,
     val city: String?,
     val town: String?,
     val state: String?,
@@ -18,9 +19,16 @@ data class NominatimAddressDetails(
 )
 
 fun NominatimResponse.toDomainModel(): AddressSuggestion {
+    val roadName = this.addressDetails?.road ?: ""
+    val suburbName = this.addressDetails?.suburb ?: ""
+
+    // 2. Combine them, ignoring empty strings
+    val combinedStreet = listOf(roadName, suburbName)
+        .filter { it.isNotBlank() }
+        .joinToString(", ")
     return AddressSuggestion(
         displayName = this.displayName,
-        street = this.addressDetails?.road ?: "",
+        street = combinedStreet,
         city = this.addressDetails?.city ?: this.addressDetails?.town ?: "",
         province = this.addressDetails?.state ?: "",
         country = this.addressDetails?.country ?: "",

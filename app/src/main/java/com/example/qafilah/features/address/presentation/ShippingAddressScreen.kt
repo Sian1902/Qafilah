@@ -41,6 +41,7 @@ import androidx.compose.ui.platform.LocalFocusManager
 @Composable
 fun ShippingAddressesScreen(
     uiState: ShippingAddressesUiState,
+    isSearching: Boolean,
     suggestions: List<AddressSuggestion>,
     onAddressQueryChanged: (String) -> Unit,
     onClearSuggestions: () -> Unit,
@@ -237,6 +238,7 @@ fun ShippingAddressesScreen(
                 AddAddressSheetContent(
                     initialAddress = editingAddress,
                     isOperationInProgress = uiState.isOperationInProgress,
+                    isSearching = isSearching,
                     suggestions = suggestions,
                     onAddressQueryChanged = onAddressQueryChanged,
                     onClearSuggestions = onClearSuggestions,
@@ -280,6 +282,7 @@ fun ShippingAddressesScreen(
 fun AddAddressSheetContent(
     initialAddress: ShippingAddress?,
     isOperationInProgress: Boolean,
+    isSearching: Boolean,
     suggestions: List<AddressSuggestion>,
     onAddressQueryChanged: (String) -> Unit,
     onClearSuggestions: () -> Unit,
@@ -301,6 +304,7 @@ fun AddAddressSheetContent(
     var phone by remember(initialAddress?.id) { mutableStateOf(initialAddress?.phone.orEmpty()) }
     var isDefault by remember(initialAddress?.id) { mutableStateOf(initialAddress?.isDefault ?: false) }
     var dropdownExpanded by remember { mutableStateOf(false) }
+    var isSelectedFromApi by remember(initialAddress?.id) { mutableStateOf(initialAddress != null) }
     val focusManager = LocalFocusManager.current
 
     Column(
@@ -323,6 +327,7 @@ fun AddAddressSheetContent(
             value = street,
             onValueChange = {
                 street = it
+                isSelectedFromApi = false
                 onAddressQueryChanged(it)
                 dropdownExpanded = true
             },
@@ -357,7 +362,7 @@ fun AddAddressSheetContent(
                                 province = suggestion.province
                                 country = suggestion.country
                                 zipCode = suggestion.zipCode
-
+                                isSelectedFromApi = true
                                 dropdownExpanded = false
                                 onClearSuggestions()
                                 focusManager.clearFocus() // <-- This hides the keyboard instantly!
@@ -370,13 +375,13 @@ fun AddAddressSheetContent(
             }
         }
         Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-            QafilahTextField(label = stringResource(R.string.address_city_label), value = city, onValueChange = { city = it }, placeholder = "Cairo", modifier = Modifier.weight(1f))
-            QafilahTextField(label = stringResource(R.string.address_province_label), value = province, onValueChange = { province = it }, placeholder = "Cairo", modifier = Modifier.weight(1f))
+            QafilahTextField(label = stringResource(R.string.address_city_label), value = city, onValueChange = { city = it }, placeholder = "Cairo", modifier = Modifier.weight(1f),enabled = false)
+            QafilahTextField(label = stringResource(R.string.address_province_label), value = province, onValueChange = { province = it }, placeholder = "Cairo", modifier = Modifier.weight(1f),enabled = false)
         }
 
         Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-            QafilahTextField(label = stringResource(R.string.address_country_label), value = country, onValueChange = { country = it }, placeholder = "Egypt", modifier = Modifier.weight(1f))
-            QafilahTextField(label = stringResource(R.string.address_zip_label), value = zipCode, onValueChange = { zipCode = it }, placeholder = "11511", modifier = Modifier.weight(1f))
+            QafilahTextField(label = stringResource(R.string.address_country_label), value = country, onValueChange = { country = it }, placeholder = "Egypt", modifier = Modifier.weight(1f),enabled = false)
+            QafilahTextField(label = stringResource(R.string.address_zip_label), value = zipCode, onValueChange = { zipCode = it }, placeholder = "11511", modifier = Modifier.weight(1f),enabled = false)
         }
         QafilahTextField(
             label = stringResource(R.string.phone_number),
@@ -416,7 +421,7 @@ fun AddAddressSheetContent(
             )
         }
 
-        val canSave = street.isNotBlank() && !isOperationInProgress
+        val canSave = street.isNotBlank() && isSelectedFromApi && !isOperationInProgress
 
         Button(
             onClick = {

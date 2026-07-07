@@ -380,6 +380,7 @@ fun AppNavHost(
             val addressViewModel: AddressViewModel = koinViewModel()
             val uiState by addressViewModel.uiState.collectAsState()
             val suggestions by addressViewModel.suggestions.collectAsState()
+            val isSearching by addressViewModel.isSearching.collectAsState()
 
             LaunchedEffect(Unit) {
                 addressViewModel.loadAddresses()
@@ -387,6 +388,7 @@ fun AppNavHost(
 
             ShippingAddressesScreen(
                 uiState = uiState,
+                isSearching = isSearching,
                 suggestions = suggestions,
                 onAddressQueryChanged = { query ->
                     addressViewModel.onAddressQueryChanged(query)
