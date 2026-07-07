@@ -34,11 +34,17 @@ import com.example.ui_kit.components.address.GlassAddressCard
 import com.example.ui_kit.components.address.QafilahTextField
 import com.example.ui_kit.components.shared.QafilahConfirmationDialog
 import kotlinx.coroutines.launch
+import com.example.qafilah.features.address.domain.model.AddressSuggestion
+import androidx.compose.ui.platform.LocalFocusManager
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ShippingAddressesScreen(
     uiState: ShippingAddressesUiState,
+    isSearching: Boolean,
+    suggestions: List<AddressSuggestion>,
+    onAddressQueryChanged: (String) -> Unit,
+    onClearSuggestions: () -> Unit,
     onBackClick: () -> Unit,
     onSaveNewAddress: (ShippingAddress) -> Unit,
     onEditAddress: (ShippingAddress) -> Unit,
@@ -232,6 +238,10 @@ fun ShippingAddressesScreen(
                 AddAddressSheetContent(
                     initialAddress = editingAddress,
                     isOperationInProgress = uiState.isOperationInProgress,
+                    isSearching = isSearching,
+                    suggestions = suggestions,
+                    onAddressQueryChanged = onAddressQueryChanged,
+                    onClearSuggestions = onClearSuggestions,
                     onSaveClick = { address ->
                         waitingForSheetClose = true
                         if (editingAddress != null) {
@@ -267,10 +277,15 @@ fun ShippingAddressesScreen(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddAddressSheetContent(
     initialAddress: ShippingAddress?,
     isOperationInProgress: Boolean,
+    isSearching: Boolean,
+    suggestions: List<AddressSuggestion>,
+    onAddressQueryChanged: (String) -> Unit,
+    onClearSuggestions: () -> Unit,
     onSaveClick: (ShippingAddress) -> Unit,
     onDeleteClick: (String) -> Unit
 ) {
@@ -288,6 +303,9 @@ fun AddAddressSheetContent(
     var zipCode by remember(initialAddress?.id) { mutableStateOf(splitLocation.getOrNull(3).orEmpty()) }
     var phone by remember(initialAddress?.id) { mutableStateOf(initialAddress?.phone.orEmpty()) }
     var isDefault by remember(initialAddress?.id) { mutableStateOf(initialAddress?.isDefault ?: false) }
+    var dropdownExpanded by remember { mutableStateOf(false) }
+    var isSelectedFromApi by remember(initialAddress?.id) { mutableStateOf(initialAddress != null) }
+    val focusManager = LocalFocusManager.current
 
     Column(
         modifier = Modifier
@@ -303,16 +321,67 @@ fun AddAddressSheetContent(
             modifier = Modifier.padding(bottom = 8.dp)
         )
 
-        QafilahTextField(label = stringResource(R.string.address_street_label), value = street, onValueChange = { street = it }, placeholder = "e.g. 123 Tahrir St")
+        // 1. The standard text field (no longer wrapped in a Box)
+        QafilahTextField(
+            label = stringResource(R.string.address_street_label),
+            value = street,
+            onValueChange = {
+                street = it
+                isSelectedFromApi = false
+                onAddressQueryChanged(it)
+                dropdownExpanded = true
+            },
+            placeholder = "e.g. 123 Tahrir St",
+        )
 
+        AnimatedVisibility(
+            visible = dropdownExpanded && suggestions.isNotEmpty()
+        ) {
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(max = 220.dp) // Stops the list from taking over the screen
+                    .padding(top = 4.dp, bottom = 8.dp),
+                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+            ) {
+                LazyColumn {
+                    items(suggestions) { suggestion ->
+                        DropdownMenuItem(
+                            text = {
+                                Text(
+                                    text = suggestion.displayName,
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+                            },
+                            onClick = {
+                                // Automatically populate form fields when item clicked
+                                street = suggestion.street
+                                city = suggestion.city
+                                province = suggestion.province
+                                country = suggestion.country
+                                zipCode = suggestion.zipCode
+                                isSelectedFromApi = true
+                                dropdownExpanded = false
+                                onClearSuggestions()
+                                focusManager.clearFocus() // <-- This hides the keyboard instantly!
+                            },
+                            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp)
+                        )
+                        HorizontalDivider(modifier = Modifier.padding(horizontal = 8.dp))
+                    }
+                }
+            }
+        }
         Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-            QafilahTextField(label = stringResource(R.string.address_city_label), value = city, onValueChange = { city = it }, placeholder = "Cairo", modifier = Modifier.weight(1f))
-            QafilahTextField(label = stringResource(R.string.address_province_label), value = province, onValueChange = { province = it }, placeholder = "Cairo", modifier = Modifier.weight(1f))
+            QafilahTextField(label = stringResource(R.string.address_city_label), value = city, onValueChange = { city = it }, placeholder = "Cairo", modifier = Modifier.weight(1f),enabled = false)
+            QafilahTextField(label = stringResource(R.string.address_province_label), value = province, onValueChange = { province = it }, placeholder = "Cairo", modifier = Modifier.weight(1f),enabled = false)
         }
 
         Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-            QafilahTextField(label = stringResource(R.string.address_country_label), value = country, onValueChange = { country = it }, placeholder = "Egypt", modifier = Modifier.weight(1f))
-            QafilahTextField(label = stringResource(R.string.address_zip_label), value = zipCode, onValueChange = { zipCode = it }, placeholder = "11511", modifier = Modifier.weight(1f))
+            QafilahTextField(label = stringResource(R.string.address_country_label), value = country, onValueChange = { country = it }, placeholder = "Egypt", modifier = Modifier.weight(1f),enabled = false)
+            QafilahTextField(label = stringResource(R.string.address_zip_label), value = zipCode, onValueChange = { zipCode = it }, placeholder = "11511", modifier = Modifier.weight(1f),enabled = false)
         }
         QafilahTextField(
             label = stringResource(R.string.phone_number),
@@ -352,7 +421,7 @@ fun AddAddressSheetContent(
             )
         }
 
-        val canSave = street.isNotBlank() && !isOperationInProgress
+        val canSave = street.isNotBlank() && isSelectedFromApi && !isOperationInProgress
 
         Button(
             onClick = {

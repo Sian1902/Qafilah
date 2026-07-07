@@ -19,7 +19,10 @@ fun QafilahTextField(
     value: String,
     onValueChange: (String) -> Unit,
     placeholder: String,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    textFieldModifier: Modifier = Modifier,
+    enabled: Boolean = true,
+    trailingIcon: @Composable (() -> Unit)? = null
 ) {
     val glassBackground = Color.White.copy(alpha = 0.08f)
     val glassBorder = Color.White.copy(alpha = 0.12f)
@@ -34,10 +37,12 @@ fun QafilahTextField(
         OutlinedTextField(
             value = value,
             onValueChange = onValueChange,
+            enabled = enabled,
             placeholder = {
                 Text(placeholder, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f))
             },
-            modifier = Modifier.fillMaxWidth(),
+            trailingIcon = trailingIcon,
+            modifier = Modifier.fillMaxWidth().then(textFieldModifier),
             shape = RoundedCornerShape(8.dp),
             colors = OutlinedTextFieldDefaults.colors(
                 focusedContainerColor = glassBackground,
@@ -45,7 +50,10 @@ fun QafilahTextField(
                 focusedBorderColor = MaterialTheme.colorScheme.primary,
                 unfocusedBorderColor = glassBorder,
                 focusedTextColor = MaterialTheme.colorScheme.onSurface,
-                unfocusedTextColor = MaterialTheme.colorScheme.onSurface
+                unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
+                disabledContainerColor = glassBackground.copy(alpha = 0.04f),
+                disabledTextColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                disabledBorderColor = Color.Transparent
             ),
             singleLine = true
         )
