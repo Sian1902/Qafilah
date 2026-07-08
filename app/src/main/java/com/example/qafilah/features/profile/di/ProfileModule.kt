@@ -47,6 +47,7 @@ val profileModule = module {
     viewModel {
         ProfileViewModel(
             getCustomerProfile = get(),
+            getWishlistUseCase = get(),
             signOutUseCase = get(),
             currencyRepository = get(),
             clearCartUseCase = get()
