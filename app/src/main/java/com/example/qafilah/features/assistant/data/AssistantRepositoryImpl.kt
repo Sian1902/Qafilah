@@ -1,52 +1,40 @@
 package com.example.qafilah.features.assistant.data
 
-
-import com.example.qafilah.features.assistant.data.local.AssistantDao
-import com.example.qafilah.features.assistant.data.local.toDomain
-import com.example.qafilah.features.assistant.data.local.toEntity
+import com.example.qafilah.core.token.TokenLocalDataSource
 import com.example.qafilah.features.assistant.data.remote.AssistantRemoteDataSource
-import com.example.qafilah.features.assistant.data.remote.ChatRequestDto
-import com.example.qafilah.features.assistant.data.remote.MessageDto
+import com.example.qafilah.features.assistant.domain.model.AssistantResponseDomain
 import com.example.qafilah.features.assistant.domain.model.ChatMessage
 import com.example.qafilah.features.assistant.domain.repository.AssistantRepository
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
-
-
+import kotlinx.coroutines.flow.flowOf
 
 class AssistantRepositoryImpl(
-    private val dao: AssistantDao,
-    private val remoteDataSource: AssistantRemoteDataSource
+    private val remoteDataSource: AssistantRemoteDataSource,
+    private val tokenLocalDataSource: TokenLocalDataSource
 ) : AssistantRepository {
 
-    override suspend fun sendMessageAndGetReply(userId: String, userText: String): Result<ChatMessage> {
-        return try {
-            val userMessage = ChatMessage(userId = userId, role = "user", content = userText)
-            dao.insertMessage(userMessage.toEntity())
-
-            val response = remoteDataSource.fetchAssistantResponse(userText)
-
-            val aiReplyContent = response.data.message
-
-            if (response.status != "success" || aiReplyContent.isBlank()) {
-                throw Exception("Failed to get a valid response from the assistant")
-            }
-
-            val aiMessage = ChatMessage(userId = userId, role = "assistant", content = aiReplyContent)
-            dao.insertMessage(aiMessage.toEntity())
-
-            Result.success(aiMessage)
-
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
-    }
-
     override fun getChatHistory(userId: String): Flow<List<ChatMessage>> {
-        return dao.getAllMessages(userId).map { list -> list.map { it.toDomain() } }
+        return flowOf(emptyList())
     }
 
     override suspend fun clearHistory(userId: String) {
-        dao.clearHistory(userId)
+        // no-op
+    }
+
+    override suspend fun sendPrompt(message: String): Result<AssistantResponseDomain> {
+        val userId = tokenLocalDataSource.getToken()
+            ?: return Result.failure(Exception("User not logged in"))
+
+        return try {
+            val response = remoteDataSource.sendPrompt(userId, message)
+            Result.success(
+                AssistantResponseDomain(
+                    message = response.message,
+                    productIds = response.products
+                )
+            )
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
     }
 }

@@ -3,6 +3,7 @@ package com.example.qafilah.features.assistant.data
 import com.example.qafilah.features.assistant.data.local.AssistantDao
 import com.example.qafilah.features.assistant.data.local.toDomain
 import com.example.qafilah.features.assistant.data.local.toEntity
+import com.example.qafilah.features.assistant.domain.model.AssistantResponseDomain
 import com.example.qafilah.features.assistant.domain.model.ChatMessage
 import com.example.qafilah.features.assistant.domain.repository.AssistantRepository
 import kotlinx.coroutines.delay
@@ -13,7 +14,6 @@ class MockAssistantRepositoryImpl(
     private val dao: AssistantDao
 ) : AssistantRepository {
 
-    // Same memory constraint you want to test
     private val contextLimit = 6
 
     override suspend fun sendMessageAndGetReply(userId: String, userText: String): Result<ChatMessage> {
@@ -49,6 +49,16 @@ class MockAssistantRepositoryImpl(
 
     override suspend fun clearHistory(userId: String) {
         dao.clearHistory(userId)
+    }
+
+    override suspend fun sendPrompt(message: String): Result<AssistantResponseDomain> {
+        delay(1000)
+        return Result.success(
+            AssistantResponseDomain(
+                message = generateMockReply(message, 0),
+                productIds = emptyList()
+            )
+        )
     }
 
     // A simple helper to make the mock responses feel slightly interactive
