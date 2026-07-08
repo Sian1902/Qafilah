@@ -83,7 +83,9 @@ fun HomeScreen(
             FloatingActionButton(
                 onClick = onChatFabClick,
                 containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = MaterialTheme.colorScheme.onPrimary
+                contentColor = MaterialTheme.colorScheme.onPrimary,
+
+                modifier = Modifier.padding(bottom = 90.dp)
             ) {
                 Icon(
                     painter = painterResource(android.R.drawable.ic_menu_compass),
@@ -152,8 +154,8 @@ private fun HomeContent(
 ) {
     LazyColumn(
         modifier = modifier.fillMaxSize(),
-        contentPadding = PaddingValues(top = 24.dp, bottom = 120.dp),
-        verticalArrangement = Arrangement.spacedBy(28.dp)
+        contentPadding = PaddingValues(top = 5.dp, bottom = 120.dp),
+        verticalArrangement = Arrangement.spacedBy(20.dp)
     )
     {
         item {

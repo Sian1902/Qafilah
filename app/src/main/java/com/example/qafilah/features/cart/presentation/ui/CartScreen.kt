@@ -158,7 +158,8 @@ private fun CartContent(
         )
     } else {
         Column(
-            modifier = modifier.padding(start = 16.dp, top = 16.dp, end = 16.dp, bottom = 2.dp)        ) {
+            modifier = modifier.padding(start = 16.dp, top = 16.dp, end = 16.dp, bottom = 120.dp),
+            ) {
             LazyColumn(
                 modifier = Modifier.weight(1f),
                 verticalArrangement = Arrangement.spacedBy(16.dp)

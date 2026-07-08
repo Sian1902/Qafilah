@@ -23,6 +23,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
@@ -38,13 +39,19 @@ fun BottomNavBar(
         modifier = modifier
             .fillMaxWidth()
             .navigationBarsPadding()
-            .padding(horizontal = 16.dp, vertical = 12.dp),
+            .padding(horizontal = 16.dp, vertical = 16.dp),
         contentAlignment = Alignment.Center
     ) {
         Row(
             modifier = Modifier
+                .shadow(
+                    elevation = 20.dp,
+                    shape = RoundedCornerShape(40.dp),
+                    ambientColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
+                    spotColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
+                )
                 .clip(RoundedCornerShape(40.dp))
-                .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.9f))
+                .background(MaterialTheme.colorScheme.surface)
                 .padding(horizontal = 8.dp, vertical = 10.dp),
             horizontalArrangement = Arrangement.SpaceEvenly,
             verticalAlignment = Alignment.CenterVertically

@@ -22,7 +22,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
-import com.example.ui_kit.components.shared.PillButton
 
 @Composable
 fun PromoBannerCard(
@@ -37,7 +36,7 @@ fun PromoBannerCard(
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .aspectRatio(1.05f)
+            .aspectRatio(16f/9f)
             .clip(RoundedCornerShape(24.dp))
     ) {
         AsyncImage(
@@ -60,23 +59,24 @@ fun PromoBannerCard(
         Column(
             modifier = Modifier
                 .align(Alignment.BottomStart)
-                .padding(24.dp)
+                .padding(horizontal = 20.dp, vertical = 16.dp)
         ) {
             Text(
                 text = tagLabel,
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.primary,
                 fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(bottom = 8.dp)
+                modifier = Modifier.padding(bottom = 4.dp)
             )
 
             Text(
                 text = title,
-                style = MaterialTheme.typography.displayMedium,
-                color = Color.White
+                style = MaterialTheme.typography.titleLarge,
+                color = Color.White,
+                maxLines = 1
             )
 
-            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(12.dp))
 
             PillButton(text = ctaText, onClick = onCtaClick)
         }

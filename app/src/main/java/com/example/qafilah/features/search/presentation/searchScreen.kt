@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -221,7 +222,10 @@ fun SearchScreen(
                         .fillMaxSize()
                         .padding(horizontal = 20.dp),
                     horizontalArrangement = Arrangement.spacedBy(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(24.dp)
+                    verticalArrangement = Arrangement.spacedBy(24.dp),
+                    contentPadding = PaddingValues(
+                        bottom = 120.dp
+                    ),
                 ) {
                     if (!showResults) {
                         if (recentSearches.isNotEmpty()) {

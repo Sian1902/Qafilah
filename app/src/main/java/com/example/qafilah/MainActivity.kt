@@ -5,8 +5,12 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.LocalActivityResultRegistryOwner
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
@@ -16,6 +20,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.LayoutDirection
+import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.qafilah.core.navigation.AppNavHost
@@ -76,8 +81,13 @@ class MainActivity : ComponentActivity() {
                     val showBottomBar = currentRoute !in Screen.hiddenRoutes
 
                     Scaffold(
+                        containerColor = MaterialTheme.colorScheme.background,
                         bottomBar = {
-                            if (showBottomBar) {
+                            AnimatedVisibility(
+                                visible = showBottomBar,
+                                enter = slideInVertically(initialOffsetY = { it }),
+                                exit = slideOutVertically(targetOffsetY = { it })
+                            ) {
                                 BottomNavBar(
                                     items = bottomNavItems,
                                     currentRoute = currentRoute,
@@ -104,7 +114,10 @@ class MainActivity : ComponentActivity() {
                         AppNavHost(
                             navController = navController,
                             startDestination = startRoute,
-                            modifier = Modifier.padding(innerPadding)
+                            modifier = Modifier.padding(
+                                top = innerPadding.calculateTopPadding(),
+                                bottom = 0.dp
+                            )
                         )
                     }
                 }
