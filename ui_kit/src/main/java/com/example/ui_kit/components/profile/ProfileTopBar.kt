@@ -26,10 +26,7 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun ProfileTopBar(
     greetingText: String,
-    notificationsContentDescription: String,
-    onNotificationsClick: () -> Unit,
     modifier: Modifier = Modifier,
-    trailingAvatar: @Composable () -> Unit
 ) {
     Row(
         modifier = modifier
@@ -43,25 +40,5 @@ fun ProfileTopBar(
             color = MaterialTheme.colorScheme.primary,
             modifier = Modifier.weight(1f)
         )
-
-        IconButton(onClick = onNotificationsClick) {
-            Icon(
-                imageVector = Icons.Filled.Notifications,
-                contentDescription = notificationsContentDescription,
-                tint = MaterialTheme.colorScheme.onBackground
-            )
-        }
-
-        Spacer(Modifier.width(4.dp))
-
-        Box(
-            modifier = Modifier
-                .size(32.dp)
-                .clip(CircleShape)
-                .border(1.dp, MaterialTheme.colorScheme.primary, CircleShape),
-            contentAlignment = Alignment.Center
-        ) {
-            trailingAvatar()
-        }
     }
 }

@@ -30,9 +30,6 @@ fun WelcomeHeader(
     userAvatarContentDescription: String,
     welcomeBackLabel: String,
     welcomeUserLabel: String,
-    notificationsContentDescription: String,
-    hasNotification: Boolean = false,
-    onNotificationClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Row(
@@ -81,11 +78,5 @@ fun WelcomeHeader(
             )
         }
 
-        CircleIconButton(
-            icon = Icons.Filled.Notifications,
-            contentDescription = notificationsContentDescription,
-            onClick = onNotificationClick,
-            showBadge = hasNotification
-        )
     }
 }

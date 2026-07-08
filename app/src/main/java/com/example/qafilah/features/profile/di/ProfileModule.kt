@@ -43,6 +43,8 @@ val profileModule = module {
     factory { GetPersonalDetailsUseCase(repository = get()) }
     factory { UpdateProfileUseCase(repository = get()) }
 
+    factory { com.google.firebase.auth.FirebaseAuth.getInstance() }
+
 
     viewModel {
         ProfileViewModel(
@@ -51,7 +53,8 @@ val profileModule = module {
             getWishlistUseCase = get(),
             signOutUseCase = get(),
             currencyRepository = get(),
-            clearCartUseCase = get()
+            clearCartUseCase = get(),
+            firebaseAuth = get()
         )
     }
 

@@ -45,6 +45,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import coil.compose.AsyncImage
 import com.example.qafilah.MainViewModel
 import com.example.qafilah.R
 import com.example.qafilah.core.preferences.ThemeMode
@@ -172,6 +173,7 @@ fun ProfileScreen(
                     ThemeMode.DARK -> stringResource(R.string.theme_dark)
                     ThemeMode.SYSTEM -> stringResource(R.string.theme_system)
                 },
+                profileUrl = uiState.profileUrl ?: "",
                 onEditProfileClick = onEditProfileClick,
                 onPersonalDetailsClick = onPersonalDetailsClick,
                 onOrdersClick = onOrdersClick,
@@ -213,8 +215,8 @@ private fun ProfileScreenContent(
     wishlistCount: Int,
     selectedLanguage: String,
     selectedTheme: String,
+    profileUrl: String,
     onEditProfileClick: () -> Unit = {},
-    onNotificationsClick: () -> Unit = {},
     onPersonalDetailsClick: () -> Unit = {},
     onOrdersClick: () -> Unit = {},
     onShippingAddressesClick: () -> Unit = {},
@@ -238,16 +240,6 @@ private fun ProfileScreenContent(
                         R.string.welcome_user_greeting,
                         profile.user.fullName.substringBefore(" ")
                     ),
-                    notificationsContentDescription = stringResource(R.string.welcome_notifications_cd),
-                    onNotificationsClick = onNotificationsClick,
-                    trailingAvatar = {
-                        Image(
-                            painter = painterResource(id = R.drawable.profile),
-                            contentDescription = null,
-                            contentScale = ContentScale.Crop,
-                            modifier = Modifier.fillMaxSize()
-                        )
-                    }
                 )
             }
 
@@ -260,12 +252,14 @@ private fun ProfileScreenContent(
                     editProfileLabel = stringResource(R.string.profile_edit_profile),
                     modifier = Modifier.padding(horizontal = 24.dp),
                     avatarContent = {
-                        Image(
-                            painter = painterResource(id = R.drawable.profile),
-                            contentDescription = null,
-                            contentScale = ContentScale.Crop,
-                            modifier = Modifier.fillMaxSize()
-                        )
+                            AsyncImage(
+                                model = profileUrl,
+                                placeholder = painterResource(id = R.drawable.profile),
+                                error = painterResource(id = R.drawable.profile),
+                                contentDescription = stringResource(R.string.profile_verified_cd),
+                                contentScale = ContentScale.Crop,
+                                modifier = Modifier.fillMaxSize()
+                            )
                     }
                 )
                 Spacer(Modifier.height(20.dp))
