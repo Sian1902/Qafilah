@@ -110,7 +110,8 @@ class WishlistViewModel(
                 startWishlistSync() // Starts the continuous real-time pipeline thread
                 loadWishlist()      // Collects structural states from database to UI
             },
-            onGuest = { _state.update { it.copy(showLoginPrompt = true) } }
+            onGuest = { _state.update { it.copy(showLoginPrompt = true,items = emptyList(),
+                errorMessage = null) } }
         )
     }
 
