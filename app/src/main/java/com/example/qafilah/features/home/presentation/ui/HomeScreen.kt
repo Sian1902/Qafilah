@@ -168,9 +168,6 @@ private fun HomeContent(
                 userAvatarContentDescription = stringResource(R.string.welcome_avatar_cd),
                 welcomeBackLabel = stringResource(R.string.welcome_back_label),
                 welcomeUserLabel = stringResource(R.string.welcome_user_greeting, userName),
-                notificationsContentDescription = stringResource(R.string.welcome_notifications_cd),
-                hasNotification = true,
-                onNotificationClick = onNotificationClick,
                 modifier = Modifier.padding(horizontal = 20.dp)
             )
         }

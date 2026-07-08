@@ -5,10 +5,12 @@ import androidx.lifecycle.viewModelScope
 
 import com.example.qafilah.features.auth.domain.util.RequireAuth
 import com.example.qafilah.core.currency.domain.repo.CurrencyRepository
+import com.example.qafilah.features.auth.domain.usecase.GetAuthStateUseCase
 import com.example.qafilah.features.auth.domain.usecase.SignOutUseCase
 import com.example.qafilah.features.cart.domain.usecase.ClearCartUseCase
 import com.example.qafilah.features.profile.domain.usecase.GetCustomerProfileUseCase
 import com.example.qafilah.features.wishlist.domain.usecase.GetWishlistUseCase
+import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -21,7 +23,8 @@ class ProfileViewModel(
     private val getWishlistUseCase: GetWishlistUseCase,
     private val signOutUseCase: SignOutUseCase,
     private val clearCartUseCase: ClearCartUseCase,
-    private val currencyRepository: CurrencyRepository
+    private val currencyRepository: CurrencyRepository,
+    private val firebaseAuth : FirebaseAuth
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(ProfileUiState())
@@ -67,6 +70,8 @@ class ProfileViewModel(
             onAuthenticated = {
                 viewModelScope.launch {
                     _state.update { it.copy(isLoading = true, error = null, showLoginPrompt = false) }
+                    val photoUrl = firebaseAuth.currentUser?.photoUrl?.toString()
+                    _state.update { it.copy(profileUrl = photoUrl) }
 
                     getCustomerProfile()
                         .onSuccess { profile ->

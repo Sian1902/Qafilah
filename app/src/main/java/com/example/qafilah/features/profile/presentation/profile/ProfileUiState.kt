@@ -11,6 +11,7 @@ data class ProfileUiState(
     val showLoginPrompt: Boolean = false,
     val selectedCurrency: String = "USD",
     val availableCurrencies: List<CurrencyMetadata> = emptyList(),
-    val wishlistCount: Int = 0
+    val wishlistCount: Int = 0,
+    val profileUrl: String? = null
 )
 
