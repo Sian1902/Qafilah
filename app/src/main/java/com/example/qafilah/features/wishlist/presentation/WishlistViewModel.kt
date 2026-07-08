@@ -61,7 +61,6 @@ class WishlistViewModel(
     private var removeFailedFallback: String = ""
     private var unknownCategoryFallback: String = ""
 
-    // Dedicated job instance to handle the continuous real-time sync stream
     private var syncJob: Job? = null
 
     fun setLocalizedStrings(loadFailed: String, removeFailed: String, unknownCategory: String) {
@@ -107,22 +106,20 @@ class WishlistViewModel(
     private fun checkAuthAndLoad() {
         requireAuth.invoke(
             onAuthenticated = {
-                startWishlistSync() // Starts the continuous real-time pipeline thread
-                loadWishlist()      // Collects structural states from database to UI
+                startWishlistSync()
+                loadWishlist()
             },
             onGuest = { _state.update { it.copy(showLoginPrompt = true) } }
         )
     }
 
     private fun startWishlistSync() {
-        // Prevent launching multiple sync loops if called repeatedly
         if (syncJob?.isActive == true) return
 
         syncJob = viewModelScope.launch {
             try {
                 syncWishlistUseCase()
             } catch (e: Exception) {
-                // Suppress network sync exceptions to preserve offline capability
             }
         }
     }
@@ -131,8 +128,7 @@ class WishlistViewModel(
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true, errorMessage = null) }
             try {
-                // Read directly from Local DB flow. Room automatically emits updates
-                // whenever the database sync adds or deletes an item remotely.
+
                 getWishlistUseCase().collect { domainItems ->
                     val uiModels = domainItems.map { it.toUiModel() }
                     _state.update { it.copy(isLoading = false, items = uiModels) }
@@ -146,7 +142,6 @@ class WishlistViewModel(
     }
 
     private fun removeItemFromDb(productId: String) {
-        // Optimistic UI update: instantly clear out item from local view state
         _state.update { state ->
             state.copy(items = state.items.filter { it.id != productId })
         }
@@ -170,7 +165,6 @@ class WishlistViewModel(
 
     override fun onCleared() {
         super.onCleared()
-        // Explicit clean up of background realtime threads when VM lifecycle scope closes
         syncJob?.cancel()
     }
 }
