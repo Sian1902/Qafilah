@@ -121,6 +121,7 @@ dependencies {
     // Security & Authentication
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.auth.ktx)
+    implementation(libs.firebase.messaging.ktx)
     implementation(libs.tink.android)
     implementation("androidx.credentials:credentials:1.2.2")
     implementation("androidx.credentials:credentials-play-services-auth:1.2.2")
