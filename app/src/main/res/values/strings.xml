@@ -333,4 +333,25 @@
     <string name="option_material">Material</string>
     <string name="payment_cancelled">Payment Cancelled</string>
 
+    <string name="camel_run_title">Play Camel Run! 🐪</string>
+    <string name="camel_run_subtitle">Win discount coupons!</string>
+    <string name="play_button_label">PLAY</string>
+    <string name="camel_run_ready_title">Ready for the Journey?</string>
+    <string name="camel_run_ready_subtitle">Tap anywhere to start your caravan</string>
+    <string name="camel_run_game_over_title">Caravan Stopped!</string>
+    <string name="camel_run_game_over_subtitle">Tap anywhere to try again</string>
+    <string name="camel_run_won_title">Oasis Reached! 🥳</string>
+    <string name="camel_run_won_subtitle">A Discount Coupon will be applied to your next purchase</string>
+    <string name="camel_run_return_home">Return to Home</string>
+    <string name="camel_run_score_label">Score: %1$d / %2$d</string>
+
+    <string name="promo_dune_title">The Dune Collection</string>
+    <string name="promo_10_off_cta">CLAIM 10% OFF</string>
+
+    <string name="promo_summer_title">Summer Fragrances</string>
+    <string name="promo_20_off_cta">CLAIM 20% OFF</string>
+
+    <string name="promo_royal_title">Royal Oud Series</string>
+    <string name="promo_50_off_cta">CLAIM 50% OFF</string>
+
 </resources>

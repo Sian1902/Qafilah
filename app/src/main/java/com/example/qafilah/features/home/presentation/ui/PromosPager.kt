@@ -59,10 +59,10 @@ fun PromosPager(
 
         PromoBannerCard(
             imageUrl = promo.imageUrl,
-            title = promo.title,
+            title = stringResource(id = promo.titleRes),
             tagLabel = stringResource(R.string.promo_tag_label),
-            imageContentDescription = promo.title,
-            ctaText = promo.ctaText,
+            imageContentDescription = stringResource(id = promo.titleRes),
+            ctaText = stringResource(id = promo.ctaTextRes),
             onCtaClick = { onClaimPromo(promo.code) }
         )
     }

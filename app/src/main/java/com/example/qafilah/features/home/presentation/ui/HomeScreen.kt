@@ -55,6 +55,7 @@ fun HomeScreen(
     onChatFabClick: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: HomeViewModel = koinViewModel(),
+    onNavigateToGame: () -> Unit = {},
 ) {
     val context = LocalContext.current
     val uiState by viewModel.uiState.collectAsState()
@@ -130,7 +131,8 @@ fun HomeScreen(
                             )
                         },
                         onClaimPromo = { code -> viewModel.claimPromoCode(code) },
-                        modifier = modifier
+                        modifier = modifier,
+                        onNavigateToGame = onNavigateToGame
                     )
                 }
             }
@@ -150,7 +152,8 @@ private fun HomeContent(
     onProductClick: (ProductUiModel) -> Unit,
     onFavoriteClick: (ProductUiModel) -> Unit,
     onClaimPromo: (String) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onNavigateToGame: () -> Unit = {}
 ) {
     LazyColumn(
         modifier = modifier.fillMaxSize(),
@@ -185,9 +188,15 @@ private fun HomeContent(
             item {
                 PromosPager(
                     promos = uiState.promos,
-                    onClaimPromo = onClaimPromo
+                    onClaimPromo = onClaimPromo,
                 )
             }
+        }
+
+        item {
+            CamelRunBanner(
+                onClick = onNavigateToGame
+            )
         }
 
         item {
