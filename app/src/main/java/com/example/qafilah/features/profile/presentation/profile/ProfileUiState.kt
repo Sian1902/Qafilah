@@ -9,6 +9,7 @@ data class ProfileUiState(
     val error: String? = null,
     val isAuthError: Boolean = false,
     val selectedCurrency: String = "USD",
-    val availableCurrencies: List<CurrencyMetadata> = emptyList()
+    val availableCurrencies: List<CurrencyMetadata> = emptyList(),
+    val wishlistCount: Int = 0
 )
 

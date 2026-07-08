@@ -16,9 +16,11 @@ import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.navArgument
 import com.example.qafilah.MainViewModel
 import com.example.qafilah.R
+import com.example.qafilah.core.presentation.NoInternetScreen
 import com.example.qafilah.features.address.presentation.AddressViewModel
 import com.example.qafilah.features.address.presentation.ShippingAddressesScreen
 import com.example.qafilah.features.assistant.presentation.ChatScreen
@@ -53,394 +55,406 @@ fun AppNavHost(
     modifier: Modifier = Modifier,
     mainViewModel: MainViewModel = koinViewModel()
 ) {
-
     val currentStartDestination by rememberUpdatedState(newValue = startDestination)
+    val appState by mainViewModel.appState.collectAsState()
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = navBackStackEntry?.destination?.route
 
-    NavHost(
-        navController = navController,
-        startDestination = Screen.Splash.route,
-        modifier = modifier
-    ) {
+    val isOfflineAndRestricted = !appState.isOnline && 
+            currentRoute != NavItem.Wishlist.route && 
+            currentRoute != Screen.Splash.route
 
-        composable(Screen.Splash.route) {
-            SplashScreen(
-                onSplashFinished = {
-                    val targetRoute = if (currentStartDestination == Screen.Splash.route) {
-                        Screen.Login.route
-                    } else {
-                        currentStartDestination
+    Box(modifier = modifier.fillMaxSize()) {
+        NavHost(
+            navController = navController,
+            startDestination = Screen.Splash.route,
+            modifier = Modifier.fillMaxSize()
+        ) {
+            composable(Screen.Splash.route) {
+                SplashScreen(
+                    onSplashFinished = {
+                        val targetRoute = if (currentStartDestination == Screen.Splash.route) {
+                            Screen.Login.route
+                        } else {
+                            currentStartDestination
+                        }
+
+                        navController.navigate(targetRoute) {
+                            popUpTo(Screen.Splash.route) { inclusive = true }
+                        }
                     }
+                )
+            }
 
-                    navController.navigate(targetRoute) {
-                        popUpTo(Screen.Splash.route) { inclusive = true }
+            composable(Screen.Onboarding.route) {
+                OnboardingScreen(
+                    onFinish = {
+                        mainViewModel.setOnboardingCompleted()
+                        navController.navigate(Screen.Login.route) {
+                            popUpTo(0) { inclusive = true }
+                        }
                     }
-                }
-            )
-        }
+                )
+            }
 
-        composable(Screen.Onboarding.route) {
-            OnboardingScreen(
-                onFinish = {
-                    mainViewModel.setOnboardingCompleted()
-                    navController.navigate(Screen.Login.route) {
-                        popUpTo(0) { inclusive = true }
-                    }
-                }
-            )
-        }
-
-        composable(Screen.Login.route) {
-            LoginScreen(
-                onNavigateToSignUp = {
-                    navController.navigate(Screen.Register.route)
-                },
-                onNavigateToHome = { _: AppUser ->
-                    navController.navigate(NavItem.Home.route) {
-                        popUpTo(0) { inclusive = true }
-                    }
-                },
-                onContinueAsGuest = {
-                    navController.navigate(NavItem.Home.route) {
-                        popUpTo(0) { inclusive = true }
-                    }
-                }
-            )
-        }
-
-        composable(Screen.Register.route) {
-            SignUpScreen(
-                onNavigateToLogin = {
-                    navController.popBackStack()
-                },
-                onNavigateToHome = { user ->
-                    navController.navigate(NavItem.Home.route) {
-                        popUpTo(0) { inclusive = true }
-                    }
-                }
-            )
-        }
-
-        composable(
-            route = Screen.ProductDetail.route,
-            arguments = listOf(
-                navArgument("productId") {
-                    type = NavType.StringType
-                    nullable = true
-                }
-            )
-        ) { backStackEntry ->
-            val productId = backStackEntry.arguments?.getString("productId")
-                ?: return@composable
-            ProductDetailScreen(
-                productId = productId,
-                onBackClick = { navController.popBackStack() }
-            )
-        }
-
-        composable(Screen.Checkout.route) {
-            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                CheckoutScreen(
-                    onNavigateToAddress = {
-                        navController.navigate(Screen.ShippingAddresses.route)
+            composable(Screen.Login.route) {
+                LoginScreen(
+                    onNavigateToSignUp = {
+                        navController.navigate(Screen.Register.route)
                     },
-                    onNavigateToHome = {
+                    onNavigateToHome = { _: AppUser ->
+                        navController.navigate(NavItem.Home.route) {
+                            popUpTo(0) { inclusive = true }
+                        }
+                    },
+                    onContinueAsGuest = {
                         navController.navigate(NavItem.Home.route) {
                             popUpTo(0) { inclusive = true }
                         }
                     }
                 )
             }
-        }
 
-        composable(
-            route = Screen.OrderConfirmation.route,
-            arguments = listOf(navArgument("orderId") { type = NavType.StringType })
-        ) { backStackEntry ->
-            val orderId = backStackEntry.arguments?.getString("orderId")
-                ?: return@composable
-            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text(stringResource(R.string.order_confirmation, orderId))
+            composable(Screen.Register.route) {
+                SignUpScreen(
+                    onNavigateToLogin = {
+                        navController.popBackStack()
+                    },
+                    onNavigateToHome = { user ->
+                        navController.navigate(NavItem.Home.route) {
+                            popUpTo(0) { inclusive = true }
+                        }
+                    }
+                )
             }
-        }
 
-        composable(NavItem.Home.route) {
-            HomeScreen(
-                onSearchClick = { navController.navigate(NavItem.Search.route) },
-                onNotificationClick = { },
-                onBrandClick = { categoryName ->
-                    navController.currentBackStackEntry?.savedStateHandle?.set(
-                        "search_category",
-                        categoryName.lowercase()
+            composable(
+                route = Screen.ProductDetail.route,
+                arguments = listOf(
+                    navArgument("productId") {
+                        type = NavType.StringType
+                        nullable = true
+                    }
+                )
+            ) { backStackEntry ->
+                val productId = backStackEntry.arguments?.getString("productId")
+                    ?: return@composable
+                ProductDetailScreen(
+                    productId = productId,
+                    onBackClick = { navController.popBackStack() }
+                )
+            }
+
+            composable(Screen.Checkout.route) {
+                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CheckoutScreen(
+                        onNavigateToAddress = {
+                            navController.navigate(Screen.ShippingAddresses.route)
+                        },
+                        onNavigateToHome = {
+                            navController.navigate(NavItem.Home.route) {
+                                popUpTo(0) { inclusive = true }
+                            }
+                        }
                     )
-                    navController.navigate(NavItem.Search.route)
-                },
-                onCategoryClick = { categoryUiModel ->
-                    navController.navigate(
-                        Screen.CatalogProducts.createRoute(
-                            categoryUiModel.id,
-                            categoryUiModel.label
+                }
+            }
+
+            composable(
+                route = Screen.OrderConfirmation.route,
+                arguments = listOf(navArgument("orderId") { type = NavType.StringType })
+            ) { backStackEntry ->
+                val orderId = backStackEntry.arguments?.getString("orderId")
+                    ?: return@composable
+                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text(stringResource(R.string.order_confirmation, orderId))
+                }
+            }
+
+            composable(NavItem.Home.route) {
+                HomeScreen(
+                    onSearchClick = { navController.navigate(NavItem.Search.route) },
+                    onNotificationClick = { },
+                    onBrandClick = { categoryName ->
+                        navController.currentBackStackEntry?.savedStateHandle?.set(
+                            "search_category",
+                            categoryName.lowercase()
                         )
-                    )
-                },
-                onViewAllCategoriesClick = {
-                    navController.navigate(Screen.Catalog.route)
-                },
-                onProductClick = { product ->
-                    navController.navigate(Screen.ProductDetail.createRoute(product.id))
-                },
-                onChatFabClick = { navController.navigate(Screen.Chat.route) }
-            )
-        }
-        composable(Screen.Chat.route) {
-            ChatScreen(
-                onNavigateBack = { navController.popBackStack() }
-            )
-        }
-        composable(Screen.Catalog.route) {
-            CatalogScreen(
-                onBackClick = { navController.popBackStack() },
-                onCategoryClick = { categoryId, categoryTitle ->
-                    navController.navigate(
-                        Screen.CatalogProducts.createRoute(categoryId, categoryTitle)
-                    )
-                }
-            )
-        }
-        composable(
-            route = Screen.CatalogProducts.route,
-            arguments = listOf(
-                navArgument("categoryId") { type = NavType.StringType },
-                navArgument("categoryTitle") { type = NavType.StringType }
-            )
-        ) { backStackEntry ->
-            val categoryId = backStackEntry.arguments?.getString("categoryId") ?: ""
-            val categoryTitle = backStackEntry.arguments?.getString("categoryTitle") ?: ""
-
-            CatalogProductsScreen(
-                categoryId = categoryId,
-                categoryTitle = categoryTitle,
-                onBackClick = { navController.popBackStack() },
-                onProductClick = { product ->
-                    navController.navigate(Screen.ProductDetail.createRoute(product.id))
-                }
-            )
-        }
-
-        composable(NavItem.Search.route) {
-            val searchViewModel: SearchViewModel = koinViewModel()
-            val uiState by searchViewModel.uiState.collectAsState()
-
-            val initialCategory = navController.previousBackStackEntry
-                ?.savedStateHandle
-                ?.get<String>("search_category")
-            val initialBrand = navController.previousBackStackEntry
-                ?.savedStateHandle
-                ?.get<String>("search_brand")
-
-            LaunchedEffect(Unit) {
-                if (initialCategory != null || initialBrand != null) {
-                    searchViewModel.applyInitialFilters(initialCategory, initialBrand)
-                    navController.previousBackStackEntry?.savedStateHandle?.remove<String>("search_category")
-                    navController.previousBackStackEntry?.savedStateHandle?.remove<String>("search_brand")
-                }
+                        navController.navigate(NavItem.Search.route)
+                    },
+                    onCategoryClick = { categoryUiModel ->
+                        navController.navigate(
+                            Screen.CatalogProducts.createRoute(
+                                categoryUiModel.id,
+                                categoryUiModel.label
+                            )
+                        )
+                    },
+                    onViewAllCategoriesClick = {
+                        navController.navigate(Screen.Catalog.route)
+                    },
+                    onProductClick = { product ->
+                        navController.navigate(Screen.ProductDetail.createRoute(product.id))
+                    },
+                    onChatFabClick = { navController.navigate(Screen.Chat.route) }
+                )
             }
 
-            SearchScreen(
-                searchQuery = uiState.searchQuery,
-                isLoading = uiState.isLoading,
-                onSearchQueryChange = { searchViewModel.onSearchQueryChanged(it) },
-                recentSearches = uiState.recentSearches,
-                trendingSearches = uiState.trendingSearches,
-                searchResults = uiState.searchResults,
-                availableCategories = uiState.availableCategories,
-                availableBrands = uiState.availableBrands,
-                onCategoryFilterSelect = { searchViewModel.toggleCategoryFilter(it) },
-                onBrandFilterSelect = { searchViewModel.toggleBrandFilter(it) },
-                onResetFilters = { searchViewModel.resetFilters() },
-                onProductClick = { product ->
-                    searchViewModel.commitSearchQuery(uiState.searchQuery)
-                    navController.navigate(
-                        Screen.ProductDetail.createRoute(Uri.encode(product.id))
-                    )
-                },
-                onFavoriteClick = { product ->
-                    searchViewModel.toggleFavorite(product.id)
-                },
-                onRemoveRecentSearch = { query ->
-                    searchViewModel.removeRecentSearch(query)
-                },
-                onClearAllRecentSearches = {
-                    searchViewModel.clearAllRecentSearches()
-                },
-                onBackClick = {
-                    navController.popBackStack()
-                }
-            )
-        }
+            composable(Screen.Chat.route) {
+                ChatScreen(
+                    onNavigateBack = { navController.popBackStack() }
+                )
+            }
 
-        composable(NavItem.Cart.route) {
-            CartScreen(
-                onNavigateToLogin = { navController.navigate(Screen.Login.route) },
-                onNavigateToSignUp = { navController.navigate(Screen.Register.route) },
-                onNavigateToHome = {
-                    navController.navigate(NavItem.Home.route) {
-                        popUpTo(NavItem.Cart.route) { inclusive = true }
+            composable(Screen.Catalog.route) {
+                CatalogScreen(
+                    onBackClick = { navController.popBackStack() },
+                    onCategoryClick = { categoryId, categoryTitle ->
+                        navController.navigate(
+                            Screen.CatalogProducts.createRoute(categoryId, categoryTitle)
+                        )
                     }
-                },
-                onNavigateToCheckout = {
-                    navController.navigate(Screen.Checkout.route)
-                },
-                onProductClick = { productId ->
-                    navController.navigate(Screen.ProductDetail.createRoute(Uri.encode(productId)))
-                }
-            )
-        }
+                )
+            }
 
-        composable(NavItem.Wishlist.route) {
-            WishlistScreen(
-                onNavigateToLogin = { navController.navigate(Screen.Login.route) },
-                onNavigateToSignUp = { navController.navigate(Screen.Register.route) },
-                onNavigateToHome = {
-                    navController.navigate(NavItem.Home.route) {
-                        popUpTo(NavItem.Wishlist.route) { inclusive = true }
+            composable(
+                route = Screen.CatalogProducts.route,
+                arguments = listOf(
+                    navArgument("categoryId") { type = NavType.StringType },
+                    navArgument("categoryTitle") { type = NavType.StringType }
+                )
+            ) { backStackEntry ->
+                val categoryId = backStackEntry.arguments?.getString("categoryId") ?: ""
+                val categoryTitle = backStackEntry.arguments?.getString("categoryTitle") ?: ""
+
+                CatalogProductsScreen(
+                    categoryId = categoryId,
+                    categoryTitle = categoryTitle,
+                    onBackClick = { navController.popBackStack() },
+                    onProductClick = { product ->
+                        navController.navigate(Screen.ProductDetail.createRoute(product.id))
                     }
-                },
-                onProductClick = { product ->
-                    navController.navigate(Screen.ProductDetail.createRoute(Uri.encode(product.id)))
-                },
-                onFavoriteClick = { }
-            )
-        }
+                )
+            }
 
-        composable(NavItem.Profile.route) {
-            val profileViewModel: ProfileViewModel = koinViewModel()
-            ProfileScreen(
-                viewModel = profileViewModel,
-                onEditProfileClick = {
-                    navController.navigate(Screen.EditProfile.route)
-                },
-                onPersonalDetailsClick = {
-                    navController.navigate(Screen.PersonalDetails.route)
-                },
-                onOrdersClick = {
-                    navController.navigate(Screen.Orders.route)
-                },
-                onShippingAddressesClick = {
-                    navController.navigate(Screen.ShippingAddresses.route)
-                },
-                onSignOutClick = {
-                    profileViewModel.signOut {
+            composable(NavItem.Search.route) {
+                val searchViewModel: SearchViewModel = koinViewModel()
+                val uiState by searchViewModel.uiState.collectAsState()
+
+                val initialCategory = navController.previousBackStackEntry
+                    ?.savedStateHandle
+                    ?.get<String>("search_category")
+                val initialBrand = navController.previousBackStackEntry
+                    ?.savedStateHandle
+                    ?.get<String>("search_brand")
+
+                LaunchedEffect(Unit) {
+                    if (initialCategory != null || initialBrand != null) {
+                        searchViewModel.applyInitialFilters(initialCategory, initialBrand)
+                        navController.previousBackStackEntry?.savedStateHandle?.remove<String>("search_category")
+                        navController.previousBackStackEntry?.savedStateHandle?.remove<String>("search_brand")
+                    }
+                }
+
+                SearchScreen(
+                    searchQuery = uiState.searchQuery,
+                    isLoading = uiState.isLoading,
+                    onSearchQueryChange = { searchViewModel.onSearchQueryChanged(it) },
+                    recentSearches = uiState.recentSearches,
+                    trendingSearches = uiState.trendingSearches,
+                    searchResults = uiState.searchResults,
+                    availableCategories = uiState.availableCategories,
+                    availableBrands = uiState.availableBrands,
+                    onCategoryFilterSelect = { searchViewModel.toggleCategoryFilter(it) },
+                    onBrandFilterSelect = { searchViewModel.toggleBrandFilter(it) },
+                    onResetFilters = { searchViewModel.resetFilters() },
+                    onProductClick = { product ->
+                        searchViewModel.commitSearchQuery(uiState.searchQuery)
+                        navController.navigate(
+                            Screen.ProductDetail.createRoute(Uri.encode(product.id))
+                        )
+                    },
+                    onFavoriteClick = { product ->
+                        searchViewModel.toggleFavorite(product.id)
+                    },
+                    onRemoveRecentSearch = { query ->
+                        searchViewModel.removeRecentSearch(query)
+                    },
+                    onClearAllRecentSearches = {
+                        searchViewModel.clearAllRecentSearches()
+                    },
+                    onBackClick = {
+                        navController.popBackStack()
+                    }
+                )
+            }
+
+            composable(NavItem.Cart.route) {
+                CartScreen(
+                    onNavigateToLogin = { navController.navigate(Screen.Login.route) },
+                    onNavigateToSignUp = { navController.navigate(Screen.Register.route) },
+                    onNavigateToHome = {
+                        navController.navigate(NavItem.Home.route) {
+                            popUpTo(NavItem.Cart.route) { inclusive = true }
+                        }
+                    },
+                    onNavigateToCheckout = {
+                        navController.navigate(Screen.Checkout.route)
+                    },
+                    onProductClick = { productId ->
+                        navController.navigate(Screen.ProductDetail.createRoute(Uri.encode(productId)))
+                    }
+                )
+            }
+
+            composable(NavItem.Wishlist.route) {
+                WishlistScreen(
+                    onNavigateToLogin = { navController.navigate(Screen.Login.route) },
+                    onNavigateToSignUp = { navController.navigate(Screen.Register.route) },
+                    onNavigateToHome = {
+                        navController.navigate(NavItem.Home.route) {
+                            popUpTo(NavItem.Wishlist.route) { inclusive = true }
+                        }
+                    },
+                    onProductClick = { product ->
+                        navController.navigate(Screen.ProductDetail.createRoute(Uri.encode(product.id)))
+                    },
+                    onFavoriteClick = { }
+                )
+            }
+
+            composable(NavItem.Profile.route) {
+                val profileViewModel: ProfileViewModel = koinViewModel()
+                ProfileScreen(
+                    viewModel = profileViewModel,
+                    onEditProfileClick = {
+                        navController.navigate(Screen.EditProfile.route)
+                    },
+                    onPersonalDetailsClick = {
+                        navController.navigate(Screen.PersonalDetails.route)
+                    },
+                    onOrdersClick = {
+                        navController.navigate(Screen.Orders.route)
+                    },
+                    onShippingAddressesClick = {
+                        navController.navigate(Screen.ShippingAddresses.route)
+                    },
+                    onSignOutClick = {
+                        profileViewModel.signOut {
+                            navController.navigate(Screen.Login.route) {
+                                popUpTo(0) { inclusive = true }
+                            }
+                        }
+                    },
+                    onNavigateToLogin = {
                         navController.navigate(Screen.Login.route) {
                             popUpTo(0) { inclusive = true }
                         }
                     }
-                },
-                onNavigateToLogin = {
-                    navController.navigate(Screen.Login.route) {
-                        popUpTo(0) { inclusive = true }
+                )
+            }
+
+            composable(Screen.PersonalDetails.route) {
+                PersonalDetailsScreen(
+                    onBackClick = { navController.popBackStack() },
+                    onEditClick = { navController.navigate(Screen.EditProfile.route) }
+                )
+            }
+
+            composable(Screen.Orders.route) {
+                val ordersViewModel: OrdersViewModel = koinViewModel()
+                OrdersScreen(
+                    viewModel = ordersViewModel,
+                    onBackClick = { navController.popBackStack() },
+                    onOrderClick = { orderId ->
+                        navController.navigate(Screen.OrderDetails.createRoute(orderId))
                     }
-                }
-            )
-        }
-
-        composable(Screen.PersonalDetails.route) {
-            PersonalDetailsScreen(
-                onBackClick = { navController.popBackStack() },
-                onEditClick = { navController.navigate(Screen.EditProfile.route) }
-            )
-        }
-
-        composable(Screen.Orders.route) {
-            val ordersViewModel: OrdersViewModel = koinViewModel()
-            OrdersScreen(
-                viewModel = ordersViewModel,
-                onBackClick = { navController.popBackStack() },
-                onOrderClick = { orderId ->
-                    navController.navigate(Screen.OrderDetails.createRoute(orderId))
-                }
-            )
-        }
-
-        composable(
-            route = Screen.OrderDetails.route,
-            arguments = listOf(navArgument("orderId") { type = NavType.StringType })
-        ) { backStackEntry ->
-            val orderId = backStackEntry.arguments?.getString("orderId") ?: ""
-            val detailsViewModel: OrderDetailsViewModel = koinViewModel()
-            val orderNotFoundMessage = stringResource(R.string.error_order_not_found)
-            
-            OrderDetailsScreen(
-                orderId = orderId,
-                viewModel = detailsViewModel,
-                orderNotFoundMessage = orderNotFoundMessage,
-                onBackClick = { navController.popBackStack() }
-            )
-        }
-
-        composable(Screen.EditProfile.route) {
-            EditProfileScreen(
-                onBackClick = { navController.popBackStack() },
-                onCancelClick = { navController.popBackStack() }
-            )
-        }
-
-        composable(Screen.ShippingAddresses.route) {
-            val addressViewModel: AddressViewModel = koinViewModel()
-            val uiState by addressViewModel.uiState.collectAsState()
-            val suggestions by addressViewModel.suggestions.collectAsState()
-            val isSearching by addressViewModel.isSearching.collectAsState()
-
-            LaunchedEffect(Unit) {
-                addressViewModel.loadAddresses()
+                )
             }
 
-            ShippingAddressesScreen(
-                uiState = uiState,
-                isSearching = isSearching,
-                suggestions = suggestions,
-                onAddressQueryChanged = { query ->
-                    addressViewModel.onAddressQueryChanged(query)
-                },
-                onClearSuggestions = {
-                    addressViewModel.clearSuggestions()
-                },
-                onBackClick = { navController.popBackStack() },
-                onSaveNewAddress = { address ->
-                    addressViewModel.createAddress(address)
-                },
-                onEditAddress = { address ->
-                    addressViewModel.updateAddress(address)
-                },
-                onDeleteAddress = { addressId ->
-                    addressViewModel.deleteAddress(addressId)
-                },
-                onSetDefaultAddress = { addressId ->
-                    addressViewModel.setDefaultAddress(addressId)
-                },
-                onConsumeOperationResult = {
-                    addressViewModel.consumeOperationResult()
+            composable(
+                route = Screen.OrderDetails.route,
+                arguments = listOf(navArgument("orderId") { type = NavType.StringType })
+            ) { backStackEntry ->
+                val orderId = backStackEntry.arguments?.getString("orderId") ?: ""
+                val detailsViewModel: OrderDetailsViewModel = koinViewModel()
+                val orderNotFoundMessage = stringResource(R.string.error_order_not_found)
+                
+                OrderDetailsScreen(
+                    orderId = orderId,
+                    viewModel = detailsViewModel,
+                    orderNotFoundMessage = orderNotFoundMessage,
+                    onBackClick = { navController.popBackStack() }
+                )
+            }
+
+            composable(Screen.EditProfile.route) {
+                EditProfileScreen(
+                    onBackClick = { navController.popBackStack() },
+                    onCancelClick = { navController.popBackStack() }
+                )
+            }
+
+            composable(Screen.ShippingAddresses.route) {
+                val addressViewModel: AddressViewModel = koinViewModel()
+                val uiState by addressViewModel.uiState.collectAsState()
+                val suggestions by addressViewModel.suggestions.collectAsState()
+                val isSearching by addressViewModel.isSearching.collectAsState()
+
+                LaunchedEffect(Unit) {
+                    addressViewModel.loadAddresses()
                 }
-            )
 
-        }
+                ShippingAddressesScreen(
+                    uiState = uiState,
+                    isSearching = isSearching,
+                    suggestions = suggestions,
+                    onAddressQueryChanged = { query ->
+                        addressViewModel.onAddressQueryChanged(query)
+                    },
+                    onClearSuggestions = {
+                        addressViewModel.clearSuggestions()
+                    },
+                    onBackClick = { navController.popBackStack() },
+                    onSaveNewAddress = { address ->
+                        addressViewModel.createAddress(address)
+                    },
+                    onEditAddress = { address ->
+                        addressViewModel.updateAddress(address)
+                    },
+                    onDeleteAddress = { addressId ->
+                        addressViewModel.deleteAddress(addressId)
+                    },
+                    onSetDefaultAddress = { addressId ->
+                        addressViewModel.setDefaultAddress(addressId)
+                    },
+                    onConsumeOperationResult = {
+                        addressViewModel.consumeOperationResult()
+                    }
+                )
+            }
 
-        composable(Screen.AddAddress.route) {
-            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text(stringResource(R.string.add_address_wip))
+            composable(Screen.AddAddress.route) {
+                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text(stringResource(R.string.add_address_wip))
+                }
+            }
+
+            composable(
+                route = Screen.EditAddress.route,
+                arguments = listOf(
+                    navArgument("addressId") { type = NavType.StringType }
+                )
+            ) { backStackEntry ->
+                val addressId = backStackEntry.arguments?.getString("addressId") ?: return@composable
+                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text(stringResource(R.string.edit_address_wip, addressId))
+                }
             }
         }
 
-        composable(
-            route = Screen.EditAddress.route,
-            arguments = listOf(
-                navArgument("addressId") { type = NavType.StringType }
-            )
-        ) { backStackEntry ->
-            val addressId = backStackEntry.arguments?.getString("addressId") ?: return@composable
-            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text(stringResource(R.string.edit_address_wip, addressId))
-            }
+        if (isOfflineAndRestricted) {
+            NoInternetScreen()
         }
-
     }
 }
