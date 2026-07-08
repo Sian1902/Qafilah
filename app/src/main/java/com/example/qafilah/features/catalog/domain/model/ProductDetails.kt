@@ -1,6 +1,5 @@
 package com.example.qafilah.features.catalog.domain.model
 
-
 data class ProductDetails(
     val id: String,
     val title: String,
@@ -11,7 +10,17 @@ data class ProductDetails(
     val images: List<String>,
     val rating: Double?,
     val ratingCount: Int?,
-    val variants: List<ProductVariant>
+    val variants: List<ProductVariant>,
+    val reviews: List<ProductReview>
+)
+
+data class ProductReview(
+    val id: String,
+    val customerName: String,
+    val rating: Int,
+    val title: String,
+    val body: String,
+    val createdAt: String
 )
 
 data class ProductVariant(

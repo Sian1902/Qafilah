@@ -224,9 +224,6 @@ fun SearchScreen(
                     horizontalArrangement = Arrangement.spacedBy(16.dp),
                     verticalArrangement = Arrangement.spacedBy(24.dp),
                     contentPadding = PaddingValues(
-                        start = 20.dp,
-                        end = 20.dp,
-                        top = 16.dp,
                         bottom = 120.dp
                     ),
                 ) {

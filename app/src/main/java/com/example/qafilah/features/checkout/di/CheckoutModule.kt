@@ -1,9 +1,14 @@
 package com.example.qafilah.features.checkout.di
 
 import com.example.qafilah.BuildConfig
-import com.example.qafilah.core.currency.ConvertRawPriceUseCase
 import com.example.qafilah.core.currency.domain.usecase.ConvertPriceUseCase
+import com.example.qafilah.core.currency.domain.usecase.ConvertRawPriceUseCase
 import com.example.qafilah.core.network.ShopifyClient
+import com.example.qafilah.core.token.TokenProvider
+import com.example.qafilah.features.address.domain.usecase.GetAddressesUseCase
+import com.example.qafilah.features.cart.domain.usecase.ClearCartUseCase
+import com.example.qafilah.features.cart.domain.usecase.ObserveCartStateUseCase
+import com.example.qafilah.features.profile.domain.usecase.GetPersonalDetailsUseCase
 import com.example.qafilah.features.checkout.data.datasource.CheckoutRemoteDataSource
 import com.example.qafilah.features.checkout.data.datasource.CheckoutRemoteDataSourceImpl
 import com.example.qafilah.features.checkout.data.datasource.PaymentRemoteDataSource
@@ -39,9 +44,9 @@ val checkoutModule = module {
 
     single<CheckoutRepository> { CheckoutRepositoryImpl(get()) }
 
-    factory<UpdateBuyerIdentityUseCase> { UpdateBuyerIdentityUseCase(get()) }
-    factory<UpdateDeliveryOptionUseCase> { UpdateDeliveryOptionUseCase(get()) }
-    factory<CompleteOrderUseCase> { CompleteOrderUseCase(get()) }
+    factory<UpdateBuyerIdentityUseCase> { UpdateBuyerIdentityUseCase(get<CheckoutRepository>()) }
+    factory<UpdateDeliveryOptionUseCase> { UpdateDeliveryOptionUseCase(get<CheckoutRepository>()) }
+    factory<CompleteOrderUseCase> { CompleteOrderUseCase(get<CheckoutRepository>()) }
 
     single<PaymobApi> {
         Retrofit.Builder()
@@ -53,7 +58,7 @@ val checkoutModule = module {
 
     single<PaymentRemoteDataSource> {
         PaymentRemoteDataSourceImpl(
-            paymobApi = get(),
+            paymobApi = get<PaymobApi>(),
             secretKey = BuildConfig.PAYMOB_SECRET_KEY,
             paymentMethodId = PAYMOB_PAYMENT_METHOD_ID
         )
@@ -61,15 +66,29 @@ val checkoutModule = module {
 
     single<PaymentRepository> {
         PaymentRepositoryImpl(
-            remoteDataSource = get(),
+            remoteDataSource = get<PaymentRemoteDataSource>(),
             publicKey = BuildConfig.PAYMOB_PUBLIC_KEY
         )
     }
 
-    factory<CreateCardPaymentIntentionUseCase> { CreateCardPaymentIntentionUseCase(get()) }
+    factory<CreateCardPaymentIntentionUseCase> { CreateCardPaymentIntentionUseCase(get<PaymentRepository>()) }
 
-    viewModel { CheckoutSharedViewModel(get(), get<ConvertPriceUseCase>()) }
-    viewModel { CheckoutSummaryViewModel(get()) }
-    viewModel { CheckoutAddressViewModel(get(), get(), get(), get()) }
-    viewModel { CheckoutPaymentViewModel(get(), get(), get(), get()) }
+    viewModel { CheckoutSharedViewModel(get<ObserveCartStateUseCase>(), get<ConvertPriceUseCase>()) }
+    viewModel { CheckoutSummaryViewModel(get<UpdateDeliveryOptionUseCase>()) }
+    viewModel {
+        CheckoutAddressViewModel(
+            get<GetAddressesUseCase>(),
+            get<GetPersonalDetailsUseCase>(),
+            get<UpdateBuyerIdentityUseCase>(),
+            get<TokenProvider>()
+        )
+    }
+    viewModel {
+        CheckoutPaymentViewModel(
+            get<CompleteOrderUseCase>(),
+            get<CreateCardPaymentIntentionUseCase>(),
+            get<ClearCartUseCase>(),
+            get<ConvertRawPriceUseCase>()
+        )
+    }
 }
