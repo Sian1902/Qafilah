@@ -50,7 +50,7 @@ import com.example.ui_kit.components.search.TrendingPillCard
 import com.example.ui_kit.components.shared.RemovableChip
 import com.example.ui_kit.components.shared.SearchField
 import kotlinx.coroutines.launch
-
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 @Composable
 private fun categoryDisplayName(categoryId: String): String {
     return when (categoryId) {
@@ -189,7 +189,8 @@ fun SearchScreen(
                 ) {
                     IconButton(onClick = onBackClick) {
                         Icon(
-                            imageVector = Icons.Default.ArrowBack,
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+
                             contentDescription = goBackDescription,
                             tint = MaterialTheme.colorScheme.primary
                         )

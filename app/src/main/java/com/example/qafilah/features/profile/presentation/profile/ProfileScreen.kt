@@ -254,8 +254,8 @@ private fun ProfileScreenContent(
                     avatarContent = {
                             AsyncImage(
                                 model = profileUrl,
-                                placeholder = painterResource(id = R.drawable.profile),
-                                error = painterResource(id = R.drawable.profile),
+                                placeholder = painterResource(id = R.drawable.ic_logo),
+                                error = painterResource(id = R.drawable.ic_logo),
                                 contentDescription = stringResource(R.string.profile_verified_cd),
                                 contentScale = ContentScale.Crop,
                                 modifier = Modifier.fillMaxSize()

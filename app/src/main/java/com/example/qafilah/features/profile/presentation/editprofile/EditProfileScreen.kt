@@ -162,7 +162,7 @@ private fun EditProfileForm(
             onChangePhotoClick = onChangePhotoClick,
             avatarContent = {
                 Image(
-                    painter = painterResource(id = R.drawable.profile),
+                    painter = painterResource(id = R.drawable.ic_logo),
                     contentDescription = null,
                     contentScale = ContentScale.Crop,
                     modifier = Modifier.fillMaxSize()

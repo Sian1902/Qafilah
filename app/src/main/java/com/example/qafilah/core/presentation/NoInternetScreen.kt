@@ -7,11 +7,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.airbnb.lottie.compose.*
+import com.example.qafilah.R
 import com.example.ui_kit.components.shared.PrimaryButton
 
 @Composable
@@ -45,7 +47,7 @@ fun NoInternetScreen(
         Spacer(modifier = Modifier.height(32.dp))
 
         Text(
-            text = "Oops! No Internet Connection",
+            text = stringResource(id = R.string.no_internet_title),
             fontSize = 24.sp,
             fontWeight = FontWeight.Bold,
             textAlign = TextAlign.Center,
@@ -55,7 +57,7 @@ fun NoInternetScreen(
         Spacer(modifier = Modifier.height(16.dp))
 
         Text(
-            text = "Please check your network settings and try again.",
+            text = stringResource(id = R.string.no_internet_subtitle),
             fontSize = 16.sp,
             textAlign = TextAlign.Center,
             color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -64,7 +66,7 @@ fun NoInternetScreen(
         Spacer(modifier = Modifier.height(48.dp))
 
         PrimaryButton(
-            text = "Try Again",
+            text = stringResource(id = R.string.try_again),
             onClick = onRetry,
             modifier = Modifier.fillMaxWidth()
         )
