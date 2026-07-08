@@ -121,8 +121,14 @@ fun WishlistScreen(
                 else -> {
                     LazyVerticalGrid(
                         columns = GridCells.Fixed(2),
-                        modifier = Modifier.fillMaxSize().padding(bottom = 120.dp),
-                        contentPadding = PaddingValues(horizontal = 20.dp, vertical = 24.dp),
+                        modifier = Modifier.fillMaxSize(),
+
+                        contentPadding = PaddingValues(
+                            start = 20.dp,
+                            top = 24.dp,
+                            end = 20.dp,
+                            bottom = 120.dp
+                        ),
                         horizontalArrangement = Arrangement.spacedBy(16.dp),
                         verticalArrangement = Arrangement.spacedBy(24.dp)
                     ) {

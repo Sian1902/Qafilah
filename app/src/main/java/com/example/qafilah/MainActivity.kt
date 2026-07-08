@@ -78,7 +78,13 @@ class MainActivity : ComponentActivity() {
                         )
                     }
 
-                    val showBottomBar = currentRoute !in Screen.hiddenRoutes
+                    val isRouteHidden = currentRoute in Screen.hiddenRoutes
+
+                    val showBottomBar = if (currentRoute == null) {
+                        appState.initialDestination == InitialDestination.Home
+                    } else {
+                        !isRouteHidden
+                    }
 
                     Scaffold(
                         containerColor = MaterialTheme.colorScheme.background,
