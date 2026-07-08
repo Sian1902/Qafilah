@@ -25,6 +25,7 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.ShoppingBag
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -55,8 +56,10 @@ import com.example.ui_kit.components.profile.ProfileStatsRow
 import com.example.ui_kit.components.profile.ProfileTopBar
 import com.example.ui_kit.components.profile.SectionLabel
 import com.example.ui_kit.components.profile.SignOutButton
+import com.example.ui_kit.components.login.LoginPromptBottomSheet
 import org.koin.androidx.compose.koinViewModel
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileScreen(
     viewModel: ProfileViewModel,
@@ -66,7 +69,9 @@ fun ProfileScreen(
     onOrdersClick: () -> Unit = {},
     onShippingAddressesClick: () -> Unit = {},
     onSignOutClick: () -> Unit = {},
-    onNavigateToLogin: () -> Unit = {}
+    onNavigateToLogin: () -> Unit = {},
+    onNavigateToSignUp: () -> Unit = {},
+    onNavigateToHome: () -> Unit = {}
 ) {
     val uiState by viewModel.state.collectAsStateWithLifecycle()
     val appState by mainViewModel.appState.collectAsStateWithLifecycle()
@@ -177,6 +182,27 @@ fun ProfileScreen(
                 onSignOutClick = onSignOutClick
             )
         }
+    }
+
+    if (uiState.showLoginPrompt) {
+        LoginPromptBottomSheet(
+            title = stringResource(R.string.login_prompt_title),
+            subtitle = stringResource(R.string.login_prompt_subtitle, stringResource(R.string.feature_name_profile)),
+            loginButtonLabel = stringResource(R.string.login_button_label),
+            signUpButtonLabel = stringResource(R.string.signup_action_label),
+            onDismiss = {
+                viewModel.dismissLoginPrompt()
+                onNavigateToHome()
+            },
+            onNavigateToLogin = {
+                viewModel.dismissLoginPrompt()
+                onNavigateToLogin()
+            },
+            onNavigateToSignUp = {
+                viewModel.dismissLoginPrompt()
+                onNavigateToSignUp()
+            }
+        )
     }
 }
 
