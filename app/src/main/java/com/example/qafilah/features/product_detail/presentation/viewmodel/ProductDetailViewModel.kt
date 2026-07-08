@@ -9,6 +9,7 @@ import com.example.qafilah.features.catalog.domain.usecases.GetSingleProductUseC
 import com.example.qafilah.core.currency.domain.usecase.ConvertPriceUseCase
 import com.example.qafilah.features.catalog.domain.model.SubmitReviewParams
 import com.example.qafilah.features.catalog.domain.usecases.SubmitProductReviewUseCase
+import com.example.qafilah.features.wishlist.domain.model.WishlistItem
 import com.example.qafilah.features.wishlist.domain.usecase.AddToWishlistParams
 import com.example.qafilah.features.wishlist.domain.usecase.AddToWishlistUseCase
 import com.example.qafilah.features.wishlist.domain.usecase.IsProductWishlistedUseCase
@@ -206,14 +207,16 @@ class ProductDetailViewModel(
                     removeFromWishlistUseCase(product.id)
                 } else {
                     addToWishlistUseCase(
-                        AddToWishlistParams(
+                        WishlistItem(
                             productId = product.id,
                             handle = product.id,
                             title = product.title,
-                            imageUrl = product.images.firstOrNull(),
+                            localImagePath = null,
+                            remoteImageUrl = product.images.firstOrNull(),
                             vendor = product.vendor,
                             price = product.variants.firstOrNull()?.price?.toDoubleOrNull() ?: 0.0,
-                            currencyCode = "USD"
+                            currencyCode = "USD",
+                            addedAt = System.currentTimeMillis()
                         )
                     )
                     _events.trySend(ProductDetailEvent.ShowToast(String.format(addedToWishlistTemplate, product.title)))

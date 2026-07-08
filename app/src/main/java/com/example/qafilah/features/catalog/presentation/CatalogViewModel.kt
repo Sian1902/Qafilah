@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.qafilah.core.model.Product
 import com.example.qafilah.features.catalog.domain.model.StoreCollection
 import com.example.qafilah.features.catalog.domain.usecases.*
+import com.example.qafilah.features.wishlist.domain.model.WishlistItem
 import com.example.qafilah.features.wishlist.domain.usecase.AddToWishlistParams
 import com.example.qafilah.features.wishlist.domain.usecase.AddToWishlistUseCase
 import com.example.qafilah.features.wishlist.domain.usecase.IsProductWishlistedUseCase
@@ -71,7 +72,13 @@ class CatalogViewModel(
         viewModelScope.launch {
             isProductWishlistedUseCase(productId).collect { isWishlisted ->
                 _list.value = _list.value.map { product ->
-                    product
+                    if (product.id == productId) {
+                        // Assuming your Product model has a copy method and an isFavorite/isWishlisted flag
+                        // e.g., product.copy(isFavorite = isWishlisted)
+                        product
+                    } else {
+                        product
+                    }
                 }
             }
         }
@@ -85,18 +92,22 @@ class CatalogViewModel(
                     removeFromWishlistUseCase(product.id)
                 } else {
                     addToWishlistUseCase(
-                        AddToWishlistParams(
+                        WishlistItem(
                             productId = product.id,
                             handle = product.id,
                             title = product.title,
-                            imageUrl = product.imageUrl,
+                            localImagePath = null,
+                            remoteImageUrl = product.imageUrl,
                             vendor = product.vendor,
                             price = product.priceAmount.toDoubleOrNull() ?: 0.0,
-                            currencyCode = product.currencyCode
+                            currencyCode = product.currencyCode,
+                            addedAt = System.currentTimeMillis()
                         )
                     )
                 }
-            } catch (e: Exception) { }
+            } catch (e: Exception) {
+                android.util.Log.e("CatalogViewModel", "Error toggling favorite: ${e.message}", e)
+            }
         }
     }
 }

@@ -1,7 +1,6 @@
-package com.example.qafilah.features.wishlist.data
+package com.example.qafilah.features.wishlist.data.local
 
 import androidx.room.Entity
-import androidx.room.PrimaryKey
 
 @Entity(
     tableName = "wishlist_items",
