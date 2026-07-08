@@ -2,7 +2,6 @@ package com.example.qafilah.features.assistant.di
 
 import com.example.qafilah.core.data.AppDatabase
 import com.example.qafilah.features.assistant.data.AssistantRepositoryImpl
-import com.example.qafilah.features.assistant.data.MockAssistantRepositoryImpl
 import com.example.qafilah.features.assistant.data.remote.AssistantApiService
 import com.example.qafilah.features.assistant.data.remote.AssistantRemoteDataSource
 import com.example.qafilah.features.assistant.domain.repository.AssistantRepository
@@ -12,12 +11,12 @@ import com.example.qafilah.features.assistant.domain.usecase.SendPromptUseCase
 import com.example.qafilah.features.assistant.presentation.AssistantViewModel
 import okhttp3.OkHttpClient
 import org.koin.androidx.viewmodel.dsl.viewModel
+import org.koin.core.scope.get
 import org.koin.dsl.module
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
 val assistantModule = module {
-
     single { get<AppDatabase>().assistantDao() }
 
     single<AssistantApiService> {
@@ -26,7 +25,6 @@ val assistantModule = module {
             .client(get<OkHttpClient>())
             .addConverterFactory(GsonConverterFactory.create())
             .build()
-
         retrofit.create(AssistantApiService::class.java)
     }
 
@@ -34,21 +32,22 @@ val assistantModule = module {
 
     single<AssistantRepository> {
         AssistantRepositoryImpl(
-            dao = get(),
-            remoteDataSource = get()
+            get(),
+            get()
         )
     }
 
-    /*
-    single<AssistantRepository> {
-        MockAssistantRepositoryImpl(
-            dao = get()
-        )
-    }*/
-
-    factory { SendPromptUseCase(repository = get(), authRepository = get()) }
+    factory { SendPromptUseCase(get()) }
     factory { GetChatHistoryUseCase(repository = get(), authRepository = get()) }
     factory { ClearChatHistoryUseCase(repository = get(), authRepository = get()) }
 
-    viewModel { AssistantViewModel(get(), get(), get()) }
+    viewModel {
+        AssistantViewModel(
+            getChatHistoryUseCase = get(),
+            sendPromptUseCase = get(),
+            clearChatHistoryUseCase = get(),
+            getSingleProductUseCase = get(),
+            convertPriceUseCase = get()
+        )
+    }
 }

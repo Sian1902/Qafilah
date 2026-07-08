@@ -55,7 +55,7 @@ fun NoInternetScreen(
         Spacer(modifier = Modifier.height(16.dp))
 
         Text(
-            text = "Please check your network settings and try again. You can still access your wishlist.",
+            text = "Please check your network settings and try again.",
             fontSize = 16.sp,
             textAlign = TextAlign.Center,
             color = MaterialTheme.colorScheme.onSurfaceVariant
