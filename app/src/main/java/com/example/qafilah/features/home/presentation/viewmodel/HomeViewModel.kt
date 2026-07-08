@@ -192,22 +192,22 @@ private val promos = listOf(
     PromoUiModel(
         id = "1",
         imageUrl = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSgGN2pTfic3uVpilnJ0l0Nj3jox1-ZdSQQ5saYLSRqsg&s=10",
-        title = "The Dune Collection",
-        ctaText = "CLAIM 10% OFF",
+        titleRes = R.string.promo_dune_title,
+        ctaTextRes = R.string.promo_10_off_cta,
         code = "CO-10"
     ),
     PromoUiModel(
         id = "2",
         imageUrl = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTPsNU7_l9Dl9ofPFJoZpKBamesMHiL89MOY3RCN3lE3w&s=10",
-        title = "Summer Fragrances",
-        ctaText = "CLAIM 20% OFF",
+        titleRes = R.string.promo_summer_title,
+        ctaTextRes = R.string.promo_20_off_cta,
         code = "CO-20"
     ),
     PromoUiModel(
         id = "3",
         imageUrl = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRVRKcx2298L0qTDGAE-pWii-7R5pB71D6rPrGX0h-IXg&s=10",
-        title = "Royal Oud Series",
-        ctaText = "CLAIM 50% OFF",
+        titleRes = R.string.promo_royal_title,
+        ctaTextRes = R.string.promo_50_off_cta,
         code = "CO-50"
     )
 )

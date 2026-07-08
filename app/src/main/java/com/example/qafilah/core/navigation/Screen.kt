@@ -38,6 +38,8 @@ sealed class Screen(val route: String) {
         fun createRoute(addressId: String) = "edit_address/$addressId"
     }
 
+    object CamelRun : Screen("camel_run")
+
     companion object {
         val hiddenRoutes = setOf(
             Splash.route,
@@ -53,7 +55,8 @@ sealed class Screen(val route: String) {
             Orders.route,
             AddAddress.route,
             "edit_address/{addressId}",
-            Chat.route
+            Chat.route,
+            CamelRun.route
         )
     }
 }

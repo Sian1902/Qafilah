@@ -333,4 +333,23 @@
     <string name="option_material">الخامة</string>
     <string name="payment_cancelled">الغاء الدفع</string>
 
+    <string name="camel_run_title">العب سباق الجمال! 🐪</string>
+    <string name="camel_run_subtitle">اربح كوبونات خصم!</string>
+    <string name="play_button_label">العب</string>
+    <string name="camel_run_ready_title">جاهز للرحلة؟</string>
+    <string name="camel_run_ready_subtitle">اضغط في أي مكان لبدء قافلتك</string>
+    <string name="camel_run_game_over_title">توقفت القافلة!</string>
+    <string name="camel_run_game_over_subtitle">اضغط في أي مكان للمحاولة مرة أخرى</string>
+    <string name="camel_run_won_title">وصلنا للواحة! 🥳</string>
+    <string name="camel_run_won_subtitle">سيتم تطبيق كوبون خصم على عملية الشراء القادمة</string>
+    <string name="camel_run_return_home">العودة للرئيسية</string>
+    <string name="camel_run_score_label">النتيجة: %1$d / %2$d</string>
+    <string name="promo_dune_title">مجموعة الكثبان</string>
+    <string name="promo_10_off_cta">احصل على خصم 10%</string>
+
+    <string name="promo_summer_title">عطور الصيف</string>
+    <string name="promo_20_off_cta">احصل على خصم 20%</string>
+
+    <string name="promo_royal_title">سلسلة العود الملكي</string>
+    <string name="promo_50_off_cta">احصل على خصم 50%</string>
 </resources>
