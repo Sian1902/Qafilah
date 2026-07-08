@@ -1,26 +1,20 @@
 package com.example.qafilah.features.cart.presentation.ui
 
 import android.widget.Toast
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -33,6 +27,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.qafilah.MainViewModel
 import com.example.qafilah.R
 import com.example.qafilah.features.cart.presentation.contract.CartEvent
 import com.example.qafilah.features.cart.presentation.contract.CartIntent
@@ -42,7 +37,6 @@ import com.example.ui_kit.components.cart.CartEmptyView
 import com.example.ui_kit.components.cart.CartItemCard
 import com.example.ui_kit.components.cart.CartSummaryCard
 import com.example.ui_kit.components.cart.DiscountCodesCard
-import com.example.ui_kit.components.login.LoginPromptBottomSheet
 import com.example.ui_kit.components.shared.PrimaryButton
 import org.koin.androidx.compose.koinViewModel
 
@@ -55,9 +49,11 @@ fun CartScreen(
     onProductClick: (String) -> Unit,
     modifier: Modifier = Modifier,
     onNavigateToCheckout: () -> Unit = {},
-    viewModel: CartViewModel = koinViewModel()
+    viewModel: CartViewModel = koinViewModel(),
+    mainViewModel: MainViewModel = koinViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val appState by mainViewModel.appState.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val errorFailedToLoadCart = stringResource(R.string.error_failed_to_load_cart)
 
@@ -76,7 +72,9 @@ fun CartScreen(
 
     LaunchedEffect(state.errorMessage) {
         state.errorMessage?.let {
-            Toast.makeText(context, it, Toast.LENGTH_LONG).show()
+            if (appState.isOnline && !it.contains("Data is null", ignoreCase = true)) {
+                Toast.makeText(context, it, Toast.LENGTH_LONG).show()
+            }
             viewModel.onIntent(CartIntent.DismissError)
         }
     }
@@ -104,7 +102,13 @@ fun CartScreen(
                         viewModel.onIntent(CartIntent.RemoveItem(lineId))
                     },
                     onAddDiscountClick = { showDiscountDialog = true },
-                    onRemoveDiscount = { code -> viewModel.onIntent(CartIntent.RemoveDiscountCode(code)) },
+                    onRemoveDiscount = { code ->
+                        viewModel.onIntent(
+                            CartIntent.RemoveDiscountCode(
+                                code
+                            )
+                        )
+                    },
                     onCheckout = onNavigateToCheckout,
                     onProductClick = onProductClick
                 )
@@ -159,7 +163,7 @@ private fun CartContent(
     } else {
         Column(
             modifier = modifier.padding(start = 16.dp, top = 16.dp, end = 16.dp, bottom = 120.dp),
-            ) {
+        ) {
             LazyColumn(
                 modifier = Modifier.weight(1f),
                 verticalArrangement = Arrangement.spacedBy(16.dp)

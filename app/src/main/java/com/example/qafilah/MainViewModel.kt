@@ -2,6 +2,7 @@ package com.example.qafilah
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.qafilah.core.network.ConnectivityObserver
 import com.example.qafilah.core.network.ShopifyClient
 import com.example.qafilah.core.preferences.AppPreferences
 import com.example.qafilah.core.preferences.ThemeMode
@@ -10,6 +11,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
@@ -24,12 +26,14 @@ data class AppState(
     val themeMode: ThemeMode = ThemeMode.SYSTEM,
     val languageCode: String = "en",
     val onboardingCompleted: Boolean = false,
-    val initialDestination: InitialDestination = InitialDestination.Splash
+    val initialDestination: InitialDestination = InitialDestination.Splash,
+    val isOnline: Boolean = true
 )
 
 class MainViewModel(
     private val appPreferences: AppPreferences,
-    private val tokenProvider: TokenProvider
+    private val tokenProvider: TokenProvider,
+    private val connectivityObserver: ConnectivityObserver
 ) : ViewModel() {
 
     init {
@@ -40,11 +44,20 @@ class MainViewModel(
         }
     }
 
+    val isOnline: StateFlow<Boolean> = connectivityObserver.observe()
+        .map { it == ConnectivityObserver.Status.Available }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = connectivityObserver.currentStatus == ConnectivityObserver.Status.Available
+        )
+
     val appState: StateFlow<AppState> = combine(
         appPreferences.themeMode,
         appPreferences.languageCode,
-        appPreferences.isOnboardingCompleted
-    ) { theme, lang, onboarding ->
+        appPreferences.isOnboardingCompleted,
+        isOnline
+    ) { theme, lang, onboarding, online ->
         val isLoggedIn = tokenProvider.getToken() != null
 
         val destination = when {
@@ -57,7 +70,8 @@ class MainViewModel(
             themeMode = theme,
             languageCode = lang,
             onboardingCompleted = onboarding,
-            initialDestination = destination
+            initialDestination = destination,
+            isOnline = online
         )
     }.stateIn(
         scope = viewModelScope,

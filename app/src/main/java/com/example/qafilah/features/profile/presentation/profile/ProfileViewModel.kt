@@ -7,6 +7,7 @@ import com.example.qafilah.core.currency.domain.repo.CurrencyRepository
 import com.example.qafilah.features.auth.domain.usecase.SignOutUseCase
 import com.example.qafilah.features.cart.domain.usecase.ClearCartUseCase
 import com.example.qafilah.features.profile.domain.usecase.GetCustomerProfileUseCase
+import com.example.qafilah.features.wishlist.domain.usecase.GetWishlistUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -15,6 +16,7 @@ import kotlinx.coroutines.launch
 
 class ProfileViewModel(
     private val getCustomerProfile: GetCustomerProfileUseCase,
+    private val getWishlistUseCase: GetWishlistUseCase,
     private val signOutUseCase: SignOutUseCase,
     private val clearCartUseCase: ClearCartUseCase,
     private val currencyRepository: CurrencyRepository
@@ -26,6 +28,15 @@ class ProfileViewModel(
     init {
         observeCurrency()
         loadAvailableCurrencies()
+        observeWishlist()
+    }
+
+    private fun observeWishlist() {
+        viewModelScope.launch {
+            getWishlistUseCase().collect { items ->
+                _state.update { it.copy(wishlistCount = items.size) }
+            }
+        }
     }
 
     private fun observeCurrency() {

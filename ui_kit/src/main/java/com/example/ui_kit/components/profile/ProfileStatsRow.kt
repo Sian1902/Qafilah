@@ -27,10 +27,8 @@ import androidx.compose.ui.unit.dp
 fun ProfileStatsRow(
     orders: Int,
     wishlist: Int,
-    reviews: Int,
     ordersLabel: String,
     wishlistLabel: String,
-    reviewsLabel: String,
     modifier: Modifier = Modifier
 ) {
     Row(
@@ -45,8 +43,6 @@ fun ProfileStatsRow(
         StatItem(value = orders, label = ordersLabel, modifier = Modifier.weight(1f))
         StatDivider()
         StatItem(value = wishlist, label = wishlistLabel, modifier = Modifier.weight(1f))
-        StatDivider()
-        StatItem(value = reviews, label = reviewsLabel, modifier = Modifier.weight(1f))
     }
 }
 

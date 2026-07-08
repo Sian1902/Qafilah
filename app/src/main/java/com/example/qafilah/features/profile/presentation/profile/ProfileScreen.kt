@@ -160,6 +160,7 @@ fun ProfileScreen(
             ProfileScreenContent(
                 profile = uiState.profile!!,
                 selectedCurrency = uiState.selectedCurrency,
+                wishlistCount = uiState.wishlistCount,
                 selectedLanguage = if (appState.languageCode == "ar") stringResource(R.string.language_arabic) else stringResource(R.string.language_english),
                 selectedTheme = when (appState.themeMode) {
                     ThemeMode.LIGHT -> stringResource(R.string.theme_light)
@@ -183,6 +184,7 @@ fun ProfileScreen(
 private fun ProfileScreenContent(
     profile: CustomerProfile,
     selectedCurrency: String,
+    wishlistCount: Int,
     selectedLanguage: String,
     selectedTheme: String,
     onEditProfileClick: () -> Unit = {},
@@ -246,11 +248,9 @@ private fun ProfileScreenContent(
             item {
                 ProfileStatsRow(
                     orders = profile.orders.size,
-                    wishlist = 0,
-                    reviews = 0,
+                    wishlist = wishlistCount,
                     ordersLabel = stringResource(R.string.profile_stats_orders),
                     wishlistLabel = stringResource(R.string.profile_stats_wishlist),
-                    reviewsLabel = stringResource(R.string.profile_stats_reviews),
                     modifier = Modifier.padding(horizontal = 20.dp)
                 )
                 Spacer(Modifier.height(24.dp))
