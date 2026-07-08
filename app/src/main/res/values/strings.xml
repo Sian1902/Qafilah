@@ -13,6 +13,7 @@
     <string name="error_registration_failed">Registration failed</string>
     <string name="error_google_auth_failed">Google authentication failed</string>
     <string name="feature_name_cart">your cart</string>
+    <string name="feature_name_profile">your profile</string>
     <string name="proceed_to_checkout">Proceed to Checkout</string>
     <string name="error_failed_to_load_cart">Failed to load cart</string>
     <string name="error_something_went_wrong">Something went wrong</string>

@@ -14,6 +14,7 @@
     <string name="error_registration_failed">فشل التسجيل</string>
     <string name="error_google_auth_failed">فشل المصادقة عبر Google</string>
     <string name="feature_name_cart">سلتك</string>
+    <string name="feature_name_profile">ملفك الشخصي</string>
     <string name="proceed_to_checkout">المتابعة إلى الدفع</string>
     <string name="error_failed_to_load_cart">فشل تحميل السلة</string>
     <string name="error_something_went_wrong">حدث خطأ ما</string>

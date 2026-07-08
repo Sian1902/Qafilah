@@ -352,6 +352,14 @@ fun AppNavHost(
                         navController.navigate(Screen.Login.route) {
                             popUpTo(0) { inclusive = true }
                         }
+                    },
+                    onNavigateToSignUp = {
+                        navController.navigate(Screen.Register.route)
+                    },
+                    onNavigateToHome = {
+                        navController.navigate(NavItem.Home.route) {
+                            popUpTo(NavItem.Profile.route) { inclusive = true }
+                        }
                     }
                 )
             }

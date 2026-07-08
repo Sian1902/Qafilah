@@ -3,6 +3,7 @@ package com.example.qafilah.features.profile.presentation.profile
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 
+import com.example.qafilah.features.auth.domain.util.RequireAuth
 import com.example.qafilah.core.currency.domain.repo.CurrencyRepository
 import com.example.qafilah.features.auth.domain.usecase.SignOutUseCase
 import com.example.qafilah.features.cart.domain.usecase.ClearCartUseCase
@@ -15,6 +16,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class ProfileViewModel(
+    private val requireAuth: RequireAuth,
     private val getCustomerProfile: GetCustomerProfileUseCase,
     private val getWishlistUseCase: GetWishlistUseCase,
     private val signOutUseCase: SignOutUseCase,
@@ -61,26 +63,37 @@ class ProfileViewModel(
     }
 
     fun loadProfile(unknownErrorMessage: String) {
-        viewModelScope.launch {
-            _state.update { it.copy(isLoading = true, error = null) }
+        requireAuth.invoke(
+            onAuthenticated = {
+                viewModelScope.launch {
+                    _state.update { it.copy(isLoading = true, error = null, showLoginPrompt = false) }
 
-            getCustomerProfile()
-                .onSuccess { profile ->
-                    _state.update { it.copy(isLoading = false, profile = profile) }
+                    getCustomerProfile()
+                        .onSuccess { profile ->
+                            _state.update { it.copy(isLoading = false, profile = profile) }
+                        }
+                        .onFailure { error ->
+                            _state.update {
+                                it.copy(
+                                    isLoading = false,
+                                    error = error.message ?: unknownErrorMessage,
+                                    isAuthError = error.message?.contains(
+                                        "authenticated",
+                                        ignoreCase = true
+                                    ) == true
+                                )
+                            }
+                        }
                 }
-                .onFailure { error ->
-                    _state.update {
-                        it.copy(
-                            isLoading = false,
-                            error = error.message ?: unknownErrorMessage,
-                            isAuthError = error.message?.contains(
-                                "authenticated",
-                                ignoreCase = true
-                            ) == true
-                        )
-                    }
-                }
-        }
+            },
+            onGuest = {
+                _state.update { it.copy(isLoading = false, showLoginPrompt = true) }
+            }
+        )
+    }
+
+    fun dismissLoginPrompt() {
+        _state.update { it.copy(showLoginPrompt = false) }
     }
 
     fun signOut(onComplete: () -> Unit) {
