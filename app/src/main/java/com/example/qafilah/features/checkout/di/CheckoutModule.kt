@@ -1,6 +1,7 @@
 package com.example.qafilah.features.checkout.di
 
 import com.example.qafilah.BuildConfig
+import com.example.qafilah.core.currency.ConvertRawPriceUseCase
 import com.example.qafilah.core.currency.domain.usecase.ConvertPriceUseCase
 import com.example.qafilah.core.network.ShopifyClient
 import com.example.qafilah.features.checkout.data.datasource.CheckoutRemoteDataSource

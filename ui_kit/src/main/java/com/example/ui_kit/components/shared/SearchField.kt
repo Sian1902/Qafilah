@@ -36,7 +36,7 @@ fun SearchField(
             .fillMaxWidth()
             .height(56.dp)
             .clip(RoundedCornerShape(28.dp))
-            .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.5f))
+            .background(MaterialTheme.colorScheme.surface)
             .let { base -> if (onClick != null) base.clickable { onClick() } else base }
             .padding(horizontal = 20.dp)
     ) {

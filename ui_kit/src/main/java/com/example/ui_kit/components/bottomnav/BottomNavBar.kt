@@ -23,6 +23,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
@@ -37,14 +38,22 @@ fun BottomNavBar(
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .navigationBarsPadding()
-            .padding(horizontal = 16.dp, vertical = 12.dp),
+            .navigationBarsPadding() // Keeps it safely above Android's system gesture bar!
+            .padding(horizontal = 16.dp, vertical = 16.dp), // Slightly increased vertical padding
         contentAlignment = Alignment.Center
     ) {
         Row(
             modifier = Modifier
+                // 1. ADD SHADOW HERE to create the 3D floating effect
+                .shadow(
+                    elevation = 20.dp,
+                    shape = RoundedCornerShape(40.dp),
+                    ambientColor = MaterialTheme.colorScheme.primary, // Optional: gives a slight colored glow
+                    spotColor = MaterialTheme.colorScheme.primary
+                )
                 .clip(RoundedCornerShape(40.dp))
-                .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.9f))
+                // 2. Made alpha 1.0f. Shadows behind transparent backgrounds can look muddy.
+                .background(MaterialTheme.colorScheme.surface)
                 .padding(horizontal = 8.dp, vertical = 10.dp),
             horizontalArrangement = Arrangement.SpaceEvenly,
             verticalAlignment = Alignment.CenterVertically

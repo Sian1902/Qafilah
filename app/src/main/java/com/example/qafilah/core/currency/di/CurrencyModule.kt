@@ -1,6 +1,7 @@
 package com.example.qafilah.core.currency.di
 
 import com.example.qafilah.BuildConfig
+import com.example.qafilah.core.currency.ConvertRawPriceUseCase
 import com.example.qafilah.core.currency.data.remote.CurrencyService
 import com.example.qafilah.core.currency.domain.repo.CurrencyRepository
 import com.example.qafilah.core.currency.domain.repo.CurrencyRepositoryImpl
@@ -21,4 +22,5 @@ val currencyModule = module {
     single<CurrencyRepository> { CurrencyRepositoryImpl(get(), get()) }
 
     factory { ConvertPriceUseCase(get()) }
+    factory<ConvertRawPriceUseCase> { ConvertRawPriceUseCase(get()) }
 }
