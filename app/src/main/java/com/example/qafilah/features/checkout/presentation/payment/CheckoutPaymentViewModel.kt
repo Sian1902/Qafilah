@@ -3,7 +3,7 @@ package com.example.qafilah.features.checkout.presentation.payment
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.qafilah.core.currency.ConvertRawPriceUseCase
+import com.example.qafilah.core.currency.domain.usecase.ConvertRawPriceUseCase
 import com.example.qafilah.features.address.domain.model.ShippingAddress
 import com.example.qafilah.features.auth.domain.model.AppUser
 import com.example.qafilah.features.cart.domain.usecase.ClearCartUseCase

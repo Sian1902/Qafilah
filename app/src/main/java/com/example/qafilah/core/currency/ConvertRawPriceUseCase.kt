@@ -1,14 +1,13 @@
-package com.example.qafilah.core.currency
+package com.example.qafilah.core.currency.domain.usecase
 
 import com.example.qafilah.core.currency.domain.repo.CurrencyRepository
 
 class ConvertRawPriceUseCase(
-    private val repository: CurrencyRepository
+    private val currencyRepository: CurrencyRepository
 ) {
-    suspend operator fun invoke(amountUsd: Double, targetCurrency: String = "EGP"): Double {
-        val rates = repository.getExchangeRates()
-        val rate = rates[targetCurrency] ?: 1.0
-
+    suspend operator fun invoke(amountUsd: Double, targetCurrency: String): Double {
+        val rates = currencyRepository.getExchangeRates()
+        val rate = rates[targetCurrency] ?: return amountUsd
         return amountUsd * rate
     }
 }

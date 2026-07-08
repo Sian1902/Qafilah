@@ -330,5 +330,6 @@
     <string name="option_color">Color</string>
     <string name="option_size">Size</string>
     <string name="option_material">Material</string>
+    <string name="payment_cancelled">Payment Cancelled</string>
 
 </resources>
