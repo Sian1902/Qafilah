@@ -5,6 +5,7 @@ import com.example.qafilah.core.currency.data.remote.CurrencyService
 import com.example.qafilah.core.currency.domain.repo.CurrencyRepository
 import com.example.qafilah.core.currency.domain.repo.CurrencyRepositoryImpl
 import com.example.qafilah.core.currency.domain.usecase.ConvertPriceUseCase
+import com.example.qafilah.core.currency.domain.usecase.ConvertRawPriceUseCase
 import org.koin.dsl.module
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -21,4 +22,5 @@ val currencyModule = module {
     single<CurrencyRepository> { CurrencyRepositoryImpl(get(), get()) }
 
     factory { ConvertPriceUseCase(get()) }
+    factory { ConvertRawPriceUseCase(get()) }
 }

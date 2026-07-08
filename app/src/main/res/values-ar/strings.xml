@@ -330,5 +330,6 @@
     <string name="option_color">اللون</string>
     <string name="option_size">الحجم</string>
     <string name="option_material">الخامة</string>
+    <string name="payment_cancelled">الغاء الدفع</string>
 
 </resources>
