@@ -17,7 +17,6 @@ class WishlistRemoteDataSourceImpl(
 
     private val wishlistsRef = firebaseDatabase.getReference("wishlists")
 
-    // Helper to sanitize the Shopify ID so Firebase doesn't treat it as a path
     private fun String.toSafeFirebaseKey(): String {
         return this.replace("/", "_").replace(".", "_")
     }
@@ -29,20 +28,16 @@ class WishlistRemoteDataSourceImpl(
                 for (child in snapshot.children) {
                     child.getValue(WishlistRemoteDto::class.java)?.let { items.add(it) }
                 }
-                // Push the updated list down the stream
                 trySend(items)
             }
 
             override fun onCancelled(error: DatabaseError) {
-                // Handle possible errors (e.g., permission denied)
                 close(error.toException())
             }
         }
 
-        // Attach the realtime listener to the user's wishlist node
         wishlistsRef.child(userId).addValueEventListener(listener)
 
-        // Critical: Remove the listener when the Flow collector/scope is cancelled to prevent memory leaks
         awaitClose {
             wishlistsRef.child(userId).removeEventListener(listener)
         }
@@ -50,7 +45,6 @@ class WishlistRemoteDataSourceImpl(
 
     override suspend fun addToWishlist(userId: String, item: WishlistRemoteDto) {
         val safeKey = item.productId.toSafeFirebaseKey()
-        // Firebase will now save this at: wishlists/userId/gid:__shopify_Product_12345
         wishlistsRef.child(userId).child(safeKey).setValue(item).await()
     }
 

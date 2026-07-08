@@ -8,6 +8,7 @@ import com.example.qafilah.features.wishlist.domain.model.WishlistItem
 import com.example.qafilah.features.wishlist.domain.repository.WishlistRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flowOf
 
 class WishlistRepositoryImpl(
     private val localDataSource: WishlistLocalDataSource,
@@ -19,23 +20,17 @@ class WishlistRepositoryImpl(
         get() = authDataSource.getCurrentUser()?.id ?: throw Exception("User not authenticated")
 
     override fun getWishlist(): Flow<List<WishlistItem>> {
-        // FIX 1: localDataSource already returns Flow<List<WishlistItem>>, so we remove the redundant mapping.
-        return localDataSource.getWishlist(userId)
+        val uid = authDataSource.getCurrentUser()?.id ?: return flowOf(emptyList())
+        return localDataSource.getWishlist(uid)
     }
 
     override suspend fun syncWishlist() {
+        val uid = authDataSource.getCurrentUser()?.id ?: return
         try {
-            val uid = userId
-
-            // 1. Continuous collection from the real-time Firebase stream
             remoteDataSource.getWishlist(uid).collect { remoteItems ->
 
-                // Get a quick snapshot list of what is currently in Room locally
-                // Note: assuming your localDataSource has a one-shot fetch or we take the first emission
-                // If getWishlist returns a Flow, use .first() to read its current state once
                 val localItemsSnapshot = localDataSource.getWishlist(uid).first()
 
-                // 2. Handle Deletions: If an item is local but NOT in remote data, delete it locally
                 val remoteProductIds = remoteItems.map { it.productId }.toSet()
                 localItemsSnapshot.forEach { localItem ->
                     if (localItem.productId !in remoteProductIds) {
@@ -43,7 +38,6 @@ class WishlistRepositoryImpl(
                     }
                 }
 
-                // 3. Handle Additions/Updates: Insert or update remote items into the local DB
                 remoteItems.forEach { remoteItem ->
                     localDataSource.addItem(
                         userId = uid,
@@ -58,14 +52,12 @@ class WishlistRepositoryImpl(
                 }
             }
         } catch (e: Exception) {
-            // Fails silently if offline; local DB acts as fallback
         }
     }
 
     override suspend fun addToWishlist(item: WishlistItem) {
         val uid = userId
 
-        // FIX 3: Use addItem and pass the individual parameters expected by LocalDataSource
         localDataSource.addItem(
             userId = uid,
             productId = item.productId,
@@ -77,31 +69,26 @@ class WishlistRepositoryImpl(
             currencyCode = item.currencyCode
         )
 
-        remoteDataSource.addToWishlist(uid, item.toRemoteDto()) // Background remote push
+        remoteDataSource.addToWishlist(uid, item.toRemoteDto())
     }
 
     override suspend fun removeFromWishlist(productId: String) {
         val uid = userId
-        // FIX 4: Call removeItem instead of removeFromWishlist
         localDataSource.removeItem(uid, productId)
         remoteDataSource.removeFromWishlist(uid, productId)
     }
 
     override fun isProductWishlisted(productId: String): Flow<Boolean> {
-        // FIX 5: Call isWishlisted instead of isProductWishlisted
-        return localDataSource.isWishlisted(userId, productId)
+        val uid = authDataSource.getCurrentUser()?.id ?: return flowOf(false)
+        return localDataSource.isWishlisted(uid, productId)
     }
 
     override suspend fun clearWishlist() {
         val uid = userId
-        // FIX 6: Call clearAll instead of clearWishlist
         localDataSource.clearAll(uid)
         remoteDataSource.clearWishlist(uid)
     }
 
-    // --- Mappers ---
-
-    // We removed the Entity.toDomain mapper because LocalDataSource handles it for us now.
 
     private fun WishlistItem.toRemoteDto() = WishlistRemoteDto(
         productId = productId, handle = handle, title = title,

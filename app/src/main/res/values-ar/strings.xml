@@ -24,7 +24,7 @@
     <string name="categories">الفئات</string>
     <string name="view_all">عرض الكل</string>
     <string name="shop_by_brand">تسوق حسب الماركة</string>
-    <string name="new_arrivals">وصل حديثًا</string>
+    <string name="new_arrivals">الأفضل مبيعا</string>
     <string name="new_arrivals_count">%d عنصر</string>
     <string name="error_failed_to_update_wishlist">فشل تحديث المفضلة</string>
     <string name="wishlist_item_added">تمت إضافة %s إلى المفضلة</string>
