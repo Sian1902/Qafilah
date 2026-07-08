@@ -109,7 +109,8 @@ class WishlistViewModel(
                 startWishlistSync()
                 loadWishlist()
             },
-            onGuest = { _state.update { it.copy(showLoginPrompt = true) } }
+            onGuest = { _state.update { it.copy(showLoginPrompt = true,items = emptyList(),
+                errorMessage = null) } }
         )
     }
 
