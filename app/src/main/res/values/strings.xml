@@ -24,7 +24,7 @@
     <string name="categories">Categories</string>
     <string name="view_all">VIEW ALL</string>
     <string name="shop_by_brand">Shop by Brand</string>
-    <string name="new_arrivals">New Arrivals</string>
+    <string name="new_arrivals">Best Selling</string>
     <string name="new_arrivals_count">%d ITEMS</string>
     <string name="error_failed_to_update_wishlist">Failed to update wishlist</string>
     <string name="wishlist_item_added">%s added to wishlist</string>

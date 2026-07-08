@@ -10,6 +10,7 @@ import com.example.qafilah.features.catalog.domain.usecases.GetBestSellingUseCas
 import com.example.qafilah.features.catalog.domain.usecases.GetCollectionsUseCase
 import com.example.qafilah.features.catalog.domain.usecases.GetProductTypesUseCase
 import com.example.qafilah.features.catalog.domain.usecases.SaveAdCouponUseCase
+import com.example.qafilah.features.wishlist.domain.model.WishlistItem
 import com.example.qafilah.features.wishlist.domain.usecase.AddToWishlistParams
 import com.example.qafilah.features.wishlist.domain.usecase.AddToWishlistUseCase
 import com.example.qafilah.features.wishlist.domain.usecase.IsProductWishlistedUseCase
@@ -24,7 +25,7 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-private const val PRODUCTS_LIMIT = 10
+private const val PRODUCTS_LIMIT = 20
 private const val COLLECTIONS_LIMIT = 10
 private const val CATEGORIES_LIMIT = 10
 
@@ -72,7 +73,14 @@ class HomeViewModel(
                 _uiState.update {
                     it.copy(
                         isLoading = false,
-                        categories = staticPopularBrands,
+                        categories = collections.map { collection ->
+                            CategoryUiModel(
+                                id = collection.id,
+                                label = collection.toBrandLabel(),
+                                icon = R.drawable.ic_logo,
+                                imageUrl = collection.imageUrl.orEmpty()
+                            )
+                        },
 
                         brands = productTypes.map { type -> type.uppercase() },
 
@@ -126,14 +134,16 @@ class HomeViewModel(
                     removeFromWishlistUseCase(productId)
                 } else {
                     addToWishlistUseCase(
-                        AddToWishlistParams(
+                        WishlistItem(
                             productId = domainProduct.id,
                             handle = domainProduct.id,
                             title = domainProduct.title,
-                            imageUrl = domainProduct.imageUrl,
+                            localImagePath = null,
+                            remoteImageUrl = domainProduct.imageUrl,
                             vendor = domainProduct.vendor,
                             price = domainProduct.priceAmount.toDoubleOrNull() ?: 0.0,
-                            currencyCode = "USD"
+                            currencyCode = "USD",
+                            addedAt = System.currentTimeMillis()
                         )
                     )
                     _events.trySend(
@@ -200,37 +210,4 @@ private val promos = listOf(
         ctaText = "CLAIM 50% OFF",
         code = "CO-50"
     )
-)
-
-private val staticPopularBrands = listOf(
-    CategoryUiModel(
-        id = "brand_nike",
-        label = "NIKE",
-        icon = R.drawable.ic_logo,
-        imageUrl = "https://nmp.about.nike.com/originals/about/prod/cf68f541-fc92-4373-91cb-086ae0fe2f88/002-nike-logos-swoosh-white.jpg?s=0d91b6d512f3b96eb15376bfb84bd503140904583667147c21ca3d6c4594e7d2"
-    ),
-    CategoryUiModel(
-        id = "brand_vans",
-        label = "VANS",
-        icon = R.drawable.ic_logo,
-        imageUrl = "https://i.pinimg.com/736x/dc/03/89/dc03893a0baf50b2efbdede6350e4d67.jpg"
-    ),
-    CategoryUiModel(
-        id = "brand_palladium",
-        label = "PALLADIUM",
-        icon = R.drawable.ic_logo,
-        imageUrl = "https://i.pinimg.com/736x/7e/52/0a/7e520a5389dfcb4e57009bf207c85d65.jpg"
-    ),
-    CategoryUiModel(
-        id = "brand_adidas",
-        label = "ADIDAS",
-        icon = R.drawable.ic_logo,
-        imageUrl = "https://preview.thenewsmarket.com/Previews/ADID/StillAssets/1920x1440/689347.jpg"
-    ),
-    CategoryUiModel(
-        id = "brand_hydrogen",
-        label = "HYDROGEN",
-        icon = R.drawable.ic_logo,
-        imageUrl = "https://ui-avatars.com/api/?name=Hydrogen&background=111111&color=fff&size=256"
-    ),
 )
