@@ -132,6 +132,9 @@ dependencies {
     // Multi-module project references
     implementation(project(":ui_kit"))
 
+    //Realtime Database
+    implementation("com.google.firebase:firebase-database-ktx")
+
     // Testing
     testImplementation(libs.junit)
     androidTestImplementation(platform(libs.androidx.compose.bom))

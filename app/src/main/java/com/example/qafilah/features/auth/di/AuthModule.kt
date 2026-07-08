@@ -63,11 +63,13 @@ val authModule = module {
         )
     }
 
-    viewModel { WishlistViewModel(
-        requireAuth = get(),
-        getWishlistUseCase = get(),
-        isProductWishlistedUseCase = get(),
-        removeFromWishlistUseCase = get(),
-        convertPriceUseCase = get()
-    ) }
+    viewModel {
+        WishlistViewModel(
+            requireAuth = get(),
+            getWishlistUseCase = get(),
+            removeFromWishlistUseCase = get(),
+            convertPriceUseCase = get(),
+            syncWishlistUseCase = get()
+        )
+    }
 }

@@ -12,6 +12,7 @@ import com.example.qafilah.features.catalog.domain.usecases.SearchProductsUseCas
 import com.example.qafilah.core.currency.domain.usecase.ConvertPriceUseCase
 import com.example.qafilah.features.search.data.datasource.SearchLocalDataSource
 import com.example.qafilah.features.search.domain.model.ChipState
+import com.example.qafilah.features.wishlist.domain.model.WishlistItem
 import com.example.qafilah.features.wishlist.domain.usecase.AddToWishlistParams
 import com.example.qafilah.features.wishlist.domain.usecase.AddToWishlistUseCase
 import com.example.qafilah.features.wishlist.domain.usecase.IsProductWishlistedUseCase
@@ -284,20 +285,21 @@ class SearchViewModel(
                     removeFromWishlistUseCase(productId)
                 } else {
                     addToWishlistUseCase(
-                        AddToWishlistParams(
+                        WishlistItem(
                             productId = domainProduct.id,
                             handle = domainProduct.id,
                             title = domainProduct.title,
-                            imageUrl = domainProduct.imageUrl,
+                            localImagePath = null,
+                            remoteImageUrl = domainProduct.imageUrl,
                             vendor = domainProduct.vendor,
                             price = domainProduct.priceAmount.toDoubleOrNull() ?: 0.0,
-                            currencyCode = domainProduct.currencyCode
+                            currencyCode = domainProduct.currencyCode,
+                            addedAt = System.currentTimeMillis()
                         )
                     )
                 }
             } catch (_: Exception) {
             }
-
         }
     }
 

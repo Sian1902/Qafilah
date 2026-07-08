@@ -1,4 +1,4 @@
-package com.example.qafilah.features.wishlist.data
+package com.example.qafilah.features.wishlist.data.local
 
 import android.content.Context
 import com.example.qafilah.features.wishlist.domain.model.WishlistItem
