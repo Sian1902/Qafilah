@@ -53,7 +53,6 @@ fun AppNavHost(
     modifier: Modifier = Modifier,
     mainViewModel: MainViewModel = koinViewModel()
 ) {
-
     val currentStartDestination by rememberUpdatedState(newValue = startDestination)
 
     NavHost(
@@ -61,7 +60,6 @@ fun AppNavHost(
         startDestination = Screen.Splash.route,
         modifier = modifier
     ) {
-
         composable(Screen.Splash.route) {
             SplashScreen(
                 onSplashFinished = {
@@ -70,7 +68,6 @@ fun AppNavHost(
                     } else {
                         currentStartDestination
                     }
-
                     navController.navigate(targetRoute) {
                         popUpTo(Screen.Splash.route) { inclusive = true }
                     }
@@ -191,11 +188,16 @@ fun AppNavHost(
                 onChatFabClick = { navController.navigate(Screen.Chat.route) }
             )
         }
+
         composable(Screen.Chat.route) {
             ChatScreen(
-                onNavigateBack = { navController.popBackStack() }
+                onNavigateBack = { navController.popBackStack() },
+                onProductClick = { productId ->
+                    navController.navigate(Screen.ProductDetail.createRoute(productId))
+                }
             )
         }
+
         composable(Screen.Catalog.route) {
             CatalogScreen(
                 onBackClick = { navController.popBackStack() },
@@ -206,6 +208,7 @@ fun AppNavHost(
                 }
             )
         }
+
         composable(
             route = Screen.CatalogProducts.route,
             arguments = listOf(
@@ -215,7 +218,6 @@ fun AppNavHost(
         ) { backStackEntry ->
             val categoryId = backStackEntry.arguments?.getString("categoryId") ?: ""
             val categoryTitle = backStackEntry.arguments?.getString("categoryTitle") ?: ""
-
             CatalogProductsScreen(
                 categoryId = categoryId,
                 categoryTitle = categoryTitle,
@@ -368,7 +370,6 @@ fun AppNavHost(
             val orderId = backStackEntry.arguments?.getString("orderId") ?: ""
             val detailsViewModel: OrderDetailsViewModel = koinViewModel()
             val orderNotFoundMessage = stringResource(R.string.error_order_not_found)
-            
             OrderDetailsScreen(
                 orderId = orderId,
                 viewModel = detailsViewModel,
@@ -421,7 +422,6 @@ fun AppNavHost(
                     addressViewModel.consumeOperationResult()
                 }
             )
-
         }
 
         composable(Screen.AddAddress.route) {
@@ -441,6 +441,5 @@ fun AppNavHost(
                 Text(stringResource(R.string.edit_address_wip, addressId))
             }
         }
-
     }
 }
