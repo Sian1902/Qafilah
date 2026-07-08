@@ -4,8 +4,8 @@ import androidx.room.Database
 import androidx.room.RoomDatabase
 import com.example.qafilah.features.assistant.data.local.AssistantDao
 import com.example.qafilah.features.assistant.data.local.AssistantMessageEntity
-import com.example.qafilah.features.wishlist.data.WishlistDao
-import com.example.qafilah.features.wishlist.data.WishlistItemEntity
+import com.example.qafilah.features.wishlist.data.local.WishlistDao
+import com.example.qafilah.features.wishlist.data.local.WishlistItemEntity
 import com.example.qafilah.features.orders.data.OrderDao
 import com.example.qafilah.features.orders.data.OrderEntity
 import com.example.qafilah.features.orders.data.OrderLineItemEntity

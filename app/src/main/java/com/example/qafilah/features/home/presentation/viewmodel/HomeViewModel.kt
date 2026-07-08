@@ -10,6 +10,7 @@ import com.example.qafilah.features.catalog.domain.usecases.GetBestSellingUseCas
 import com.example.qafilah.features.catalog.domain.usecases.GetCollectionsUseCase
 import com.example.qafilah.features.catalog.domain.usecases.GetProductTypesUseCase
 import com.example.qafilah.features.catalog.domain.usecases.SaveAdCouponUseCase
+import com.example.qafilah.features.wishlist.domain.model.WishlistItem
 import com.example.qafilah.features.wishlist.domain.usecase.AddToWishlistParams
 import com.example.qafilah.features.wishlist.domain.usecase.AddToWishlistUseCase
 import com.example.qafilah.features.wishlist.domain.usecase.IsProductWishlistedUseCase
@@ -126,14 +127,16 @@ class HomeViewModel(
                     removeFromWishlistUseCase(productId)
                 } else {
                     addToWishlistUseCase(
-                        AddToWishlistParams(
+                        WishlistItem(
                             productId = domainProduct.id,
                             handle = domainProduct.id,
                             title = domainProduct.title,
-                            imageUrl = domainProduct.imageUrl,
+                            localImagePath = null,
+                            remoteImageUrl = domainProduct.imageUrl,
                             vendor = domainProduct.vendor,
                             price = domainProduct.priceAmount.toDoubleOrNull() ?: 0.0,
-                            currencyCode = "USD"
+                            currencyCode = "USD",
+                            addedAt = System.currentTimeMillis()
                         )
                     )
                     _events.trySend(

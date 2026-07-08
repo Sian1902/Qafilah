@@ -1,7 +1,9 @@
 package com.example.qafilah.features.wishlist.domain.usecase
 
 import com.example.qafilah.features.auth.domain.repository.AuthRepository
-import com.example.qafilah.features.wishlist.data.WishlistLocalDataSource
+import com.example.qafilah.features.wishlist.data.local.WishlistLocalDataSource
+import com.example.qafilah.features.wishlist.domain.model.WishlistItem
+import com.example.qafilah.features.wishlist.domain.repository.WishlistRepository
 
 data class AddToWishlistParams(
     val productId: String,
@@ -13,21 +15,6 @@ data class AddToWishlistParams(
     val currencyCode: String
 )
 
-class AddToWishlistUseCase(
-    private val localDataSource: WishlistLocalDataSource,
-    private val authRepository: AuthRepository
-) {
-    suspend operator fun invoke(params: AddToWishlistParams) {
-        val userId = authRepository.getCurrentUser()?.id ?: return
-        localDataSource.addItem(
-            userId = userId,
-            productId = params.productId,
-            handle = params.handle,
-            title = params.title,
-            imageUrl = params.imageUrl,
-            vendor = params.vendor,
-            price = params.price,
-            currencyCode = params.currencyCode
-        )
-    }
+class AddToWishlistUseCase(private val repository: WishlistRepository) {
+    suspend operator fun invoke(item: WishlistItem) = repository.addToWishlist(item)
 }
