@@ -163,13 +163,7 @@ private fun ProductDetailContent(
                 TopIconBar(
                     isFavorite = product.isFavorite,
                     onBackClick = onBackClick,
-                    onShareClick = {
-                        Toast.makeText(
-                            context,
-                            String.format(strings.sharedProductTemplate, product.title),
-                            Toast.LENGTH_SHORT
-                        ).show()
-                    },
+
                     onFavoriteToggle = {
                         viewModel.toggleFavorite(
                             notLoggedInMessage = strings.wishlistNotLoggedInMessage,
@@ -178,7 +172,6 @@ private fun ProductDetailContent(
                         )
                     },
                     backContentDescription = strings.backDesc,
-                    shareContentDescription = strings.shareDesc,
                     addToWishlistContentDescription = strings.addToWishlistDesc,
                     removeFromWishlistContentDescription = strings.removeFromWishlistDesc
                 )

@@ -27,7 +27,9 @@ fun EditableTextField(
     leadingIcon: ImageVector? = null,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
     singleLine: Boolean = true,
-    error: String? = null
+    error: String? = null,
+    enabled: Boolean = true,
+    readOnly: Boolean = false
 ) {
     Column(modifier = modifier.fillMaxWidth()) {
         Text(
@@ -44,13 +46,17 @@ fun EditableTextField(
             value = value,
             onValueChange = onValueChange,
             modifier = Modifier.fillMaxWidth(),
+            enabled = enabled,
+            readOnly = readOnly,
             isError = error != null,
             leadingIcon = leadingIcon?.let {
                 {
                     Icon(
                         imageVector = it,
                         contentDescription = null,
-                        tint = if (error != null) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
+                        tint = if (error != null) MaterialTheme.colorScheme.error
+                        else if (!enabled) MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
+                        else MaterialTheme.colorScheme.primary
                     )
                 }
             },
@@ -61,11 +67,14 @@ fun EditableTextField(
             colors = OutlinedTextFieldDefaults.colors(
                 focusedContainerColor = MaterialTheme.colorScheme.surface,
                 unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.6f),
                 focusedBorderColor = MaterialTheme.colorScheme.primary,
                 unfocusedBorderColor = Color.Transparent,
+                disabledBorderColor = Color.Transparent,
                 errorBorderColor = MaterialTheme.colorScheme.error,
                 focusedTextColor = MaterialTheme.colorScheme.onSurface,
                 unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
+                disabledTextColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
                 cursorColor = MaterialTheme.colorScheme.primary
             )
         )

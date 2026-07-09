@@ -17,7 +17,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Phone
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarDuration
@@ -196,10 +195,11 @@ private fun EditProfileForm(
             EditableTextField(
                 label = stringResource(R.string.email_address),
                 value = state.email,
-                onValueChange = onEmailChange,
+                onValueChange = {},
                 leadingIcon = Icons.Filled.Email,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
-                error = state.emailError
+                error = state.emailError,
+                enabled = false
             )
             EditableTextField(
                 label = stringResource(R.string.phone_number),
