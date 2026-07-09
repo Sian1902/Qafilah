@@ -40,12 +40,9 @@ fun PaymobSdkLauncher(
                     if (hasResolved) return
                     hasResolved = true
 
-                    val elapsed = System.currentTimeMillis() - launchedAtMs
                     val looksLikeGenericTeardown = msg == null || msg.contains("cancel", ignoreCase = true)
 
-                    if (looksLikeGenericTeardown && elapsed >= MIN_ELAPSED_MS_FOR_LIKELY_SUCCESS) {
-                        onResult(true, null)
-                    } else if (looksLikeGenericTeardown) {
+                    if (looksLikeGenericTeardown) {
                         onResult(false, cancelledTooSoonMessage)
                     } else {
                         onResult(false, errorPrefix.format(msg))
