@@ -24,13 +24,15 @@ fun RemovableChip(
     label: String,
     removeContentDescription: String,
     onRemoveClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onClick: (() -> Unit)? = null
 ) {
     Row(
         modifier = modifier
             .clip(CircleShape)
             .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.4f))
             .border(1.dp, MaterialTheme.colorScheme.surfaceVariant, CircleShape)
+            .let { base -> if (onClick != null) base.clickable { onClick() } else base }
             .padding(horizontal = 16.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp)

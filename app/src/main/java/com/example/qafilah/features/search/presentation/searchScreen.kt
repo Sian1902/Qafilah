@@ -270,6 +270,7 @@ fun SearchScreen(
                                             RemovableChip(
                                                 label = chip.name,
                                                 removeContentDescription = stringResource(R.string.search_remove_chip_cd),
+                                                onClick = { onSearchQueryChange(chip.name) },
                                                 onRemoveClick = { onRemoveRecentSearch(chip.name) }
                                             )
                                         }

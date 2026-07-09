@@ -177,20 +177,19 @@ fun AppNavHost(
                 HomeScreen(
                     onSearchClick = { navController.navigate(NavItem.Search.route) },
                     onNotificationClick = { },
-                    onBrandClick = { categoryName ->
+                    onBrandClick = { productType ->
                         navController.currentBackStackEntry?.savedStateHandle?.set(
                             "search_category",
-                            categoryName.lowercase()
+                            productType
                         )
                         navController.navigate(NavItem.Search.route)
                     },
                     onCategoryClick = { categoryUiModel ->
-                        navController.navigate(
-                            Screen.CatalogProducts.createRoute(
-                                categoryUiModel.id,
-                                categoryUiModel.label
-                            )
+                        navController.currentBackStackEntry?.savedStateHandle?.set(
+                            "search_brand",
+                            categoryUiModel.label
                         )
+                        navController.navigate(NavItem.Search.route)
                     },
                     onViewAllCategoriesClick = {
                         navController.navigate(Screen.Catalog.route)
@@ -484,4 +483,3 @@ fun AppNavHost(
         }
     }
 }
-
