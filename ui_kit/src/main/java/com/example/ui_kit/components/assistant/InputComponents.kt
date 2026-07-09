@@ -5,6 +5,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -43,55 +44,70 @@ fun QafilahChatInputBar(
     onMicClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Box(modifier = modifier.fillMaxWidth(), contentAlignment = Alignment.CenterStart) {
-        OutlinedTextField(
-            value = value,
-            onValueChange = onValueChange,
-            placeholder = { Text(text = placeholderText, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)) },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(56.dp),
-            shape = CircleShape,
-            colors = OutlinedTextFieldDefaults.colors(
-                unfocusedContainerColor = Color.White.copy(alpha = 0.08f),
-                focusedContainerColor = Color.White.copy(alpha = 0.12f),
-                unfocusedBorderColor = Color.White.copy(alpha = 0.12f),
-                focusedBorderColor = MaterialTheme.colorScheme.primary,
-            ),
-            singleLine = true
-        )
-
-        // Dynamic Button Container
-        Box(
-            modifier = Modifier
-                .align(Alignment.CenterEnd)
-                .padding(end = 6.dp)
-        ) {
-            if (value.isNotBlank()) {
-                IconButton(
-                    onClick = onSendClick,
-                    modifier = Modifier
-                        .size(44.dp)
-                        .background(
-                            brush = Brush.linearGradient(listOf(MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.tertiary)),
-                            shape = CircleShape
+    OutlinedTextField(
+        value = value,
+        onValueChange = onValueChange,
+        placeholder = {
+            Text(
+                text = placeholderText,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+            )
+        },
+        modifier = modifier
+            .fillMaxWidth()
+            .heightIn(min = 56.dp, max = 140.dp), // Allows the input box to grow dynamically up to a limit
+        shape = RoundedCornerShape(28.dp), // Maintains a clean pill shape even when wrapping text
+        colors = OutlinedTextFieldDefaults.colors(
+            unfocusedContainerColor = Color.White.copy(alpha = 0.08f),
+            focusedContainerColor = Color.White.copy(alpha = 0.12f),
+            unfocusedBorderColor = Color.White.copy(alpha = 0.12f),
+            focusedBorderColor = MaterialTheme.colorScheme.primary,
+        ),
+        maxLines = 4, // Lets long text wrap up to 4 lines before scrolling internally
+        trailingIcon = {
+            // Moving the Dynamic Button Container here ensures text never runs under it
+            Box(
+                modifier = Modifier
+                    .padding(end = 6.dp)
+            ) {
+                if (value.isNotBlank()) {
+                    IconButton(
+                        onClick = onSendClick,
+                        modifier = Modifier
+                            .size(44.dp)
+                            .background(
+                                brush = Brush.linearGradient(
+                                    listOf(MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.tertiary)
+                                ),
+                                shape = CircleShape
+                            )
+                    ) {
+                        Icon(
+                            painterResource(android.R.drawable.ic_menu_send),
+                            contentDescription = "Send",
+                            tint = MaterialTheme.colorScheme.background
                         )
-                ) {
-                    Icon(painterResource(android.R.drawable.ic_menu_send), contentDescription = "Send", tint = MaterialTheme.colorScheme.background)
-                }
-            } else {
-                IconButton(
-                    onClick = onMicClick,
-                    modifier = Modifier
-                        .size(44.dp)
-                        .background(
-                            brush = Brush.linearGradient(listOf(MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.tertiary)),
-                            shape = CircleShape
+                    }
+                } else {
+                    IconButton(
+                        onClick = onMicClick,
+                        modifier = Modifier
+                            .size(44.dp)
+                            .background(
+                                brush = Brush.linearGradient(
+                                    listOf(MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.tertiary)
+                                ),
+                                shape = CircleShape
+                            )
+                    ) {
+                        Icon(
+                            painterResource(com.example.ui_kit.R.drawable.ic_mic),
+                            contentDescription = "Speak",
+                            tint = MaterialTheme.colorScheme.background
                         )
-                ) {
-                    Icon(painterResource(com.example.ui_kit.R.drawable.ic_mic), contentDescription = "Speak", tint = MaterialTheme.colorScheme.background)
+                    }
                 }
             }
         }
-    }
+    )
 }
