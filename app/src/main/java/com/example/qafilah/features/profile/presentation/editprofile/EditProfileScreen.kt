@@ -103,7 +103,7 @@ fun EditProfileScreen(
                 title = stringResource(R.string.profile_edit_profile),
                 backContentDescription = stringResource(R.string.back),
                 onBackClick = onBackClick,
-                trailingIcon = Icons.Filled.Settings,
+                trailingIcon = null,
                 trailingContentDescription = stringResource(R.string.settings_cd),
                 onTrailingClick = onSettingsClick
             )
@@ -158,7 +158,7 @@ private fun EditProfileForm(
             .padding(horizontal = 20.dp)
     ) {
         ChangePhotoAvatar(
-            changePhotoLabel = stringResource(R.string.profile_change_photo),
+            changePhotoLabel = "",
             onChangePhotoClick = onChangePhotoClick,
             avatarContent = {
                 Image(
