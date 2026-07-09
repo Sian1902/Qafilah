@@ -8,7 +8,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
-import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -20,10 +19,8 @@ import com.example.ui_kit.components.shared.CircleIconButton
 fun TopIconBar(
     isFavorite: Boolean,
     onBackClick: () -> Unit,
-    onShareClick: () -> Unit,
     onFavoriteToggle: () -> Unit,
     backContentDescription: String,
-    shareContentDescription: String,
     addToWishlistContentDescription: String,
     removeFromWishlistContentDescription: String,
     modifier: Modifier = Modifier
@@ -45,11 +42,6 @@ fun TopIconBar(
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            CircleIconButton(
-                icon = Icons.Default.Share,
-                contentDescription = shareContentDescription,
-                onClick = onShareClick
-            )
 
             CircleIconButton(
                 icon = if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
