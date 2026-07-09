@@ -15,6 +15,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -68,6 +71,7 @@ fun BottomNavBar(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun BottomNavBarItemView(
     item: BottomNavBarItem,
@@ -90,12 +94,25 @@ private fun BottomNavBarItemView(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
-        Icon(
-            painter = painterResource(id = item.icon),
-            contentDescription = item.label,
-            tint = if (isSelected) activeColor else inactiveColor,
-            modifier = Modifier.size(24.dp)
-        )
+        BadgedBox(
+            badge = {
+                if (item.badgeCount > 0) {
+                    Badge(
+                        containerColor = MaterialTheme.colorScheme.error,
+                        contentColor = MaterialTheme.colorScheme.onError
+                    ) {
+                        Text(text = item.badgeCount.toString())
+                    }
+                }
+            }
+        ) {
+            Icon(
+                painter = painterResource(id = item.icon),
+                contentDescription = item.label,
+                tint = if (isSelected) activeColor else inactiveColor,
+                modifier = Modifier.size(24.dp)
+            )
+        }
 
         Text(
             text = item.label,
@@ -115,5 +132,6 @@ private fun BottomNavBarItemView(
 data class BottomNavBarItem(
     val route: String,
     val label: String,
-    @DrawableRes val icon: Int
+    @DrawableRes val icon: Int,
+    val badgeCount: Int = 0
 )

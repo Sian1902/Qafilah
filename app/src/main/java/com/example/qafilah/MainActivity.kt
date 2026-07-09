@@ -34,10 +34,12 @@ import com.example.qafilah.core.navigation.Screen
 import com.example.qafilah.core.preferences.ThemeMode
 import com.example.qafilah.core.util.LocalRealActivity
 import com.example.qafilah.core.util.LocaleHelper
+import com.example.qafilah.features.cart.domain.usecase.ObserveCartStateUseCase
 import com.example.ui_kit.components.bottomnav.BottomNavBar
 import com.example.ui_kit.components.bottomnav.BottomNavBarItem
 import com.example.ui_kit.theme.QafilahTheme
 import org.koin.androidx.compose.koinViewModel
+import org.koin.compose.koinInject
 
 class MainActivity : ComponentActivity() {
 
@@ -85,11 +87,16 @@ class MainActivity : ComponentActivity() {
                     val backStackEntry by navController.currentBackStackEntryAsState()
                     val currentRoute = backStackEntry?.destination?.route
 
+                    val observeCartStateUseCase: ObserveCartStateUseCase = koinInject()
+                    val cart by observeCartStateUseCase().collectAsState(initial = null)
+                    val cartItemCount = cart?.totalQuantity ?: 0
+
                     val bottomNavItems = NavItem.all.map { navItem ->
                         BottomNavBarItem(
                             route = navItem.route,
                             label = stringResource(id = navItem.label),
-                            icon = navItem.icon
+                            icon = navItem.icon,
+                            badgeCount = if (navItem == NavItem.Cart) cartItemCount else 0
                         )
                     }
 
