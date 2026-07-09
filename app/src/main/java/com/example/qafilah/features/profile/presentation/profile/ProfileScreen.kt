@@ -22,6 +22,7 @@ import androidx.compose.material.icons.filled.CreditCard
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.ShoppingBag
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -29,6 +30,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -376,43 +378,83 @@ fun CurrencyPicker(
     onCurrencySelected: (String) -> Unit,
     onDismiss: () -> Unit
 ) {
+    // State to hold the current search text
+    var searchQuery by remember { mutableStateOf("") }
+
+    // Dynamically filter the list based on the search query (matching code or full name)
+    val filteredCurrencies = remember(searchQuery, availableCurrencies) {
+        if (searchQuery.isBlank()) {
+            availableCurrencies
+        } else {
+            availableCurrencies.filter {
+                it.code.contains(searchQuery, ignoreCase = true) ||
+                        it.fullName.contains(searchQuery, ignoreCase = true)
+            }
+        }
+    }
+
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.currency)) },
         text = {
-            if (availableCurrencies.isEmpty()) {
-                Box(modifier = Modifier.fillMaxWidth().padding(24.dp), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator(modifier = Modifier.size(32.dp))
-                }
-            } else {
-                LazyColumn(modifier = Modifier.height(300.dp)) {
-                    items(availableCurrencies) { currency ->
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable { onCurrencySelected(currency.code) }
-                                .padding(vertical = 12.dp, horizontal = 8.dp),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Column(modifier = Modifier.weight(1f)) {
-                                Text(
-                                    text = currency.code,
-                                    style = MaterialTheme.typography.bodyLarge
-                                )
-                                Text(
-                                    text = currency.fullName,
-                                    style = MaterialTheme.typography.labelSmall,
-                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-                                )
-                            }
-                            if (currency.code == selectedCurrency) {
-                                Icon(
-                                    imageVector = Icons.Default.Check,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.primary,
-                                    modifier = Modifier.size(20.dp)
-                                )
+            Column {
+                OutlinedTextField(
+                    value = searchQuery,
+                    onValueChange = { searchQuery = it },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 12.dp),
+                    placeholder = { Text("Search..." )},
+                    leadingIcon = {
+                        Icon(
+                            imageVector = Icons.Default.Search,
+                            contentDescription = null
+                        )
+                    },
+                    singleLine = true
+                )
+
+                if (availableCurrencies.isEmpty()) {
+                    Box(modifier = Modifier.fillMaxWidth().padding(24.dp), contentAlignment = Alignment.Center) {
+                        CircularProgressIndicator(modifier = Modifier.size(32.dp))
+                    }
+                } else if (filteredCurrencies.isEmpty()) {
+                    Box(modifier = Modifier.fillMaxWidth().padding(24.dp), contentAlignment = Alignment.Center) {
+                        Text(
+                            text = "No currencies found",
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    }
+                } else {
+                    LazyColumn(modifier = Modifier.height(300.dp)) {
+                        items(filteredCurrencies) { currency ->
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable { onCurrencySelected(currency.code) }
+                                    .padding(vertical = 12.dp, horizontal = 8.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Text(
+                                        text = currency.code,
+                                        style = MaterialTheme.typography.bodyLarge
+                                    )
+                                    Text(
+                                        text = currency.fullName,
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                                    )
+                                }
+                                if (currency.code == selectedCurrency) {
+                                    Icon(
+                                        imageVector = Icons.Default.Check,
+                                        contentDescription = null,
+                                        tint = MaterialTheme.colorScheme.primary,
+                                        modifier = Modifier.size(20.dp)
+                                    )
+                                }
                             }
                         }
                     }
