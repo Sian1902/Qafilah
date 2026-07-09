@@ -66,15 +66,24 @@ class SearchViewModel(
             return
         }
 
-        _uiState.update { state ->
-            state.copy(
-                selectedCategory = category ?: state.selectedCategory,
-                selectedBrand = brand ?: state.selectedBrand,
-                availableCategories = state.availableCategories.map {
-                    it.copy(isSelected = it.id == (category ?: state.selectedCategory))
+        val state = _uiState.value
+
+        val matchedCategory = category?.let { target ->
+            state.availableCategories.find { it.id.equals(target, ignoreCase = true) }?.id
+        }
+        val matchedBrand = brand?.let { target ->
+            state.availableBrands.find { it.id.equals(target, ignoreCase = true) }?.id
+        }
+
+        _uiState.update { s ->
+            s.copy(
+                selectedCategory = matchedCategory ?: s.selectedCategory,
+                selectedBrand = matchedBrand ?: s.selectedBrand,
+                availableCategories = s.availableCategories.map {
+                    it.copy(isSelected = it.id == (matchedCategory ?: s.selectedCategory))
                 },
-                availableBrands = state.availableBrands.map {
-                    it.copy(isSelected = it.id == (brand ?: state.selectedBrand))
+                availableBrands = s.availableBrands.map {
+                    it.copy(isSelected = it.id == (matchedBrand ?: s.selectedBrand))
                 }
             )
         }
