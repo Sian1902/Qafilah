@@ -23,6 +23,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -51,187 +52,192 @@ fun ChatScreen(
     val listState = rememberLazyListState()
     val context = LocalContext.current
 
-    // Auto-scroll
+    // Keyboard controller instance
+    val keyboardController = LocalSoftwareKeyboardController.current
+
+    // Auto-scroll 
     LaunchedEffect(state.messages.size) {
         if (state.messages.isNotEmpty()) {
             listState.animateScrollToItem(state.messages.size - 1)
         }
     }
 
-    // Show error Toast and clear it
+    // Show error Toast and clear it 
     LaunchedEffect(state.error) {
         state.error?.let {
             Toast.makeText(context, it, Toast.LENGTH_LONG).show()
-            viewModel.clearError()
+            viewModel.clearError() 
         }
     }
 
-    val backgroundBrush = Brush.verticalGradient(
-        colors = listOf(
-            MaterialTheme.colorScheme.background.copy(alpha = 0.8f),
-            MaterialTheme.colorScheme.background
-        )
+    val backgroundBrush = Brush.verticalGradient( 
+    colors = listOf( 
+    MaterialTheme.colorScheme.background.copy(alpha = 0.8f), 
+    MaterialTheme.colorScheme.background 
+    )
     )
 
-    val speechRecognizerLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.StartActivityForResult()
+    val speechRecognizerLauncher = rememberLauncherForActivityResult( 
+    contract = ActivityResultContracts.StartActivityForResult() 
     ) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
             val data = result.data
-            val matches = data?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)
+            val matches = data?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS) 
             if (!matches.isNullOrEmpty()) {
                 inputText = matches[0]
             }
         }
     }
 
-    val permissionLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestPermission()
+    val permissionLauncher = rememberLauncherForActivityResult( 
+    contract = ActivityResultContracts.RequestPermission() 
     ) { isGranted: Boolean ->
         if (isGranted) {
-            val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
-                putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
-                putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault())
-                putExtra(RecognizerIntent.EXTRA_PROMPT, "Speak now...")
+            val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply { 
+                putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM) 
+                putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault()) 
+                putExtra(RecognizerIntent.EXTRA_PROMPT, "Speak now...") 
             }
             try {
-                speechRecognizerLauncher.launch(intent)
+                speechRecognizerLauncher.launch(intent) 
             } catch (e: Exception) {
-                Toast.makeText(context, "Speech-to-text not supported on this device", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, "Speech-to-text not supported on this device", Toast.LENGTH_SHORT).show() 
             }
         } else {
-            Toast.makeText(context, "Microphone permission is required to use voice input.", Toast.LENGTH_LONG).show()
+            Toast.makeText(context, "Microphone permission is required to use voice input.", Toast.LENGTH_LONG).show() 
         }
     }
 
-    Box(modifier = Modifier.fillMaxSize().background(backgroundBrush)) {
+    Box(modifier = Modifier.fillMaxSize().background(backgroundBrush)) { 
         Scaffold(
-            containerColor = Color.Transparent,
-            topBar = {
-                AssistantTopAppBar(
-                    title = stringResource(id = R.string.ai_name),
-                    subtitle = stringResource(id = R.string.ai_subtitle),
-                    onBackClick = onNavigateBack,
-                    onMoreClick = { viewModel.clearChat() },
-                    painterResource(R.drawable.ic_arrow_back)
-                )
-            },
-            bottomBar = {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(
-                            Brush.verticalGradient(
-                                listOf(Color.Transparent, MaterialTheme.colorScheme.background)
-                            )
-                        )
-                        .padding(horizontal = 20.dp, vertical = 16.dp)
-                ) {
-                    QafilahChatInputBar(
-                        value = inputText,
-                        onValueChange = { inputText = it },
-                        placeholderText = stringResource(id = R.string.ask_ai_placeholder),
-                        onSendClick = {
-                            if (inputText.isNotBlank()) {
-                                viewModel.sendMessage(inputText)
-                                inputText = ""
-                            }
-                        },
-                        onMicClick = {
-                            val permissionCheck = ContextCompat.checkSelfPermission(
-                                context,
-                                Manifest.permission.RECORD_AUDIO
-                            )
-
-                            if (permissionCheck == PackageManager.PERMISSION_GRANTED) {
-                                val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
-                                    putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
-                                    putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault())
-                                    putExtra(RecognizerIntent.EXTRA_PROMPT, "Speak now...")
-                                }
-                                try {
-                                    speechRecognizerLauncher.launch(intent)
-                                } catch (e: Exception) {
-                                    Toast.makeText(context, "Speech-to-text not supported on this device", Toast.LENGTH_SHORT).show()
-                                }
-                            } else {
-                                permissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
-                            }
-                        }
+            containerColor = Color.Transparent, 
+        topBar = { 
+            AssistantTopAppBar(
+                title = stringResource(id = R.string.ai_name), 
+            subtitle = stringResource(id = R.string.ai_subtitle), 
+            onBackClick = onNavigateBack, 
+            onMoreClick = { viewModel.clearChat() }, 
+            painterResource(R.drawable.ic_arrow_back) 
+            )
+        },
+        bottomBar = { 
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth() 
+            .background( 
+            Brush.verticalGradient( 
+            listOf(Color.Transparent, MaterialTheme.colorScheme.background) 
+            )
+            )
+            .imePadding() // 1. FIX: Pushes the input bar above the keyboard instead of shifting the whole screen
+                .padding(horizontal = 20.dp, vertical = 16.dp) 
+            ) {
+                QafilahChatInputBar(
+                    value = inputText, 
+                onValueChange = { inputText = it }, 
+                placeholderText = stringResource(id = R.string.ask_ai_placeholder), 
+                onSendClick = { 
+                    if (inputText.isNotBlank()) { 
+                        viewModel.sendMessage(inputText) 
+                        inputText = "" 
+                        keyboardController?.hide() // 2. FIX: Hides the soft keyboard cleanly on submit
+                    }
+                },
+                onMicClick = { 
+                    val permissionCheck = ContextCompat.checkSelfPermission( 
+                    context, 
+                    Manifest.permission.RECORD_AUDIO 
                     )
+
+                    if (permissionCheck == PackageManager.PERMISSION_GRANTED) { 
+                        val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply { 
+                            putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM) 
+                            putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault()) 
+                            putExtra(RecognizerIntent.EXTRA_PROMPT, "Speak now...") 
+                        }
+                        try {
+                            speechRecognizerLauncher.launch(intent) 
+                        } catch (e: Exception) {
+                            Toast.makeText(context, "Speech-to-text not supported on this device", Toast.LENGTH_SHORT).show() 
+                        }
+                    } else {
+                        permissionLauncher.launch(Manifest.permission.RECORD_AUDIO) 
+                    }
                 }
+                )
             }
+        }
         ) { paddingValues ->
             LazyColumn(
-                state = listState,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues)
-                    .padding(horizontal = 20.dp),
-                contentPadding = PaddingValues(vertical = 16.dp),
-                verticalArrangement = Arrangement.spacedBy(24.dp)
+                state = listState, 
+            modifier = Modifier
+                .fillMaxSize() 
+            .padding(paddingValues) 
+            .padding(horizontal = 20.dp), 
+            contentPadding = PaddingValues(vertical = 16.dp), 
+            verticalArrangement = Arrangement.spacedBy(24.dp) 
             ) {
-                items(state.messages) { message ->
-                    val isUser = message.role == "user"
+            items(state.messages) { message -> 
+                val isUser = message.role == "user" 
 
-                    if (isUser) {
-                        QafilahTextMessage(
-                            text = message.content,
-                            timestamp = formatTimestamp(message.timestamp),
-                            senderName = stringResource(id = R.string.you),
-                            isUser = true
-                        )
-                    } else {
-                        Column(
-                            modifier = Modifier.fillMaxWidth(),
-                            verticalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            if (message.products.isNotEmpty()) {
-                                LazyRow(
-                                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                                    modifier = Modifier.fillMaxWidth()
-                                ) {
-                                    items(message.products) { product ->
-                                        ProductCard(
-                                            product = product,
-                                            onClick = { onProductClick(product.id) },
-                                            onFavoriteClick = { },
-                                            toggleWishlistContentDescription = "Toggle wishlist",
-                                            modifier = Modifier.width(140.dp)
-                                        )
-                                    }
+                if (isUser) { 
+                    QafilahTextMessage(
+                        text = message.content, 
+                    timestamp = formatTimestamp(message.timestamp), 
+                    senderName = stringResource(id = R.string.you), 
+                    isUser = true 
+                    )
+                } else { 
+                    Column(
+                        modifier = Modifier.fillMaxWidth(), 
+                    verticalArrangement = Arrangement.spacedBy(8.dp) 
+                    ) {
+                        if (message.products.isNotEmpty()) { 
+                            LazyRow(
+                                horizontalArrangement = Arrangement.spacedBy(12.dp), 
+                            modifier = Modifier.fillMaxWidth() 
+                            ) {
+                                items(message.products) { product -> 
+                                    ProductCard(
+                                        product = product, 
+                                    onClick = { onProductClick(product.id) }, 
+                                    onFavoriteClick = { }, 
+                                    toggleWishlistContentDescription = "Toggle wishlist", 
+                                    modifier = Modifier.width(140.dp) 
+                                    )
                                 }
                             }
-
-                            QafilahTextMessage(
-                                text = message.content,
-                                timestamp = formatTimestamp(message.timestamp),
-                                senderName = stringResource(id = R.string.ai_name),
-                                isUser = false
-                            )
                         }
-                    }
-                }
 
-                if (state.isLoading) {
-                    item {
-                        Box(
-                            modifier = Modifier.fillMaxWidth(),
-                            contentAlignment = Alignment.CenterStart
-                        ) {
-                            CircularProgressIndicator(
-                                modifier = Modifier.size(24.dp),
-                                color = MaterialTheme.colorScheme.primary
-                            )
-                        }
+                        QafilahTextMessage(
+                            text = message.content, 
+                        timestamp = formatTimestamp(message.timestamp), 
+                        senderName = stringResource(id = R.string.ai_name), 
+                        isUser = false 
+                        )
                     }
                 }
             }
+
+            if (state.isLoading) { 
+                item { 
+                    Box(
+                        modifier = Modifier.fillMaxWidth(), 
+                    contentAlignment = Alignment.CenterStart 
+                    ) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(24.dp), 
+                        color = MaterialTheme.colorScheme.primary 
+                        )
+                    }
+                }
+            }
+        }
         }
     }
 }
 
 private fun formatTimestamp(timestamp: Long): String {
-    val sdf = SimpleDateFormat("hh:mm a", Locale.getDefault())
-    return sdf.format(Date(timestamp))
+    val sdf = SimpleDateFormat("hh:mm a", Locale.getDefault()) 
+    return sdf.format(Date(timestamp)) 
 }
