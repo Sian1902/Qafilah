@@ -98,9 +98,7 @@ fun HomeScreen(
         Box(modifier = Modifier.padding(paddingValues)) {
             when {
                 uiState.isLoading && uiState.products.isEmpty() -> {
-                    Box(modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        CircularProgressIndicator()
-                    }
+                    HomeLoadingScreen(modifier = modifier)
                 }
 
                 uiState.error != null && uiState.products.isEmpty() -> {

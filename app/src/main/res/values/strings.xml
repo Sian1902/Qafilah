@@ -354,4 +354,7 @@
     <string name="promo_royal_title">Royal Oud Series</string>
     <string name="promo_50_off_cta">CLAIM 50% OFF</string>
 
+    <string name="no_internet_title">Oops! No Internet Connection</string>
+    <string name="no_internet_subtitle">Please check your network settings and try again.</string>
+    <string name="try_again">Try Again</string>
 </resources>

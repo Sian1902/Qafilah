@@ -118,7 +118,7 @@ private fun PersonalDetailsContent(user: AppUser) {
             modifier = Modifier.padding(top = 12.dp),
             avatarContent = {
                 Image(
-                    painter = painterResource(id = R.drawable.profile),
+                    painter = painterResource(id = R.drawable.ic_logo),
                     contentDescription = null,
                     contentScale = ContentScale.Crop,
                     modifier = Modifier.fillMaxSize()
